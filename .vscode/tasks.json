@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Forgelink: analyze",
+      "type": "shell",
+      "command": "flutter analyze",
+      "problemMatcher": []
+    },
+    {
+      "label": "Forgelink: test",
+      "type": "shell",
+      "command": "flutter test",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Forgelink: gen-l10n",
+      "type": "shell",
+      "command": "flutter gen-l10n",
+      "problemMatcher": []
+    },
+    {
+      "label": "Forgelink: build debug APK",
+      "type": "shell",
+      "command": "flutter build apk --debug",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Forgelink: install debug APK on phone",
+      "type": "shell",
+      "command": "flutter install --debug",
+      "problemMatcher": []
+    },
+    {
+      "label": "Forgelink: device logs",
+      "type": "shell",
+      "command": "adb logcat -v time flutter:I *:S",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
