@@ -477,6 +477,90 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Zkusit znovu'**
   String get actionRetry;
+
+  /// No description provided for @settingsHcHistory.
+  ///
+  /// In cs, this message translates to:
+  /// **'Oprávnění ke čtení historie'**
+  String get settingsHcHistory;
+
+  /// No description provided for @settingsHcHistoryGranted.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čtení historie starší než 30 dní je povolené.'**
+  String get settingsHcHistoryGranted;
+
+  /// No description provided for @settingsHcHistoryUnavailable.
+  ///
+  /// In cs, this message translates to:
+  /// **'Tato verze Health Connect čtení historie nepodporuje.'**
+  String get settingsHcHistoryUnavailable;
+
+  /// No description provided for @settingsHcPriorityHint.
+  ///
+  /// In cs, this message translates to:
+  /// **'Tip: v aplikaci Health Connect nastav prioritu zdrojů pro kroky, aby se nesčítaly z více zařízení.'**
+  String get settingsHcPriorityHint;
+
+  /// No description provided for @settingsHcAllGranted.
+  ///
+  /// In cs, this message translates to:
+  /// **'Oprávnění ke čtení váhy a kroků jsou udělena.'**
+  String get settingsHcAllGranted;
+
+  /// No description provided for @ktEmailLabel.
+  ///
+  /// In cs, this message translates to:
+  /// **'E-mail'**
+  String get ktEmailLabel;
+
+  /// No description provided for @ktPasswordLabel.
+  ///
+  /// In cs, this message translates to:
+  /// **'Heslo'**
+  String get ktPasswordLabel;
+
+  /// No description provided for @ktLoginButton.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přihlásit a ověřit'**
+  String get ktLoginButton;
+
+  /// No description provided for @ktLogoutButton.
+  ///
+  /// In cs, this message translates to:
+  /// **'Odhlásit'**
+  String get ktLogoutButton;
+
+  /// No description provided for @ktChangeCredentials.
+  ///
+  /// In cs, this message translates to:
+  /// **'Změnit údaje'**
+  String get ktChangeCredentials;
+
+  /// No description provided for @ktCancel.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zrušit'**
+  String get ktCancel;
+
+  /// No description provided for @ktSignedInAs.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přihlášeno jako {email}'**
+  String ktSignedInAs(String email);
+
+  /// No description provided for @ktLoginSuccess.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přihlášení ověřeno.'**
+  String get ktLoginSuccess;
+
+  /// No description provided for @ktFieldsRequired.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vyplň e-mail i heslo.'**
+  String get ktFieldsRequired;
 }
 
 class _AppLocalizationsDelegate

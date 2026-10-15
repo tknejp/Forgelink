@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 
 import '../../core/log_buffer.dart';
 import '../../core/sync_issue.dart';
-import '../../core/system_intents.dart';
 import '../../l10n/l10n.dart';
+import 'health_connect_controller.dart';
+import 'health_connect_section.dart';
+import 'kt_controller.dart';
+import 'kt_section.dart';
 
 /// Settings skeleton (Phase 1). Every section is addressable through
 /// [initialSection]: the screen scrolls to it and briefly highlights it, so
@@ -19,7 +22,8 @@ class SettingsScreen extends StatefulWidget {
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends State<SettingsScreen>
+    with WidgetsBindingObserver {
   final Map<SettingsSection, GlobalKey> _keys = {
     for (final s in SettingsSection.values) s: GlobalKey(),
   };
@@ -28,11 +32,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _refreshLocalStatus();
     final target = widget.initialSection;
     if (target != null) {
       _highlighted = target;
       WidgetsBinding.instance.addPostFrameCallback((_) => _reveal(target));
     }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // Permission changes happen in other apps (Health Connect), so re-check
+  // local status whenever the user comes back.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _refreshLocalStatus();
+  }
+
+  void _refreshLocalStatus() {
+    context.read<HealthConnectController>().refresh();
+    context.read<KtController>().load();
   }
 
   Future<void> _reveal(SettingsSection section) async {
@@ -69,22 +93,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             section(
               SettingsSection.healthConnect,
               l10n.settingsSectionHealthConnect,
-              [
-                _StatusLine(text: l10n.statusNotConfigured),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    icon: const Icon(Icons.open_in_new),
-                    label: Text(l10n.settingsOpenHealthConnect),
-                    onPressed: () => context
-                        .read<SystemIntents>()
-                        .openHealthConnectSettings(),
-                  ),
-                ),
-              ],
+              const [HealthConnectSection()],
             ),
-            section(SettingsSection.kt, l10n.settingsSectionKt, [
-              _StatusLine(text: l10n.statusNotConfigured),
+            section(SettingsSection.kt, l10n.settingsSectionKt, const [
+              KtSection(),
             ]),
             section(SettingsSection.google, l10n.settingsSectionGoogle, [
               _StatusLine(text: l10n.statusNotConfigured),

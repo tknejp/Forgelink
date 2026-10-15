@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forgelink/sources/health/health_source.dart';
+import 'package:forgelink/sources/kt/kt_client.dart';
+import 'package:forgelink/sync/integration_status.dart';
+import 'package:forgelink/ui/settings/health_connect_controller.dart';
+import 'package:forgelink/ui/settings/kt_controller.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:forgelink/app.dart';
 import 'package:forgelink/core/log_buffer.dart';
 import 'package:forgelink/core/prefs_store.dart';
@@ -12,13 +20,25 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
+import '../sources/health/fake_hc_read_client.dart';
+
 Widget _withProviders(Widget child) {
   final prefs = PrefsStore();
+  const intents = SystemIntents();
+  final health = HealthSource(prefs: prefs, client: FakeHcReadClient());
+  final kt = KtClient(
+    storage: const FlutterSecureStorage(),
+    client: MockClient((_) async => http.Response('', 500)),
+  );
   return MultiProvider(
     providers: [
       Provider<PrefsStore>.value(value: prefs),
-      Provider<SystemIntents>.value(value: const SystemIntents()),
+      Provider<SystemIntents>.value(value: intents),
       ChangeNotifierProvider(create: (_) => PersistentLogBuffer(prefs)),
+      ChangeNotifierProvider(
+          create: (_) => HealthConnectController(health, intents)),
+      ChangeNotifierProvider(
+          create: (_) => KtController(kt, IntegrationStatusStore(prefs))),
     ],
     child: child,
   );
@@ -30,6 +50,7 @@ void main() {
   setUp(() {
     SharedPreferencesAsyncPlatform.instance =
         InMemorySharedPreferencesAsync.empty();
+    FlutterSecureStorage.setMockInitialValues({});
   });
 
   testWidgets('home renders in Czech with the brand title', (tester) async {

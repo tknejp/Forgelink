@@ -226,4 +226,52 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get actionRetry => 'Zkusit znovu';
+
+  @override
+  String get settingsHcHistory => 'Oprávnění ke čtení historie';
+
+  @override
+  String get settingsHcHistoryGranted =>
+      'Čtení historie starší než 30 dní je povolené.';
+
+  @override
+  String get settingsHcHistoryUnavailable =>
+      'Tato verze Health Connect čtení historie nepodporuje.';
+
+  @override
+  String get settingsHcPriorityHint =>
+      'Tip: v aplikaci Health Connect nastav prioritu zdrojů pro kroky, aby se nesčítaly z více zařízení.';
+
+  @override
+  String get settingsHcAllGranted =>
+      'Oprávnění ke čtení váhy a kroků jsou udělena.';
+
+  @override
+  String get ktEmailLabel => 'E-mail';
+
+  @override
+  String get ktPasswordLabel => 'Heslo';
+
+  @override
+  String get ktLoginButton => 'Přihlásit a ověřit';
+
+  @override
+  String get ktLogoutButton => 'Odhlásit';
+
+  @override
+  String get ktChangeCredentials => 'Změnit údaje';
+
+  @override
+  String get ktCancel => 'Zrušit';
+
+  @override
+  String ktSignedInAs(String email) {
+    return 'Přihlášeno jako $email';
+  }
+
+  @override
+  String get ktLoginSuccess => 'Přihlášení ověřeno.';
+
+  @override
+  String get ktFieldsRequired => 'Vyplň e-mail i heslo.';
 }

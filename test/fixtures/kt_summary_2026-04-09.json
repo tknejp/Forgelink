@@ -1,0 +1,131 @@
+{
+    "requestId": null,
+    "code": 0,
+    "message": null,
+    "data": {
+        "date": null,
+        "items": [
+            {
+                "title": null,
+                "titleShort": null,
+                "unit": "kcal",
+                "goal": "2 785",
+                "actual": "2 700",
+                "percent": 97,
+                "actualValue": 0.0,
+                "code": "total"
+            },
+            {
+                "title": "Pitný režim",
+                "titleShort": null,
+                "unit": "l",
+                "goal": "3,5",
+                "actual": "0,26",
+                "percent": 7,
+                "actualValue": 0.0,
+                "code": null
+            },
+            {
+                "title": "Cílová hmotnost",
+                "titleShort": null,
+                "unit": "kg",
+                "goal": "105",
+                "actual": "106,3",
+                "percent": 101,
+                "actualValue": 0.0,
+                "code": null
+            }
+        ],
+        "itemsDynamic": [
+            [
+                {
+                    "title": "Bílkoviny",
+                    "titleShort": "Bílkoviny",
+                    "unit": "g",
+                    "goal": "230",
+                    "actual": "216",
+                    "percent": 93,
+                    "actualValue": 216.009,
+                    "code": "protein"
+                },
+                {
+                    "title": "Vláknina",
+                    "titleShort": "Vláknina",
+                    "unit": "g",
+                    "goal": "30",
+                    "actual": "26,6",
+                    "percent": 88,
+                    "actualValue": 26.645,
+                    "code": "fiber"
+                },
+                {
+                    "title": "Sacharidy",
+                    "titleShort": "Sacharidy",
+                    "unit": "g",
+                    "goal": "275",
+                    "actual": "308",
+                    "percent": 112,
+                    "actualValue": 308.422,
+                    "code": "carbohydrate"
+                }
+            ],
+            [
+                {
+                    "title": "Cukry",
+                    "titleShort": "Cukry",
+                    "unit": "g",
+                    "goal": "100",
+                    "actual": "120",
+                    "percent": 119,
+                    "actualValue": 119.83701,
+                    "code": "sugar"
+                },
+                {
+                    "title": "Tuky",
+                    "titleShort": "Tuky",
+                    "unit": "g",
+                    "goal": "85",
+                    "actual": "61,2",
+                    "percent": 72,
+                    "actualValue": 61.2185,
+                    "code": "fat"
+                },
+                {
+                    "title": "Nasycené mastné kyseliny",
+                    "titleShort": "Nasycené mastné...",
+                    "unit": "g",
+                    "goal": "40",
+                    "actual": "15,7",
+                    "percent": 39,
+                    "actualValue": 15.710051,
+                    "code": "saturatedFattyAcid"
+                }
+            ]
+        ],
+        "activityEnergyTotal": 0.0,
+        "foodstuffEnergyTotal": 2700.0,
+        "digestion": null,
+        "energyUnit": null,
+        "weight": "106",
+        "alcohol": null,
+        "mode": 1,
+        "nutrientsFromActivities": false,
+        "balance": {
+            "energyOutputTotal": "2 785",
+            "energyIntakeMaintenance": null,
+            "energyDeficit": null,
+            "target": "2 785",
+            "basal": "1 977",
+            "digestion": false,
+            "considerActivity": false,
+            "ownTarget": true,
+            "ownTargetValue": "2 785",
+            "intake": "2 700",
+            "intakePercent": "97",
+            "intakeRest": "84,9",
+            "intakeRestPercent": "3",
+            "output": "2 785",
+            "aml": null
+        }
+    }
+}

@@ -1,54 +1,49 @@
 {
   "@@locale": "cs",
-
   "settingsTitle": "Nastavení",
-  "@settingsTitle": { "description": "Settings screen title / tooltip of the settings icon." },
-
+  "@settingsTitle": {
+    "description": "Settings screen title / tooltip of the settings icon."
+  },
   "homeIntegrationsTitle": "Propojení",
   "homeAllConnected": "Vše připojeno",
   "homeNotConfiguredYet": "Aplikace zatím není nastavená.",
   "homeOpenSettings": "Otevřít nastavení",
-
   "homeLastSyncTitle": "Poslední synchronizace",
   "homeLastSyncNever": "Zatím neproběhla žádná synchronizace.",
-
   "homeQuickSyncButton": "Synchronizovat",
   "homeQuickSyncSubtitle": "Včera: výživa a kroky · Dnes: váha",
-
   "homeCalendarTitle": "Kalendář",
   "homeComingSoon": "Bude doplněno v další fázi.",
-  "@homeComingSoon": { "description": "Placeholder for home sections built in later implementation phases." },
-
+  "@homeComingSoon": {
+    "description": "Placeholder for home sections built in later implementation phases."
+  },
   "homeAdvancedTitle": "Další možnosti",
   "homeRangeSync": "Synchronizovat období…",
   "homeHistory": "Historie synchronizací",
-
   "settingsSectionHealthConnect": "Health Connect",
   "settingsSectionKt": "Kalorické tabulky",
   "settingsSectionGoogle": "Google účet",
   "settingsSectionSheet": "Tabulka",
   "settingsSectionAutoSync": "Automatická synchronizace",
   "settingsSectionDiagnostics": "Diagnostika",
-
   "statusNotConfigured": "Nenastaveno",
   "statusConfigured": "Nastaveno",
   "statusReadVerified": "Čtení ověřeno",
   "statusVerified": "Ověřeno",
   "statusError": "Chyba",
-
   "settingsOpenHealthConnect": "Otevřít Health Connect",
   "settingsAutoSyncLater": "Automatická synchronizace přibude v pozdější fázi.",
   "diagnosticsEmpty": "Žádné záznamy.",
   "diagnosticsCopy": "Kopírovat",
   "diagnosticsCopied": "Zkopírováno do schránky.",
   "diagnosticsClear": "Vymazat",
-
   "dataSourceHealthConnect": "Health Connect",
   "dataSourceKt": "Kalorických tabulkách",
-  "@dataSourceKt": { "description": "Locative form, used in issueNoData: 'V {source} nejsou…'." },
+  "@dataSourceKt": {
+    "description": "Locative form, used in issueNoData: 'V {source} nejsou…'."
+  },
   "hcTypeSteps": "kroky",
   "hcTypeWeight": "váha",
-
   "issueKtCredentialsMissing": "Chybí přihlašovací údaje ke Kalorickým tabulkám.",
   "issueKtAuthRejected": "Přihlášení do Kalorických tabulek se nezdařilo. Zkontroluj e-mail a heslo.",
   "issueKtUnavailable": "Kalorické tabulky teď neodpovídají.",
@@ -57,35 +52,112 @@
   "issueSheetNotConfigured": "Není nastavená cílová tabulka.",
   "issueSheetNotFound": "Tabulka nebyla nalezena. Zkontroluj odkaz v nastavení.",
   "issueSheetNoEditAccess": "Účet {email} nemá oprávnění tabulku upravovat.",
-  "@issueSheetNoEditAccess": { "placeholders": { "email": { "type": "String" } } },
+  "@issueSheetNoEditAccess": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "issueSheetsApiDisabled": "Google Sheets API není v projektu Google Cloud povolené.",
   "issueSheetTabMissing": "V tabulce chybí list „{tab}“.",
-  "@issueSheetTabMissing": { "placeholders": { "tab": { "type": "String" } } },
+  "@issueSheetTabMissing": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
   "issueSheetLayoutChanged": "Rozvržení listu „{tab}“ se změnilo. Nic nebylo zapsáno.",
-  "@issueSheetLayoutChanged": { "placeholders": { "tab": { "type": "String" } } },
+  "@issueSheetLayoutChanged": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
   "issueDateNotInSheet": "Datum {date} v tabulce není. Nic nebylo zapsáno.",
-  "@issueDateNotInSheet": { "placeholders": { "date": { "type": "String" } } },
+  "@issueDateNotInSheet": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "issueDateDuplicated": "Datum {date} je v tabulce vícekrát. Nic nebylo zapsáno.",
-  "@issueDateDuplicated": { "placeholders": { "date": { "type": "String" } } },
+  "@issueDateDuplicated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "issueCellHasFormula": "Buňka {cell} obsahuje vzorec, nebyla přepsána.",
-  "@issueCellHasFormula": { "placeholders": { "cell": { "type": "String" } } },
+  "@issueCellHasFormula": {
+    "placeholders": {
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
   "issueSheetsUnavailable": "Google Sheets je dočasně nedostupné.",
   "issueHcNotAvailable": "Health Connect není nainstalovaný nebo potřebuje aktualizaci.",
   "issueHcPermissionMissing": "Chybí oprávnění Health Connect: {types}.",
-  "@issueHcPermissionMissing": { "placeholders": { "types": { "type": "String" } } },
+  "@issueHcPermissionMissing": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      }
+    }
+  },
   "issueHcHistoryPermissionMissing": "Data starší než 30 dní vyžadují oprávnění ke čtení historie.",
   "issueHcBackgroundPermissionMissing": "Automatická synchronizace nemá oprávnění číst Health Connect na pozadí.",
   "issueHcReadFailed": "Health Connect pro {date} nevrátil data.",
-  "@issueHcReadFailed": { "placeholders": { "date": { "type": "String" } } },
+  "@issueHcReadFailed": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "issueNoData": "V {source} nejsou pro {date} žádná data. Buňky zůstaly beze změny.",
-  "@issueNoData": { "placeholders": { "source": { "type": "String" }, "date": { "type": "String" } } },
+  "@issueNoData": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "issueOffline": "Synchronizace vyžaduje připojení k internetu.",
   "issueUnexpected": "Synchronizace se nezdařila z neočekávaného důvodu.",
-
   "actionOpenSettings": "Otevřít nastavení",
   "actionInstallHealthConnect": "Nainstalovat / aktualizovat",
   "actionGrantPermissions": "Udělit oprávnění",
   "actionConnectGoogle": "Připojit Google účet",
   "actionReconnectGoogle": "Znovu připojit",
-  "actionRetry": "Zkusit znovu"
+  "actionRetry": "Zkusit znovu",
+  "settingsHcHistory": "Oprávnění ke čtení historie",
+  "settingsHcHistoryGranted": "Čtení historie starší než 30 dní je povolené.",
+  "settingsHcHistoryUnavailable": "Tato verze Health Connect čtení historie nepodporuje.",
+  "settingsHcPriorityHint": "Tip: v aplikaci Health Connect nastav prioritu zdrojů pro kroky, aby se nesčítaly z více zařízení.",
+  "settingsHcAllGranted": "Oprávnění ke čtení váhy a kroků jsou udělena.",
+  "ktEmailLabel": "E-mail",
+  "ktPasswordLabel": "Heslo",
+  "ktLoginButton": "Přihlásit a ověřit",
+  "ktLogoutButton": "Odhlásit",
+  "ktChangeCredentials": "Změnit údaje",
+  "ktCancel": "Zrušit",
+  "ktSignedInAs": "Přihlášeno jako {email}",
+  "@ktSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "ktLoginSuccess": "Přihlášení ověřeno.",
+  "ktFieldsRequired": "Vyplň e-mail i heslo."
 }

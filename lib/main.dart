@@ -6,7 +6,14 @@ import 'app.dart';
 import 'core/app_log.dart';
 import 'core/log_buffer.dart';
 import 'core/prefs_store.dart';
+import 'core/secure_store.dart';
 import 'core/system_intents.dart';
+import 'sources/health/health_source.dart';
+import 'sources/kt/kt_client.dart';
+import 'sources/kt/kt_source.dart';
+import 'sync/integration_status.dart';
+import 'ui/settings/health_connect_controller.dart';
+import 'ui/settings/kt_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,12 +25,27 @@ Future<void> main() async {
   await logBuffer.load();
   AppLog.app.info('Forgelink starting');
 
+  const intents = SystemIntents();
+  final statusStore = IntegrationStatusStore(prefs);
+  final ktClient = KtClient(storage: SecureStore.instance);
+  final healthSource = HealthSource(prefs: prefs);
+
   runApp(
     MultiProvider(
       providers: [
         Provider<PrefsStore>.value(value: prefs),
-        Provider<SystemIntents>.value(value: const SystemIntents()),
+        Provider<SystemIntents>.value(value: intents),
+        Provider<IntegrationStatusStore>.value(value: statusStore),
+        Provider<KtClient>.value(value: ktClient),
+        Provider<KtSource>(create: (_) => KtSource(ktClient)),
+        Provider<HealthSource>.value(value: healthSource),
         ChangeNotifierProvider<PersistentLogBuffer>.value(value: logBuffer),
+        ChangeNotifierProvider(
+          create: (_) => HealthConnectController(healthSource, intents),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => KtController(ktClient, statusStore),
+        ),
       ],
       child: const ForgelinkApp(),
     ),

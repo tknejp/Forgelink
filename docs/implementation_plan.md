@@ -612,6 +612,20 @@ Launcher label and backup exclusion still need a check on the device.
 
 ### Phase 2 — Sources
 
+**Status: code done 2026-10-16.** 64 tests pass, analyze clean, APK builds. Not yet verified on the device: the Health Connect permission flow and a real KT login.
+
+Layout:
+- KT lives in `sources/kt/`:
+  - `kt_client.dart` with parts `kt_session_client`, `kt_summary_parser`, `kt_formatter`;
+  - `kt_source.dart`, which does the refresh-once and the `SyncIssue` mapping.
+- Health Connect lives in `sources/health/` (`hc_read_client.dart`, `health_source.dart`).
+- Integration status is in `sync/integration_status.dart`.
+- Settings controllers and sections are in `ui/settings/`.
+
+Deviations:
+- Settings shows the stored KT email unmasked; it is the user's own. Logs stay masked.
+- `kt_session_client.dart` also adds a 20 s request timeout.
+
 - **KT:** port the session client, the trimmed facade, the summary-only diary call, the nullable parser and the formatter. In the port:
   - re-point the `part of` directives at `kt_client.dart`;
   - require the `SecureStore` instance (no default storage);

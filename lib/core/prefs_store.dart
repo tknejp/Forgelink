@@ -77,6 +77,16 @@ class PrefsStore {
     await _prefs.setString(_kHcFirstGrantDate, date.isoKey);
   }
 
+  // ─── Integration status (raw; see sync/integration_status.dart) ─────────
+
+  Future<String?> integrationStatusRaw(String integration) =>
+      _prefs.getString('status.$integration');
+
+  Future<void> setIntegrationStatusRaw(String integration, String? raw) =>
+      raw == null
+          ? _prefs.remove('status.$integration')
+          : _prefs.setString('status.$integration', raw);
+
   // ─── Diagnostics ────────────────────────────────────────────────────────
 
   Future<List<String>> logLines() async =>
