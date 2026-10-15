@@ -58,8 +58,12 @@ class GoogleAuth implements TokenProvider {
       AppLog.auth.success('Google account connected: ${maskEmail(account.email)}');
       return account.email;
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        AppLog.auth.info('Google connect cancelled by user');
+      // Leaving the consent page surfaces as unknownError "[16] Cancelled by
+      // user" on Android, not as `canceled`.
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          (e.description ?? '').contains('Cancelled by user')) {
+        AppLog.auth.info('Google connect cancelled by user',
+            payload: '${e.code}: ${e.description}');
         return null;
       }
       AppLog.auth.error('Google connect failed',
