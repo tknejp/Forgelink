@@ -841,7 +841,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendarHint.
   ///
   /// In cs, this message translates to:
-  /// **'Klepnutím na den ho synchronizuješ, podržením zobrazíš detail.'**
+  /// **'Klepnutím na den ho synchronizuješ. Podržením zobrazíš detail, podržením a tažením vybereš období.'**
   String get calendarHint;
 
   /// No description provided for @rangeTooLong.
@@ -933,6 +933,18 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Zapsaných buněk: {count}'**
   String historyCells(int count);
+
+  /// No description provided for @rangeConfirmTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizovat období?'**
+  String get rangeConfirmTitle;
+
+  /// No description provided for @rangeConfirmBody.
+  ///
+  /// In cs, this message translates to:
+  /// **'{dates} · {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}'**
+  String rangeConfirmBody(String dates, int count);
 }
 
 class _AppLocalizationsDelegate

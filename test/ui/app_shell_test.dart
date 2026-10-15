@@ -89,8 +89,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Forgelink'), findsOneWidget);
-    expect(find.text('Synchronizovat'), findsOneWidget);
     expect(find.text('Kalendář'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Synchronizovat'), 300);
+    expect(find.text('Synchronizovat'), findsOneWidget);
     expect(find.text('Včera: výživa a kroky · Dnes: váha'), findsOneWidget);
   });
 

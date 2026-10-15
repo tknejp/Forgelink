@@ -449,7 +449,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get calendarHint =>
-      'Klepnutím na den ho synchronizuješ, podržením zobrazíš detail.';
+      'Klepnutím na den ho synchronizuješ. Podržením zobrazíš detail, podržením a tažením vybereš období.';
 
   @override
   String rangeTooLong(int max) {
@@ -498,5 +498,20 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String historyCells(int count) {
     return 'Zapsaných buněk: $count';
+  }
+
+  @override
+  String get rangeConfirmTitle => 'Synchronizovat období?';
+
+  @override
+  String rangeConfirmBody(String dates, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dní',
+      few: '$count dny',
+      one: '1 den',
+    );
+    return '$dates · $_temp0';
   }
 }

@@ -345,7 +345,7 @@
   "dayNeverSynced": "Tento den zatím nebyl synchronizován.",
   "daySyncNow": "Synchronizovat tento den",
   "dayTodayWeightOnly": "Dnes se synchronizuje jen váha.",
-  "calendarHint": "Klepnutím na den ho synchronizuješ, podržením zobrazíš detail.",
+  "calendarHint": "Klepnutím na den ho synchronizuješ. Podržením zobrazíš detail, podržením a tažením vybereš období.",
   "rangeTooLong": "Období může mít nejvýše {max} dní.",
   "@rangeTooLong": {
     "placeholders": {
@@ -370,6 +370,18 @@
   "historyCells": "Zapsaných buněk: {count}",
   "@historyCells": {
     "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rangeConfirmTitle": "Synchronizovat období?",
+  "rangeConfirmBody": "{dates} · {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}",
+  "@rangeConfirmBody": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      },
       "count": {
         "type": "int"
       }

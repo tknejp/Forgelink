@@ -83,6 +83,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  /// Range dragged on the calendar: confirm before syncing several days.
+  Future<void> _confirmRange(LocalDate from, LocalDate to) async {
+    final l10n = context.l10n;
+    final text = SyncText(l10n);
+    final count = from.daysUntil(to) + 1;
+    if (count > AppConfig.maxRangeDays) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.rangeTooLong(AppConfig.maxRangeDays))));
+      return;
+    }
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.rangeConfirmTitle),
+        content: Text(l10n.rangeConfirmBody(text.dates([from, to]), count)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.ktCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.homeQuickSyncButton),
+          ),
+        ],
+      ),
+    );
+    if (ok == true && mounted) await _sync((c) => c.syncRange(from, to));
+  }
+
   Future<void> _pickRange() async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
@@ -143,8 +173,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ],
             const SizedBox(height: 12),
-            SyncCard(onQuickSync: () => _sync((c) => c.quickSync())),
-            const SizedBox(height: 12),
             SectionCard(
               icon: Icons.calendar_month_outlined,
               title: l10n.homeCalendarTitle,
@@ -153,9 +181,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   onTapDay: (d) => _sync((c) => c.syncDate(d)),
                   onLongPressDay: (d) => showDayDetail(context, d,
                       onSync: () => _sync((c) => c.syncDate(d))),
+                  onSelectRange: _confirmRange,
                 ),
               ],
             ),
+            // Below the calendar so the big button sits near the thumb.
+            const SizedBox(height: 12),
+            SyncCard(onQuickSync: () => _sync((c) => c.quickSync())),
             const SizedBox(height: 12),
             SectionCard(
               icon: Icons.tune,
