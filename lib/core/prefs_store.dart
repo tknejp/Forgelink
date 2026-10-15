@@ -87,6 +87,13 @@ class PrefsStore {
           ? _prefs.remove('status.$integration')
           : _prefs.setString('status.$integration', raw);
 
+  // ─── Raw JSON blobs (sync/sync_history.dart) ────────────────────────────
+
+  Future<String?> rawString(String key) => _prefs.getString(key);
+
+  Future<void> setRawString(String key, String value) =>
+      _prefs.setString(key, value);
+
   // ─── Diagnostics ────────────────────────────────────────────────────────
 
   Future<List<String>> logLines() async =>

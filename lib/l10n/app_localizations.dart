@@ -142,12 +142,6 @@ abstract class AppLocalizations {
   /// **'Kalendář'**
   String get homeCalendarTitle;
 
-  /// Placeholder for home sections built in later implementation phases.
-  ///
-  /// In cs, this message translates to:
-  /// **'Bude doplněno v další fázi.'**
-  String get homeComingSoon;
-
   /// No description provided for @homeAdvancedTitle.
   ///
   /// In cs, this message translates to:
@@ -651,6 +645,294 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Opravit'**
   String get homeFix;
+
+  /// No description provided for @whenToday.
+  ///
+  /// In cs, this message translates to:
+  /// **'dnes {time}'**
+  String whenToday(String time);
+
+  /// No description provided for @whenYesterday.
+  ///
+  /// In cs, this message translates to:
+  /// **'včera {time}'**
+  String whenYesterday(String time);
+
+  /// No description provided for @lastSuccessLine.
+  ///
+  /// In cs, this message translates to:
+  /// **'Naposledy úspěšně: {when} · {trigger}'**
+  String lastSuccessLine(String when, String trigger);
+
+  /// No description provided for @triggerManualShort.
+  ///
+  /// In cs, this message translates to:
+  /// **'ručně'**
+  String get triggerManualShort;
+
+  /// No description provided for @triggerBackgroundShort.
+  ///
+  /// In cs, this message translates to:
+  /// **'na pozadí'**
+  String get triggerBackgroundShort;
+
+  /// No description provided for @syncProgress.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizuji {done}/{total} · {date}'**
+  String syncProgress(int done, int total, String date);
+
+  /// No description provided for @syncProgressWriting.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zapisuji do tabulky…'**
+  String get syncProgressWriting;
+
+  /// No description provided for @runSuccess.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizováno: {dates}.'**
+  String runSuccess(String dates);
+
+  /// No description provided for @runNothingToWrite.
+  ///
+  /// In cs, this message translates to:
+  /// **'Pro {dates} nejsou žádná data. Tabulka zůstala beze změny.'**
+  String runNothingToWrite(String dates);
+
+  /// No description provided for @runPartial.
+  ///
+  /// In cs, this message translates to:
+  /// **'Částečně synchronizováno: {dates}.'**
+  String runPartial(String dates);
+
+  /// No description provided for @runFailed.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizace se nezdařila: {dates}.'**
+  String runFailed(String dates);
+
+  /// No description provided for @runDayWritten.
+  ///
+  /// In cs, this message translates to:
+  /// **'zapsáno {fields}'**
+  String runDayWritten(String fields);
+
+  /// No description provided for @runDayUnchanged.
+  ///
+  /// In cs, this message translates to:
+  /// **'beze změny {fields}'**
+  String runDayUnchanged(String fields);
+
+  /// No description provided for @runDayMissing.
+  ///
+  /// In cs, this message translates to:
+  /// **'bez dat {fields}'**
+  String runDayMissing(String fields);
+
+  /// No description provided for @runDayFailed.
+  ///
+  /// In cs, this message translates to:
+  /// **'nezapsáno {fields}'**
+  String runDayFailed(String fields);
+
+  /// No description provided for @detailsShow.
+  ///
+  /// In cs, this message translates to:
+  /// **'Podrobnosti'**
+  String get detailsShow;
+
+  /// No description provided for @detailsHide.
+  ///
+  /// In cs, this message translates to:
+  /// **'Skrýt podrobnosti'**
+  String get detailsHide;
+
+  /// No description provided for @fieldWeight.
+  ///
+  /// In cs, this message translates to:
+  /// **'váha'**
+  String get fieldWeight;
+
+  /// No description provided for @fieldKcal.
+  ///
+  /// In cs, this message translates to:
+  /// **'kcal'**
+  String get fieldKcal;
+
+  /// No description provided for @fieldProtein.
+  ///
+  /// In cs, this message translates to:
+  /// **'bílkoviny'**
+  String get fieldProtein;
+
+  /// No description provided for @fieldCarbs.
+  ///
+  /// In cs, this message translates to:
+  /// **'sacharidy'**
+  String get fieldCarbs;
+
+  /// No description provided for @fieldFat.
+  ///
+  /// In cs, this message translates to:
+  /// **'tuky'**
+  String get fieldFat;
+
+  /// No description provided for @fieldFiber.
+  ///
+  /// In cs, this message translates to:
+  /// **'vláknina'**
+  String get fieldFiber;
+
+  /// No description provided for @fieldSteps.
+  ///
+  /// In cs, this message translates to:
+  /// **'kroky'**
+  String get fieldSteps;
+
+  /// No description provided for @outcomeWritten.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zapsáno'**
+  String get outcomeWritten;
+
+  /// No description provided for @outcomeUnchanged.
+  ///
+  /// In cs, this message translates to:
+  /// **'Beze změny'**
+  String get outcomeUnchanged;
+
+  /// No description provided for @outcomeMissing.
+  ///
+  /// In cs, this message translates to:
+  /// **'Bez dat'**
+  String get outcomeMissing;
+
+  /// No description provided for @outcomeSkippedFormula.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vzorec – přeskočeno'**
+  String get outcomeSkippedFormula;
+
+  /// No description provided for @outcomeFailed.
+  ///
+  /// In cs, this message translates to:
+  /// **'Chyba'**
+  String get outcomeFailed;
+
+  /// No description provided for @dayNeverSynced.
+  ///
+  /// In cs, this message translates to:
+  /// **'Tento den zatím nebyl synchronizován.'**
+  String get dayNeverSynced;
+
+  /// No description provided for @daySyncNow.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizovat tento den'**
+  String get daySyncNow;
+
+  /// No description provided for @dayTodayWeightOnly.
+  ///
+  /// In cs, this message translates to:
+  /// **'Dnes se synchronizuje jen váha.'**
+  String get dayTodayWeightOnly;
+
+  /// No description provided for @calendarHint.
+  ///
+  /// In cs, this message translates to:
+  /// **'Klepnutím na den ho synchronizuješ, podržením zobrazíš detail.'**
+  String get calendarHint;
+
+  /// No description provided for @rangeTooLong.
+  ///
+  /// In cs, this message translates to:
+  /// **'Období může mít nejvýše {max} dní.'**
+  String rangeTooLong(int max);
+
+  /// No description provided for @rangePickerHelp.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vyber období k synchronizaci'**
+  String get rangePickerHelp;
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Historie synchronizací'**
+  String get historyTitle;
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zatím žádné synchronizace.'**
+  String get historyEmpty;
+
+  /// No description provided for @triggerQuick.
+  ///
+  /// In cs, this message translates to:
+  /// **'Rychlá synchronizace'**
+  String get triggerQuick;
+
+  /// No description provided for @triggerCalendar.
+  ///
+  /// In cs, this message translates to:
+  /// **'Kalendář'**
+  String get triggerCalendar;
+
+  /// No description provided for @triggerRange.
+  ///
+  /// In cs, this message translates to:
+  /// **'Období'**
+  String get triggerRange;
+
+  /// No description provided for @triggerBackground.
+  ///
+  /// In cs, this message translates to:
+  /// **'Na pozadí'**
+  String get triggerBackground;
+
+  /// No description provided for @runStatusSuccess.
+  ///
+  /// In cs, this message translates to:
+  /// **'Hotovo'**
+  String get runStatusSuccess;
+
+  /// No description provided for @runStatusNoData.
+  ///
+  /// In cs, this message translates to:
+  /// **'Bez dat'**
+  String get runStatusNoData;
+
+  /// No description provided for @runStatusPartial.
+  ///
+  /// In cs, this message translates to:
+  /// **'Částečně'**
+  String get runStatusPartial;
+
+  /// No description provided for @runStatusFailed.
+  ///
+  /// In cs, this message translates to:
+  /// **'Chyba'**
+  String get runStatusFailed;
+
+  /// No description provided for @openIssuesTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vyžaduje pozornost'**
+  String get openIssuesTitle;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In cs, this message translates to:
+  /// **'Skrýt'**
+  String get dismiss;
+
+  /// No description provided for @historyCells.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zapsaných buněk: {count}'**
+  String historyCells(int count);
 }
 
 class _AppLocalizationsDelegate

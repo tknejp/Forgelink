@@ -683,6 +683,23 @@ Deviations:
 
 ### Phase 4 — Sync engine and Home (MVP)
 
+**Status: code done 2026-10-16.** 141 tests pass, analyze clean.
+
+Verified on the device against the test copy: Quick Sync over the duplicated week reports "Datum … je v tabulce vícekrát (řádky 886, 900)", writes nothing, and marks the days red in the calendar.
+
+Still to check on the device: a successful calendar-date write, idempotency (a second tap reports *beze změny*), range sync, and the open-issue flow.
+
+Layout:
+- `sync/sync_engine.dart`, `sync_models.dart`, `sync_history.dart`, `sync_controller.dart`;
+- `core/sync_issue_codec.dart` (issue persistence);
+- `ui/home/` (`sync_card`, `month_calendar`, `day_detail_sheet`), `ui/history/history_screen.dart`, `ui/issue_actions.dart`, `ui/sync_text.dart`.
+
+Deviations:
+- Calendar days use a light tint for their status, plus a border for today.
+- Long-press on a day opens the per-field detail with a "Synchronizovat tento den" button.
+- A KT failure stops KT requests for the rest of that run.
+- Dates the sheet can't take (not found, duplicated, layout) are not fetched from the sources at all.
+
 - `SyncEngine` (§4 algorithm), `SyncController`, `SyncHistory`, integration status.
 - Home: status strip, last sync card, Quick Sync, calendar with per-date status, range sync, history list, result details with actions.
 

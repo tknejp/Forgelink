@@ -12,6 +12,10 @@ import 'package:forgelink/sheets/tracker_sheet.dart';
 import 'package:forgelink/ui/settings/google_controller.dart';
 import 'package:forgelink/ui/settings/kt_controller.dart';
 import 'package:forgelink/ui/settings/sheet_controller.dart';
+import 'package:forgelink/sources/kt/kt_source.dart';
+import 'package:forgelink/sync/sync_controller.dart';
+import 'package:forgelink/sync/sync_engine.dart';
+import 'package:forgelink/sync/sync_history.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:forgelink/app.dart';
@@ -56,7 +60,18 @@ Widget _withProviders(Widget child) {
                 IntegrationStatusStore(prefs),
               )),
     ],
-    child: child,
+    child: ChangeNotifierProvider(
+      create: (_) => SyncController(
+        SyncEngine(
+          prefs: prefs,
+          health: health,
+          kt: KtSource(kt),
+          sheet: TrackerSheet(SheetsGateway(_NoTokens())),
+        ),
+        SyncHistory(prefs, IntegrationStatusStore(prefs)),
+      ),
+      child: child,
+    ),
   );
 }
 
@@ -75,6 +90,7 @@ void main() {
 
     expect(find.text('Forgelink'), findsOneWidget);
     expect(find.text('Synchronizovat'), findsOneWidget);
+    expect(find.text('Kalendář'), findsOneWidget);
     expect(find.text('Včera: výživa a kroky · Dnes: váha'), findsOneWidget);
   });
 

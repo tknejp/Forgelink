@@ -2,19 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/app_config.dart';
+import '../../core/local_date.dart';
 import '../../core/sync_issue.dart';
 import '../../l10n/l10n.dart';
 import '../../sync/integration_status.dart';
+import '../../sync/sync_controller.dart';
+import '../../sync/sync_models.dart';
+import '../history/history_screen.dart';
+import '../issue_actions.dart';
 import '../settings/google_controller.dart';
 import '../settings/health_connect_controller.dart';
 import '../settings/kt_controller.dart';
 import '../settings/settings_screen.dart';
 import '../settings/sheet_controller.dart';
+import '../sync_text.dart';
 import '../theme.dart';
+import '../widgets/issue_notice.dart';
 import '../widgets/section_card.dart';
+import 'day_detail_sheet.dart';
+import 'month_calendar.dart';
+import 'sync_card.dart';
 
-/// Home (docs/implementation_plan.md §8). Sync actions and the calendar
-/// become live in Phase 4; the connection status is live already.
+/// Home (docs/implementation_plan.md §8): connections, open issues, Quick
+/// Sync, calendar, range sync, history.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -47,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     context.read<KtController>().load();
     context.read<GoogleController>().load();
     context.read<SheetController>().load();
+    context.read<SyncController>().reload();
   }
 
   Future<void> _openSettings([SettingsSection? section]) async {
@@ -58,11 +69,46 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _refresh();
   }
 
+  /// Runs a sync and gives the plan §8 feedback: a snackbar for success /
+  /// nothing-to-write; partial and failed results stay in the sync card.
+  Future<void> _sync(Future<RunResult?> Function(SyncController c) start) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final text = SyncText(context.l10n);
+    final result = await start(context.read<SyncController>());
+    if (!mounted || result == null) return;
+    _refresh();
+    if (result.status == RunStatus.success ||
+        result.status == RunStatus.noData) {
+      messenger.showSnackBar(SnackBar(content: Text(text.runSummary(result))));
+    }
+  }
+
+  Future<void> _pickRange() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final today = context.read<SyncController>().today;
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(today.year - 2),
+      lastDate: today.startOfDay,
+      helpText: l10n.rangePickerHelp,
+      locale: const Locale('cs'),
+    );
+    if (picked == null || !mounted) return;
+    final from = LocalDate.fromDateTime(picked.start);
+    final to = LocalDate.fromDateTime(picked.end);
+    if (from.daysUntil(to) + 1 > AppConfig.maxRangeDays) {
+      messenger.showSnackBar(SnackBar(
+          content: Text(l10n.rangeTooLong(AppConfig.maxRangeDays))));
+      return;
+    }
+    await _sync((c) => c.syncRange(from, to));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final muted = TextStyle(color: theme.colorScheme.onSurfaceVariant);
+    final sync = context.watch<SyncController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -83,66 +129,105 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           const SizedBox(width: 4),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-        children: [
-          _ConnectionsCard(onFix: _openSettings),
-          const SizedBox(height: 12),
-          SectionCard(
-            icon: Icons.sync,
-            title: l10n.homeLastSyncTitle,
-            children: [
-              Text(l10n.homeLastSyncNever, style: muted),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: null, // Phase 4
-                  icon: const Icon(Icons.sync),
-                  label: Text(l10n.homeQuickSyncButton),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(56),
-                    textStyle: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
+      body: RefreshIndicator(
+        onRefresh: () async => _refresh(),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          children: [
+            _ConnectionsCard(onFix: _openSettings),
+            if (sync.openIssues.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _OpenIssuesCard(
+                issues: sync.openIssues,
+                onRetry: () => _sync((c) => c.quickSync()),
+              ),
+            ],
+            const SizedBox(height: 12),
+            SyncCard(onQuickSync: () => _sync((c) => c.quickSync())),
+            const SizedBox(height: 12),
+            SectionCard(
+              icon: Icons.calendar_month_outlined,
+              title: l10n.homeCalendarTitle,
+              children: [
+                MonthCalendar(
+                  onTapDay: (d) => _sync((c) => c.syncDate(d)),
+                  onLongPressDay: (d) => showDayDetail(context, d,
+                      onSync: () => _sync((c) => c.syncDate(d))),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SectionCard(
+              icon: Icons.tune,
+              title: l10n.homeAdvancedTitle,
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  enabled: !sync.busy,
+                  leading: const Icon(Icons.date_range_outlined),
+                  title: Text(l10n.homeRangeSync),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _pickRange,
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.history),
+                  title: Text(l10n.homeHistory),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                          builder: (_) => const HistoryScreen())),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Persisted problems from earlier runs (incl. background) with their
+/// actions; dismissable (plan §6 open issues).
+class _OpenIssuesCard extends StatelessWidget {
+  const _OpenIssuesCard({required this.issues, required this.onRetry});
+
+  final List<SyncIssue> issues;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final c = context.read<SyncController>();
+    return SectionCard(
+      icon: Icons.warning_amber_rounded,
+      title: l10n.openIssuesTitle,
+      children: [
+        for (final issue in issues)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: IssueNotice(
+                    issue: issue,
+                    onAction: issue.action == null
+                        ? null
+                        : () => runIssueAction(context, issue.action!,
+                            onRetry: onRetry),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: Text(l10n.homeQuickSyncSubtitle,
-                    style: theme.textTheme.bodySmall?.merge(muted)),
-              ),
-            ],
+                IconButton(
+                  tooltip: l10n.dismiss,
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: () => c.dismissIssue(issue),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          SectionCard(
-            icon: Icons.calendar_month_outlined,
-            title: l10n.homeCalendarTitle,
-            children: [Text(l10n.homeComingSoon, style: muted)],
-          ),
-          const SizedBox(height: 12),
-          SectionCard(
-            icon: Icons.tune,
-            title: l10n.homeAdvancedTitle,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                enabled: false, // Phase 4
-                leading: const Icon(Icons.date_range_outlined),
-                title: Text(l10n.homeRangeSync),
-                trailing: const Icon(Icons.chevron_right),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                enabled: false, // Phase 4
-                leading: const Icon(Icons.history),
-                title: Text(l10n.homeHistory),
-                trailing: const Icon(Icons.chevron_right),
-              ),
-            ],
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

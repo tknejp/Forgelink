@@ -11,10 +11,6 @@
   "homeQuickSyncButton": "Synchronizovat",
   "homeQuickSyncSubtitle": "Včera: výživa a kroky · Dnes: váha",
   "homeCalendarTitle": "Kalendář",
-  "homeComingSoon": "Bude doplněno v další fázi.",
-  "@homeComingSoon": {
-    "description": "Placeholder for home sections built in later implementation phases."
-  },
   "homeAdvancedTitle": "Další možnosti",
   "homeRangeSync": "Synchronizovat období…",
   "homeHistory": "Historie synchronizací",
@@ -223,5 +219,160 @@
   },
   "diagnosticsHide": "Skrýt záznamy",
   "homeIntegrationSheets": "Google Sheets",
-  "homeFix": "Opravit"
+  "homeFix": "Opravit",
+  "whenToday": "dnes {time}",
+  "@whenToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "whenYesterday": "včera {time}",
+  "@whenYesterday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSuccessLine": "Naposledy úspěšně: {when} · {trigger}",
+  "@lastSuccessLine": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "trigger": {
+        "type": "String"
+      }
+    }
+  },
+  "triggerManualShort": "ručně",
+  "triggerBackgroundShort": "na pozadí",
+  "syncProgress": "Synchronizuji {done}/{total} · {date}",
+  "@syncProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "syncProgressWriting": "Zapisuji do tabulky…",
+  "runSuccess": "Synchronizováno: {dates}.",
+  "@runSuccess": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      }
+    }
+  },
+  "runNothingToWrite": "Pro {dates} nejsou žádná data. Tabulka zůstala beze změny.",
+  "@runNothingToWrite": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      }
+    }
+  },
+  "runPartial": "Částečně synchronizováno: {dates}.",
+  "@runPartial": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      }
+    }
+  },
+  "runFailed": "Synchronizace se nezdařila: {dates}.",
+  "@runFailed": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      }
+    }
+  },
+  "runDayWritten": "zapsáno {fields}",
+  "@runDayWritten": {
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "runDayUnchanged": "beze změny {fields}",
+  "@runDayUnchanged": {
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "runDayMissing": "bez dat {fields}",
+  "@runDayMissing": {
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "runDayFailed": "nezapsáno {fields}",
+  "@runDayFailed": {
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsShow": "Podrobnosti",
+  "detailsHide": "Skrýt podrobnosti",
+  "fieldWeight": "váha",
+  "fieldKcal": "kcal",
+  "fieldProtein": "bílkoviny",
+  "fieldCarbs": "sacharidy",
+  "fieldFat": "tuky",
+  "fieldFiber": "vláknina",
+  "fieldSteps": "kroky",
+  "outcomeWritten": "Zapsáno",
+  "outcomeUnchanged": "Beze změny",
+  "outcomeMissing": "Bez dat",
+  "outcomeSkippedFormula": "Vzorec – přeskočeno",
+  "outcomeFailed": "Chyba",
+  "dayNeverSynced": "Tento den zatím nebyl synchronizován.",
+  "daySyncNow": "Synchronizovat tento den",
+  "dayTodayWeightOnly": "Dnes se synchronizuje jen váha.",
+  "calendarHint": "Klepnutím na den ho synchronizuješ, podržením zobrazíš detail.",
+  "rangeTooLong": "Období může mít nejvýše {max} dní.",
+  "@rangeTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "rangePickerHelp": "Vyber období k synchronizaci",
+  "historyTitle": "Historie synchronizací",
+  "historyEmpty": "Zatím žádné synchronizace.",
+  "triggerQuick": "Rychlá synchronizace",
+  "triggerCalendar": "Kalendář",
+  "triggerRange": "Období",
+  "triggerBackground": "Na pozadí",
+  "runStatusSuccess": "Hotovo",
+  "runStatusNoData": "Bez dat",
+  "runStatusPartial": "Částečně",
+  "runStatusFailed": "Chyba",
+  "openIssuesTitle": "Vyžaduje pozornost",
+  "dismiss": "Skrýt",
+  "historyCells": "Zapsaných buněk: {count}",
+  "@historyCells": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

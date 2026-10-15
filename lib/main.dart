@@ -15,6 +15,9 @@ import 'sources/health/health_source.dart';
 import 'sources/kt/kt_client.dart';
 import 'sources/kt/kt_source.dart';
 import 'sync/integration_status.dart';
+import 'sync/sync_controller.dart';
+import 'sync/sync_engine.dart';
+import 'sync/sync_history.dart';
 import 'ui/settings/health_connect_controller.dart';
 import 'ui/settings/google_controller.dart';
 import 'ui/settings/kt_controller.dart';
@@ -42,6 +45,17 @@ Future<void> main() async {
     AppLog.auth.error('GoogleSignIn.initialize failed', err: e, stackTrace: st);
   }
   final trackerSheet = TrackerSheet(SheetsGateway(googleAuth));
+  final ktSource = KtSource(ktClient);
+  final syncController = SyncController(
+    SyncEngine(
+      prefs: prefs,
+      health: healthSource,
+      kt: ktSource,
+      sheet: trackerSheet,
+    ),
+    SyncHistory(prefs, statusStore),
+  );
+  await syncController.reload();
 
   runApp(
     MultiProvider(
@@ -50,7 +64,8 @@ Future<void> main() async {
         Provider<SystemIntents>.value(value: intents),
         Provider<IntegrationStatusStore>.value(value: statusStore),
         Provider<KtClient>.value(value: ktClient),
-        Provider<KtSource>(create: (_) => KtSource(ktClient)),
+        Provider<KtSource>.value(value: ktSource),
+        ChangeNotifierProvider<SyncController>.value(value: syncController),
         Provider<HealthSource>.value(value: healthSource),
         ChangeNotifierProvider<PersistentLogBuffer>.value(value: logBuffer),
         ChangeNotifierProvider(

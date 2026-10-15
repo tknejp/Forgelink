@@ -33,9 +33,6 @@ class AppLocalizationsCs extends AppLocalizations {
   String get homeCalendarTitle => 'Kalendář';
 
   @override
-  String get homeComingSoon => 'Bude doplněno v další fázi.';
-
-  @override
   String get homeAdvancedTitle => 'Další možnosti';
 
   @override
@@ -329,4 +326,177 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get homeFix => 'Opravit';
+
+  @override
+  String whenToday(String time) {
+    return 'dnes $time';
+  }
+
+  @override
+  String whenYesterday(String time) {
+    return 'včera $time';
+  }
+
+  @override
+  String lastSuccessLine(String when, String trigger) {
+    return 'Naposledy úspěšně: $when · $trigger';
+  }
+
+  @override
+  String get triggerManualShort => 'ručně';
+
+  @override
+  String get triggerBackgroundShort => 'na pozadí';
+
+  @override
+  String syncProgress(int done, int total, String date) {
+    return 'Synchronizuji $done/$total · $date';
+  }
+
+  @override
+  String get syncProgressWriting => 'Zapisuji do tabulky…';
+
+  @override
+  String runSuccess(String dates) {
+    return 'Synchronizováno: $dates.';
+  }
+
+  @override
+  String runNothingToWrite(String dates) {
+    return 'Pro $dates nejsou žádná data. Tabulka zůstala beze změny.';
+  }
+
+  @override
+  String runPartial(String dates) {
+    return 'Částečně synchronizováno: $dates.';
+  }
+
+  @override
+  String runFailed(String dates) {
+    return 'Synchronizace se nezdařila: $dates.';
+  }
+
+  @override
+  String runDayWritten(String fields) {
+    return 'zapsáno $fields';
+  }
+
+  @override
+  String runDayUnchanged(String fields) {
+    return 'beze změny $fields';
+  }
+
+  @override
+  String runDayMissing(String fields) {
+    return 'bez dat $fields';
+  }
+
+  @override
+  String runDayFailed(String fields) {
+    return 'nezapsáno $fields';
+  }
+
+  @override
+  String get detailsShow => 'Podrobnosti';
+
+  @override
+  String get detailsHide => 'Skrýt podrobnosti';
+
+  @override
+  String get fieldWeight => 'váha';
+
+  @override
+  String get fieldKcal => 'kcal';
+
+  @override
+  String get fieldProtein => 'bílkoviny';
+
+  @override
+  String get fieldCarbs => 'sacharidy';
+
+  @override
+  String get fieldFat => 'tuky';
+
+  @override
+  String get fieldFiber => 'vláknina';
+
+  @override
+  String get fieldSteps => 'kroky';
+
+  @override
+  String get outcomeWritten => 'Zapsáno';
+
+  @override
+  String get outcomeUnchanged => 'Beze změny';
+
+  @override
+  String get outcomeMissing => 'Bez dat';
+
+  @override
+  String get outcomeSkippedFormula => 'Vzorec – přeskočeno';
+
+  @override
+  String get outcomeFailed => 'Chyba';
+
+  @override
+  String get dayNeverSynced => 'Tento den zatím nebyl synchronizován.';
+
+  @override
+  String get daySyncNow => 'Synchronizovat tento den';
+
+  @override
+  String get dayTodayWeightOnly => 'Dnes se synchronizuje jen váha.';
+
+  @override
+  String get calendarHint =>
+      'Klepnutím na den ho synchronizuješ, podržením zobrazíš detail.';
+
+  @override
+  String rangeTooLong(int max) {
+    return 'Období může mít nejvýše $max dní.';
+  }
+
+  @override
+  String get rangePickerHelp => 'Vyber období k synchronizaci';
+
+  @override
+  String get historyTitle => 'Historie synchronizací';
+
+  @override
+  String get historyEmpty => 'Zatím žádné synchronizace.';
+
+  @override
+  String get triggerQuick => 'Rychlá synchronizace';
+
+  @override
+  String get triggerCalendar => 'Kalendář';
+
+  @override
+  String get triggerRange => 'Období';
+
+  @override
+  String get triggerBackground => 'Na pozadí';
+
+  @override
+  String get runStatusSuccess => 'Hotovo';
+
+  @override
+  String get runStatusNoData => 'Bez dat';
+
+  @override
+  String get runStatusPartial => 'Částečně';
+
+  @override
+  String get runStatusFailed => 'Chyba';
+
+  @override
+  String get openIssuesTitle => 'Vyžaduje pozornost';
+
+  @override
+  String get dismiss => 'Skrýt';
+
+  @override
+  String historyCells(int count) {
+    return 'Zapsaných buněk: $count';
+  }
 }
