@@ -584,11 +584,20 @@ Each phase ends with `flutter analyze` clean, its tests green and a commit. Phas
 
 ### Phase 0 — Setup (no app code)
 
-- [ ] Decide on the GCP project (§16). Do §11 steps 1–8, including the **Web client** (needed for the MVP connect flow).
-- [ ] **Make a test copy of the coach's sheet**: File → Make a copy → "the coach's spreadsheet (Forgelink test)". All development and dry runs target the copy until Phase 5 signs off.
+- [x] Decide on the GCP project (§16): new project **`forgelink-511721`** (project number 598204569304).
+- [ ] Do §11 steps 2–8 in that project, including the **Web client** (needed for the MVP connect flow). Put the Web client ID into `AppConfig.googleWebClientId`.
+  - Debug keystore (`%USERPROFILE%\.android\debug.keystore`) SHA-1 for the Android client: `43:85:B2:26:9C:73:D0:91:EE:3F:93:CD:C3:09:59:95:EC:C1:4F:8B`.
+  - The release keystore doesn't exist yet. Add its SHA-1 as a second Android client once `android/key.properties` is set up.
+- [x] **Test copy of the coach's sheet**: ID `<test copy ID>`. All development and dry runs target the copy until Phase 5 signs off.
 - [ ] Confirm the KT account's energy unit is kcal, not kJ.
 
 ### Phase 1 — Foundation
+
+**Status: done 2026-10-15.** `flutter analyze` clean, 23 tests pass, debug APK builds. Two deviations from the tree in §5:
+- the persisted log ring buffer lives in `core/log_buffer.dart`;
+- `SheetColumn` (the B–H column map) lives in `core/app_config.dart`.
+
+Launcher label and backup exclusion still need a check on the device.
 
 - Pubspec dependencies (§5, without the Phase 6 packages), `l10n.yaml` + `app_cs.arb`, `context.l10n`.
 - App shell: theme light/dark/system, `MaterialApp(title: 'Forgelink')`, Home and Settings skeletons with deep-link sections, `provider` wiring.
