@@ -655,9 +655,21 @@ Layout:
 - `sheets/tracker_sheet.dart`: orchestration and `parseSpreadsheetId`.
 - Settings sections: `google_*`, `sheet_*`.
 
+**Findings from the real sheet (test copy, 2026-10-16), which change §2:**
+- The `tracker` tab has **64 weekly Tables** with **four different column orders**, so the fixed B–H mapping in §2 is wrong for older weeks:
+  - 25 tables: KCAL in G, BÍLKOVINY in C, SACHARIDY in D, KROKY in K;
+  - 13 tables: like the 25, but BÍLKOVINY and SACHARIDY swapped (D and C);
+  - 25 tables (the newest): C to H, as in §2;
+  - 1 table: the newest order, but KROKY in K.
+- **Every owned column is therefore located per Table by header name.** A Table missing one of the 8 headers blocks only its own dates (`SheetLayoutChanged`). Rows outside weekly Tables are ignored. A tab with no weekly Table at all is an error.
+- The API omits `columnIndex` when it is 0, so a missing index means column 0.
+- `footerColorStyle` is absent on these Tables. Footer rows are still safe because they have no date in column A.
+- 441 dates from 21. 7. 2025 to 18. 10. 2026. The current week, 12.–18. 10. 2026, exists **twice**. Those dates are reported with their row numbers and never written until the duplicate is removed.
+
 Deviations:
-- Weekly Tables are recognized as tables that start in column A with `DATUM` as the first column. Other Tables on the tab are ignored.
-- Date cells must parse to a year between 2000 and 2100, which rules out other numbers in column A.
+- Weekly Tables are recognized by a `DATUM` column.
+- Date cells must parse to a year between 2000 and 2100.
+- Values and formulas are read from column A up to the right-most Table column.
 
 - `GoogleAuth`: the connect flow (`authenticate()` → pin email/id → `authorizeScopes`), and a `TokenProvider` interface whose Play-services implementation requests tokens for the pinned email via the platform interface (silent, then interactive in the foreground).
 - `SheetsApi` wrapper with the error mapping (§6).
