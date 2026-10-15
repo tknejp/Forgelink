@@ -585,7 +585,7 @@ Each phase ends with `flutter analyze` clean, its tests green and a commit. Phas
 ### Phase 0 — Setup (no app code)
 
 - [x] Decide on the GCP project (§16): new project **`forgelink-511721`** (project number 598204569304).
-- [ ] Do §11 steps 2–8 in that project, including the **Web client** (needed for the MVP connect flow). Put the Web client ID into `AppConfig.googleWebClientId`.
+- [x] Do §11 steps 2–8 in that project, including the **Web client**. Its ID is in `AppConfig.googleWebClientId`.
   - Debug keystore (`%USERPROFILE%\.android\debug.keystore`) SHA-1 for the Android client: `43:85:B2:26:9C:73:D0:91:EE:3F:93:CD:C3:09:59:95:EC:C1:4F:8B`.
   - The release keystore doesn't exist yet. Add its SHA-1 as a second Android client once `android/key.properties` is set up.
 - [x] **Test copy of the coach's sheet**: ID `<test copy ID>`. All development and dry runs target the copy until Phase 5 signs off.
@@ -645,7 +645,7 @@ Deviations:
 **Status: code done 2026-10-16.** 106 tests pass, analyze clean, APK builds.
 
 Open items:
-- `AppConfig.googleWebClientId` is still empty. Put the Web client ID from `forgelink-511721` there.
+- `AppConfig.googleWebClientId` is set (Web client in `forgelink-511721`).
 - Not yet verified on the device: "Ověřit" against the test copy, the account picker and the token for the pinned account.
 
 Layout:

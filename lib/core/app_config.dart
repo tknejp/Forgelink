@@ -7,8 +7,9 @@ abstract final class AppConfig {
   ///
   /// Web OAuth client ID used as `serverClientId` for
   /// `GoogleSignIn.instance.initialize`. Required for the connect flow on
-  /// Android (docs/implementation_plan.md §11 step 6). Filled in Phase 3.
-  static const googleWebClientId = '';
+  /// Android (docs/implementation_plan.md §11 step 6).
+  static const googleWebClientId =
+      '598204569304-4556eie5qesqgqusnqsdumi2fdhuhm7f.apps.googleusercontent.com';
 
   static const sheetsScope = 'https://www.googleapis.com/auth/spreadsheets';
 
