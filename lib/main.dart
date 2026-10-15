@@ -8,12 +8,17 @@ import 'core/log_buffer.dart';
 import 'core/prefs_store.dart';
 import 'core/secure_store.dart';
 import 'core/system_intents.dart';
+import 'sheets/google_auth.dart';
+import 'sheets/sheets_gateway.dart';
+import 'sheets/tracker_sheet.dart';
 import 'sources/health/health_source.dart';
 import 'sources/kt/kt_client.dart';
 import 'sources/kt/kt_source.dart';
 import 'sync/integration_status.dart';
 import 'ui/settings/health_connect_controller.dart';
+import 'ui/settings/google_controller.dart';
 import 'ui/settings/kt_controller.dart';
+import 'ui/settings/sheet_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +34,14 @@ Future<void> main() async {
   final statusStore = IntegrationStatusStore(prefs);
   final ktClient = KtClient(storage: SecureStore.instance);
   final healthSource = HealthSource(prefs: prefs);
+  final googleAuth = GoogleAuth(prefs);
+  try {
+    await googleAuth.initialize();
+  } catch (e, st) {
+    // Don't block startup; connect/sync will surface the problem.
+    AppLog.auth.error('GoogleSignIn.initialize failed', err: e, stackTrace: st);
+  }
+  final trackerSheet = TrackerSheet(SheetsGateway(googleAuth));
 
   runApp(
     MultiProvider(
@@ -45,6 +58,15 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => KtController(ktClient, statusStore),
+        ),
+        Provider<GoogleAuth>.value(value: googleAuth),
+        Provider<TrackerSheet>.value(value: trackerSheet),
+        ChangeNotifierProvider(
+          create: (_) => GoogleController(googleAuth, statusStore),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              SheetController(prefs, trackerSheet, googleAuth, statusStore),
         ),
       ],
       child: const ForgelinkApp(),

@@ -274,4 +274,46 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get ktFieldsRequired => 'Vyplň e-mail i heslo.';
+
+  @override
+  String googleConnectedAs(String email) {
+    return 'Připojený účet: $email';
+  }
+
+  @override
+  String get googleDisconnect => 'Odpojit';
+
+  @override
+  String get googleWebClientMissing =>
+      'V aplikaci chybí ID webového klienta Google, připojení nemusí fungovat.';
+
+  @override
+  String get sheetUrlLabel => 'Odkaz nebo ID tabulky';
+
+  @override
+  String get sheetTabLabel => 'Název listu';
+
+  @override
+  String get sheetSaveVerify => 'Uložit a ověřit';
+
+  @override
+  String get sheetVerify => 'Ověřit';
+
+  @override
+  String get sheetInvalidId => 'Neplatný odkaz nebo ID tabulky.';
+
+  @override
+  String get sheetNeedsGoogle => 'Pro ověření nejdřív připoj Google účet.';
+
+  @override
+  String sheetVerifyResult(int weeks, int days, String first, String last) {
+    return 'Týdenních tabulek: $weeks, dní: $days ($first – $last).';
+  }
+
+  @override
+  String get sheetVerifyNoDates => 'V listu nebyla nalezena žádná data.';
+
+  @override
+  String get sheetEditAccessNote =>
+      'Čtení ověřeno; oprávnění k úpravám se ověří při první synchronizaci.';
 }

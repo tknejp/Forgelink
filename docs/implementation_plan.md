@@ -642,6 +642,23 @@ Deviations:
 
 ### Phase 3 — Sheets
 
+**Status: code done 2026-10-16.** 106 tests pass, analyze clean, APK builds.
+
+Open items:
+- `AppConfig.googleWebClientId` is still empty. Put the Web client ID from `forgelink-511721` there.
+- Not yet verified on the device: "Ověřit" against the test copy, the account picker and the token for the pinned account.
+
+Layout:
+- `sheets/google_auth.dart`: connect flow and a pinned-email `TokenProvider`.
+- `sheets/sheets_gateway.dart`: error mapping and backoff; the classifier is pure.
+- `sheets/tracker_index.dart` and `sheets/write_plan.dart`: pure.
+- `sheets/tracker_sheet.dart`: orchestration and `parseSpreadsheetId`.
+- Settings sections: `google_*`, `sheet_*`.
+
+Deviations:
+- Weekly Tables are recognized as tables that start in column A with `DATUM` as the first column. Other Tables on the tab are ignored.
+- Date cells must parse to a year between 2000 and 2100, which rules out other numbers in column A.
+
 - `GoogleAuth`: the connect flow (`authenticate()` → pin email/id → `authorizeScopes`), and a `TokenProvider` interface whose Play-services implementation requests tokens for the pinned email via the platform interface (silent, then interactive in the foreground).
 - `SheetsApi` wrapper with the error mapping (§6).
 - `TrackerIndex` and `WritePlan` as pure functions.

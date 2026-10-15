@@ -159,5 +159,40 @@
     }
   },
   "ktLoginSuccess": "Přihlášení ověřeno.",
-  "ktFieldsRequired": "Vyplň e-mail i heslo."
+  "ktFieldsRequired": "Vyplň e-mail i heslo.",
+  "googleConnectedAs": "Připojený účet: {email}",
+  "@googleConnectedAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "googleDisconnect": "Odpojit",
+  "googleWebClientMissing": "V aplikaci chybí ID webového klienta Google, připojení nemusí fungovat.",
+  "sheetUrlLabel": "Odkaz nebo ID tabulky",
+  "sheetTabLabel": "Název listu",
+  "sheetSaveVerify": "Uložit a ověřit",
+  "sheetVerify": "Ověřit",
+  "sheetInvalidId": "Neplatný odkaz nebo ID tabulky.",
+  "sheetNeedsGoogle": "Pro ověření nejdřív připoj Google účet.",
+  "sheetVerifyResult": "Týdenních tabulek: {weeks}, dní: {days} ({first} – {last}).",
+  "@sheetVerifyResult": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      },
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "sheetVerifyNoDates": "V listu nebyla nalezena žádná data.",
+  "sheetEditAccessNote": "Čtení ověřeno; oprávnění k úpravám se ověří při první synchronizaci."
 }

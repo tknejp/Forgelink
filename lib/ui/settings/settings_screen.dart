@@ -8,7 +8,11 @@ import '../../l10n/l10n.dart';
 import 'health_connect_controller.dart';
 import 'health_connect_section.dart';
 import 'kt_controller.dart';
+import 'google_controller.dart';
+import 'google_section.dart';
 import 'kt_section.dart';
+import 'sheet_controller.dart';
+import 'sheet_section.dart';
 
 /// Settings skeleton (Phase 1). Every section is addressable through
 /// [initialSection]: the screen scrolls to it and briefly highlights it, so
@@ -57,6 +61,8 @@ class _SettingsScreenState extends State<SettingsScreen>
   void _refreshLocalStatus() {
     context.read<HealthConnectController>().refresh();
     context.read<KtController>().load();
+    context.read<GoogleController>().load();
+    context.read<SheetController>().load();
   }
 
   Future<void> _reveal(SettingsSection section) async {
@@ -98,11 +104,11 @@ class _SettingsScreenState extends State<SettingsScreen>
             section(SettingsSection.kt, l10n.settingsSectionKt, const [
               KtSection(),
             ]),
-            section(SettingsSection.google, l10n.settingsSectionGoogle, [
-              _StatusLine(text: l10n.statusNotConfigured),
+            section(SettingsSection.google, l10n.settingsSectionGoogle, const [
+              GoogleSection(),
             ]),
-            section(SettingsSection.sheet, l10n.settingsSectionSheet, [
-              _StatusLine(text: l10n.statusNotConfigured),
+            section(SettingsSection.sheet, l10n.settingsSectionSheet, const [
+              SheetSection(),
             ]),
             section(SettingsSection.autoSync, l10n.settingsSectionAutoSync, [
               Text(l10n.settingsAutoSyncLater),
@@ -152,24 +158,6 @@ class _SettingsSectionCard extends StatelessWidget {
           ...children,
         ],
       ),
-    );
-  }
-}
-
-class _StatusLine extends StatelessWidget {
-  const _StatusLine({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(Icons.circle_outlined,
-            size: 12, color: Theme.of(context).colorScheme.outline),
-        const SizedBox(width: 8),
-        Text(text),
-      ],
     );
   }
 }

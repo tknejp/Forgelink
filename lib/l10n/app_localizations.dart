@@ -561,6 +561,78 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Vyplň e-mail i heslo.'**
   String get ktFieldsRequired;
+
+  /// No description provided for @googleConnectedAs.
+  ///
+  /// In cs, this message translates to:
+  /// **'Připojený účet: {email}'**
+  String googleConnectedAs(String email);
+
+  /// No description provided for @googleDisconnect.
+  ///
+  /// In cs, this message translates to:
+  /// **'Odpojit'**
+  String get googleDisconnect;
+
+  /// No description provided for @googleWebClientMissing.
+  ///
+  /// In cs, this message translates to:
+  /// **'V aplikaci chybí ID webového klienta Google, připojení nemusí fungovat.'**
+  String get googleWebClientMissing;
+
+  /// No description provided for @sheetUrlLabel.
+  ///
+  /// In cs, this message translates to:
+  /// **'Odkaz nebo ID tabulky'**
+  String get sheetUrlLabel;
+
+  /// No description provided for @sheetTabLabel.
+  ///
+  /// In cs, this message translates to:
+  /// **'Název listu'**
+  String get sheetTabLabel;
+
+  /// No description provided for @sheetSaveVerify.
+  ///
+  /// In cs, this message translates to:
+  /// **'Uložit a ověřit'**
+  String get sheetSaveVerify;
+
+  /// No description provided for @sheetVerify.
+  ///
+  /// In cs, this message translates to:
+  /// **'Ověřit'**
+  String get sheetVerify;
+
+  /// No description provided for @sheetInvalidId.
+  ///
+  /// In cs, this message translates to:
+  /// **'Neplatný odkaz nebo ID tabulky.'**
+  String get sheetInvalidId;
+
+  /// No description provided for @sheetNeedsGoogle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Pro ověření nejdřív připoj Google účet.'**
+  String get sheetNeedsGoogle;
+
+  /// No description provided for @sheetVerifyResult.
+  ///
+  /// In cs, this message translates to:
+  /// **'Týdenních tabulek: {weeks}, dní: {days} ({first} – {last}).'**
+  String sheetVerifyResult(int weeks, int days, String first, String last);
+
+  /// No description provided for @sheetVerifyNoDates.
+  ///
+  /// In cs, this message translates to:
+  /// **'V listu nebyla nalezena žádná data.'**
+  String get sheetVerifyNoDates;
+
+  /// No description provided for @sheetEditAccessNote.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čtení ověřeno; oprávnění k úpravám se ověří při první synchronizaci.'**
+  String get sheetEditAccessNote;
 }
 
 class _AppLocalizationsDelegate

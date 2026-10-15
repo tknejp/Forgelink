@@ -5,7 +5,13 @@ import 'package:forgelink/sources/health/health_source.dart';
 import 'package:forgelink/sources/kt/kt_client.dart';
 import 'package:forgelink/sync/integration_status.dart';
 import 'package:forgelink/ui/settings/health_connect_controller.dart';
+import 'package:forgelink/core/sync_issue.dart' as issues;
+import 'package:forgelink/sheets/google_auth.dart';
+import 'package:forgelink/sheets/sheets_gateway.dart';
+import 'package:forgelink/sheets/tracker_sheet.dart';
+import 'package:forgelink/ui/settings/google_controller.dart';
 import 'package:forgelink/ui/settings/kt_controller.dart';
+import 'package:forgelink/ui/settings/sheet_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:forgelink/app.dart';
@@ -39,6 +45,16 @@ Widget _withProviders(Widget child) {
           create: (_) => HealthConnectController(health, intents)),
       ChangeNotifierProvider(
           create: (_) => KtController(kt, IntegrationStatusStore(prefs))),
+      ChangeNotifierProvider(
+          create: (_) =>
+              GoogleController(GoogleAuth(prefs), IntegrationStatusStore(prefs))),
+      ChangeNotifierProvider(
+          create: (_) => SheetController(
+                prefs,
+                TrackerSheet(SheetsGateway(_NoTokens())),
+                _NoTokens(),
+                IntegrationStatusStore(prefs),
+              )),
     ],
     child: child,
   );
@@ -93,4 +109,14 @@ void main() {
     final context = tester.element(find.text('Forgelink'));
     expect(Theme.of(context).brightness, Brightness.dark);
   });
+}
+
+class _NoTokens implements TokenProvider {
+  @override
+  Future<String?> accountEmail() async => null;
+  @override
+  Future<String> accessToken({required bool interactive}) async =>
+      throw const issues.SyncIssueException(issues.GoogleNotConnected());
+  @override
+  Future<void> invalidate(String token) async {}
 }
