@@ -84,6 +84,20 @@ class _SheetSectionState extends State<SheetSection> {
                   presenter.formatDate(v.last!),
                 )),
         ],
+        if (v != null && v.duplicates.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Builder(builder: (_) {
+            final dates = v.duplicates.keys.toList()..sort();
+            final rows = (v.duplicates.values.expand((r) => r).toSet().toList()
+                  ..sort())
+                .join(', ');
+            return Text(
+              l10n.sheetDuplicates(dates.length, presenter.formatDate(dates.first),
+                  presenter.formatDate(dates.last), rows),
+              style: errorStyle,
+            );
+          }),
+        ],
         if (readOk && c.status.state != IntegrationState.verified)
           Text(l10n.sheetEditAccessNote,
               style: Theme.of(context).textTheme.bodySmall),

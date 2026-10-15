@@ -31,7 +31,7 @@ void main() {
     const SheetTabMissing('tracker'),
     const SheetLayoutChanged('tracker'),
     DateNotInSheet(date),
-    DateDuplicated(date),
+    DateDuplicated(date, const [883, 893]),
     const CellHasFormula('B883'),
     const SheetsUnavailable(),
     const HcNotAvailable(),

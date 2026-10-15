@@ -13,8 +13,9 @@ class TrackerSheet {
 
   final SheetsGateway _gateway;
 
-  /// Metadata + `A:H` read → [TrackerIndex]. Throws [SyncIssueException]
-  /// with [SheetTabMissing] or [SheetLayoutChanged] for a structural problem.
+  /// Metadata + one values read → [TrackerIndex]. Throws [SyncIssueException]
+  /// with [SheetTabMissing], or [SheetLayoutChanged] when the tab has no
+  /// weekly Table at all.
   Future<TrackerIndex> loadIndex(String spreadsheetId, String tab) async {
     final meta = await _gateway.metadata(spreadsheetId);
     final sheet = meta.sheets
@@ -27,10 +28,11 @@ class TrackerSheet {
     final tables = [
       for (final t in sheet.tables ?? const <Table>[]) tableInfoOf(t),
     ];
+    _logLayouts(tab, tables);
 
     final read = await _gateway.values(
       spreadsheetId,
-      '${quoteSheetName(tab)}!A:H',
+      _readRange(tab, tables),
       valueRenderOption: 'UNFORMATTED_VALUE',
       dateTimeRenderOption: 'SERIAL_NUMBER',
     );
@@ -41,24 +43,24 @@ class TrackerSheet {
       valuesStartRow: startRowOfRange(read.range),
     );
 
-    if (!index.layoutOk) {
-      AppLog.sheets.warn('Layout check failed',
-          payload: 'tables=${index.mismatchedTables}');
+    if (index.weekTables == 0) {
+      AppLog.sheets.warn('No weekly Table (with a $dateHeader column) on "$tab"');
       throw SyncIssueException(SheetLayoutChanged(tab));
     }
     AppLog.sheets.info('Index built',
         payload: 'weekTables=${index.weekTables}, dates=${index.rows.length}, '
-            'duplicates=${index.duplicates.length}, '
-            'range=${index.firstDate}..${index.lastDate}');
+            'range=${index.firstDate}..${index.lastDate}, '
+            'duplicates=${index.duplicateRows}, '
+            'incompleteTables=${index.incompleteTables}');
     return index;
   }
 
-  /// `B:H` with `FORMULA` rendering → 1-based row → cells.
+  /// Cells from column A with `FORMULA` rendering → 1-based row → cells.
   Future<Map<int, List<Object?>>> loadFormulas(
-      String spreadsheetId, String tab) async {
+      String spreadsheetId, String tab, TrackerIndex index) async {
     final read = await _gateway.values(
       spreadsheetId,
-      '${quoteSheetName(tab)}!B:H',
+      '${quoteSheetName(tab)}!A:${columnLetter(index.maxColumn)}',
       valueRenderOption: 'FORMULA',
     );
     final start = startRowOfRange(read.range);
@@ -67,6 +69,29 @@ class TrackerSheet {
       for (var i = 0; i < rows.length; i++)
         if (rows[i].isNotEmpty) start + i: rows[i],
     };
+  }
+
+  String _readRange(String tab, List<TableInfo> tables) {
+    var maxCol = 0;
+    for (final t in tables) {
+      for (final rel in t.columnNames.keys) {
+        if (t.startColumn + rel > maxCol) maxCol = t.startColumn + rel;
+      }
+    }
+    return '${quoteSheetName(tab)}!A:${columnLetter(maxCol < 7 ? 7 : maxCol)}';
+  }
+
+  void _logLayouts(String tab, List<TableInfo> tables) {
+    final layouts = <String, int>{};
+    for (final t in tables) {
+      final cols = t.ownedColumns.entries
+          .map((e) => '${e.key.header}=${columnLetter(e.value)}')
+          .join(' ');
+      final key = 'date=${t.dateColumn == null ? '-' : columnLetter(t.dateColumn!)} $cols';
+      layouts[key] = (layouts[key] ?? 0) + 1;
+    }
+    AppLog.sheets.info('Tables on "$tab": ${tables.length}',
+        payload: layouts.entries.map((e) => '${e.value}x [${e.key}]').join(' | '));
   }
 
   /// Sends the plan's ranges in one values-only request. No-op without writes.
@@ -90,7 +115,8 @@ TableInfo tableInfoOf(Table t) {
     hasFooter: t.rowsProperties?.footerColorStyle != null,
     columnNames: {
       for (final c in t.columnProperties ?? const <TableColumnProperties>[])
-        if (c.columnIndex != null) c.columnIndex!: c.columnName ?? '',
+        // The API omits columnIndex when it is 0 (proto default).
+        c.columnIndex ?? 0: c.columnName ?? '',
     },
   );
 }

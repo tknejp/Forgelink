@@ -3,8 +3,8 @@ import 'package:meta/meta.dart';
 import '../core/app_config.dart';
 import '../core/local_date.dart';
 
-/// A weekly Table on the tracker tab, reduced to what the index needs.
-/// Rows are 0-based grid indexes, end exclusive (as in the Sheets API).
+/// A Table on the tracker tab, reduced to what the index needs.
+/// Rows/columns are 0-based grid indexes, end exclusive (as in the Sheets API).
 @immutable
 class TableInfo {
   final String name;
@@ -29,125 +29,161 @@ class TableInfo {
   int get firstDataRow => startRow + 1;
   int get endDataRow => endRow - (hasFooter ? 1 : 0);
 
-  bool containsDataRow(int gridRow) =>
-      gridRow >= firstDataRow && gridRow < endDataRow;
+  /// Absolute 0-based sheet column of the header [name], or null.
+  int? columnOf(String name) {
+    final wanted = normalizeHeader(name);
+    for (final e in columnNames.entries) {
+      if (normalizeHeader(e.value) == wanted) return startColumn + e.key;
+    }
+    return null;
+  }
+
+  /// Absolute date column (DATUM); null → not a weekly table.
+  int? get dateColumn => columnOf(dateHeader);
+
+  /// Absolute column of every owned field found by header name.
+  Map<SheetColumn, int> get ownedColumns => {
+        for (final c in SheetColumn.values) c: ?columnOf(c.header),
+      };
+
+  bool get isComplete => ownedColumns.length == SheetColumn.values.length;
 }
 
-/// Expected headers of a weekly table, columns A..H.
-const expectedTableHeaders = [
-  'DATUM',
-  'VÁHA',
-  'KCAL',
-  'BÍLKOVINY',
-  'SACHARIDY',
-  'TUKY',
-  'VLÁKNINA',
-  'KROKY',
-];
+const dateHeader = 'DATUM';
 
 String normalizeHeader(String s) =>
     s.trim().toUpperCase().replaceAll(RegExp(r'\s+'), ' ');
 
+/// One writable date row.
+@immutable
+class IndexedRow {
+  /// 1-based sheet row.
+  final int row;
+  final String table;
+
+  /// Absolute 0-based column per owned field, from this row's table headers.
+  final Map<SheetColumn, int> columns;
+
+  /// Current unformatted value per owned field.
+  final Map<SheetColumn, Object?> current;
+
+  const IndexedRow({
+    required this.row,
+    required this.table,
+    required this.columns,
+    required this.current,
+  });
+}
+
 /// Date → row lookup for the tracker tab (docs/implementation_plan.md §4
-/// steps 4–5). Pure; built from the metadata and one `A:H` values read.
+/// steps 4–5). Pure; built from the Table metadata and one values read.
+///
+/// Older weeks in the coach's sheet use a different column order than newer
+/// ones, so columns are never assumed: each row's owned columns come from the
+/// header names of the weekly Table it belongs to. Rows outside weekly Tables
+/// are ignored.
 @immutable
 class TrackerIndex {
-  /// Date → 1-based sheet row.
-  final Map<LocalDate, int> rows;
+  final Map<LocalDate, IndexedRow> rows;
 
-  /// Dates that appear on more than one row: never written.
-  final Set<LocalDate> duplicates;
+  /// Dates that appear on more than one row → all their 1-based rows.
+  /// Never written.
+  final Map<LocalDate, List<int>> duplicateRows;
 
-  /// 1-based row → current unformatted values of B..H (length ≤ 7).
-  final Map<int, List<Object?>> currentValues;
+  Set<LocalDate> get duplicates => duplicateRows.keys.toSet();
 
-  /// Number of weekly tables recognized (0 when the tab has no Tables).
+  /// Dates inside a weekly Table that lacks one of the owned headers: never
+  /// written (reported as a layout problem for that date only).
+  final Set<LocalDate> layoutBroken;
+
+  /// Weekly Tables recognized (have a DATUM column).
   final int weekTables;
 
-  /// Names of weekly tables whose headers don't match [expectedTableHeaders].
-  final List<String> mismatchedTables;
+  /// Names of weekly Tables missing one of the owned headers.
+  final List<String> incompleteTables;
 
   const TrackerIndex({
     required this.rows,
-    required this.duplicates,
-    required this.currentValues,
+    required this.duplicateRows,
+    required this.layoutBroken,
     required this.weekTables,
-    required this.mismatchedTables,
+    required this.incompleteTables,
   });
 
-  bool get layoutOk => mismatchedTables.isEmpty;
+  /// Highest owned column used by any indexed row (for the formula read).
+  int get maxColumn => rows.values.fold(
+      7,
+      (m, r) => r.columns.values.fold(m, (m2, c) => c > m2 ? c : m2));
 
-  LocalDate? get firstDate => rows.isEmpty ? null : (rows.keys.toList()..sort()).first;
-  LocalDate? get lastDate => rows.isEmpty ? null : (rows.keys.toList()..sort()).last;
+  LocalDate? get firstDate =>
+      rows.isEmpty ? null : (rows.keys.toList()..sort()).first;
+  LocalDate? get lastDate =>
+      rows.isEmpty ? null : (rows.keys.toList()..sort()).last;
 
-  /// Builds the index.
-  ///
-  /// [values] is the `A:H` read with `UNFORMATTED_VALUE` + `SERIAL_NUMBER`;
-  /// [valuesStartRow] is the 1-based row of `values[0]` (from the response
-  /// range). A row counts only if column A parses as a date and — when weekly
-  /// Tables exist — it lies inside a weekly Table's data rows.
+  /// [values] is a read of the tab starting at column A with
+  /// `UNFORMATTED_VALUE` + `SERIAL_NUMBER`; [valuesStartRow] is the 1-based
+  /// row of `values[0]` (from the response range).
   factory TrackerIndex.build({
     required List<TableInfo> tables,
     required List<List<Object?>> values,
     int valuesStartRow = 1,
   }) {
-    // Weekly tables: start at column A and have DATUM as the first column.
-    final weekly = tables
-        .where((t) =>
-            t.startColumn == 0 &&
-            normalizeHeader(t.columnNames[0] ?? '') == expectedTableHeaders[0])
-        .toList();
-    final mismatched = <String>[
-      for (final t in weekly)
-        if (!_headersMatch(t)) t.name,
-    ];
+    final weekly = tables.where((t) => t.dateColumn != null).toList()
+      ..sort((a, b) => a.startRow.compareTo(b.startRow));
 
-    final rows = <LocalDate, int>{};
-    final duplicates = <LocalDate>{};
-    final current = <int, List<Object?>>{};
+    final rows = <LocalDate, IndexedRow>{};
+    final duplicates = <LocalDate, List<int>>{};
+    final broken = <LocalDate>{};
+    final incomplete = <String>[];
 
-    for (var i = 0; i < values.length; i++) {
-      final row = values[i];
-      if (row.isEmpty) continue;
-      final date = parseDateCell(row[0]);
-      if (date == null) continue;
-
-      final sheetRow = valuesStartRow + i;
-      final gridRow = sheetRow - 1;
-      if (weekly.isNotEmpty && !weekly.any((t) => t.containsDataRow(gridRow))) {
-        continue;
-      }
-
-      if (rows.containsKey(date)) {
-        duplicates.add(date);
-      } else {
-        rows[date] = sheetRow;
-      }
-      current[sheetRow] = row.length > 1 ? row.sublist(1) : const [];
+    Object? cell(int gridRow, int col) {
+      final i = gridRow - (valuesStartRow - 1);
+      if (i < 0 || i >= values.length) return null;
+      final r = values[i];
+      return col < r.length ? r[col] : null;
     }
+
+    for (final t in weekly) {
+      final dateCol = t.dateColumn!;
+      final columns = t.ownedColumns;
+      final complete = t.isComplete;
+      if (!complete) incomplete.add(t.name);
+
+      for (var g = t.firstDataRow; g < t.endDataRow; g++) {
+        final date = parseDateCell(cell(g, dateCol));
+        if (date == null) continue;
+        if (!complete) {
+          broken.add(date);
+          continue;
+        }
+        if (rows.containsKey(date) || duplicates.containsKey(date)) {
+          duplicates
+              .putIfAbsent(date, () => [rows[date]!.row])
+              .add(g + 1);
+          continue;
+        }
+        rows[date] = IndexedRow(
+          row: g + 1,
+          table: t.name,
+          columns: columns,
+          current: {for (final e in columns.entries) e.key: cell(g, e.value)},
+        );
+      }
+    }
+
+    duplicates.keys.forEach(rows.remove);
 
     return TrackerIndex(
       rows: rows,
-      duplicates: duplicates,
-      currentValues: current,
+      duplicateRows: duplicates,
+      layoutBroken: broken,
       weekTables: weekly.length,
-      mismatchedTables: mismatched,
+      incompleteTables: incomplete,
     );
   }
 
-  static bool _headersMatch(TableInfo t) {
-    for (var i = 0; i < expectedTableHeaders.length; i++) {
-      if (normalizeHeader(t.columnNames[i] ?? '') !=
-          normalizeHeader(expectedTableHeaders[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /// Column A cell → date. Serial numbers (real dates) and `d.M.yyyy`
-  /// strings; anything else (CÍLE:, DATUM, empty, formulas' errors) → null.
-  /// Serials outside 2000–2100 are rejected as implausible.
+  /// Date cell → date. Serial numbers (real dates) and `d.M.yyyy` strings;
+  /// anything else → null. Serials outside 2000–2100 are rejected.
   static LocalDate? parseDateCell(Object? cell) {
     if (cell is num) {
       if (cell < 36526 || cell > 73051) return null; // 2000-01-01..2100-01-01
@@ -159,7 +195,7 @@ class TrackerIndex {
 }
 
 /// 1-based row of the first value in a `values.get` response, parsed from its
-/// A1 range (e.g. `tracker!A1:H904` or `'my tab'!A3:H10`). Defaults to 1.
+/// A1 range (e.g. `tracker!A1:Z904` or `'my tab'!A3:Z10`). Defaults to 1.
 int startRowOfRange(String? a1Range) {
   if (a1Range == null) return 1;
   final cells = a1Range.split('!').last;
@@ -170,5 +206,14 @@ int startRowOfRange(String? a1Range) {
 /// Quoted sheet name for A1 notation: `'tracker'`, `'it''s'`.
 String quoteSheetName(String tab) => "'${tab.replaceAll("'", "''")}'";
 
-/// Columns B..H in sheet order.
-const ownedColumns = SheetColumn.values;
+/// 0-based column index → A1 letters (0 → A, 25 → Z, 26 → AA).
+String columnLetter(int index) {
+  var n = index + 1;
+  var s = '';
+  while (n > 0) {
+    final r = (n - 1) % 26;
+    s = String.fromCharCode(65 + r) + s;
+    n = (n - 1) ~/ 26;
+  }
+  return s;
+}

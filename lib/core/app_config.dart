@@ -22,8 +22,10 @@ abstract final class AppConfig {
   static const maxRangeDays = 120;
 }
 
-/// Columns Forgelink owns on the coach's sheet (B..H). Column A (date) and
-/// I..L (manual) are never written.
+/// Fields Forgelink owns on the coach's sheet. The actual sheet column is
+/// located per weekly Table by [header] (older weeks use a different column
+/// order); [letter] is only the layout of the newest weeks, for reference.
+/// The date column and the manual columns are never written.
 enum SheetColumn {
   weight('B', 'VÁHA'),
   kcal('C', 'KCAL'),
@@ -40,7 +42,4 @@ enum SheetColumn {
 
   /// Expected (normalized, uppercase) header in the weekly Table.
   final String header;
-
-  /// 0-based column index on the sheet (A = 0).
-  int get sheetColumnIndex => letter.codeUnitAt(0) - 'A'.codeUnitAt(0);
 }

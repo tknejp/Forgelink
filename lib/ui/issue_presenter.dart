@@ -30,8 +30,8 @@ class IssuePresenter {
         SheetLayoutChanged(:final tab) => l10n.issueSheetLayoutChanged(tab),
         DateNotInSheet(:final date) =>
           l10n.issueDateNotInSheet(formatDate(date)),
-        DateDuplicated(:final date) =>
-          l10n.issueDateDuplicated(formatDate(date)),
+        DateDuplicated(:final date, :final rows) =>
+          l10n.issueDateDuplicated(formatDate(date), rows.join(', ')),
         CellHasFormula(:final cell) => l10n.issueCellHasFormula(cell),
         SheetsUnavailable() => l10n.issueSheetsUnavailable,
         HcNotAvailable() => l10n.issueHcNotAvailable,

@@ -213,7 +213,10 @@ final class DateNotInSheet extends SyncIssue {
 
 final class DateDuplicated extends SyncIssue {
   final LocalDate date;
-  const DateDuplicated(this.date);
+
+  /// 1-based sheet rows holding this date.
+  final List<int> rows;
+  const DateDuplicated(this.date, [this.rows = const []]);
   @override
   IssueAction? get action => null;
   @override

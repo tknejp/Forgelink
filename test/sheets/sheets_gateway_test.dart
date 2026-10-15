@@ -221,7 +221,7 @@ void main() {
         });
       });
       final index = await TrackerSheet(g).loadIndex(id, 'tracker');
-      expect(index.rows[LocalDate(2026, 10, 12)], 883);
+      expect(index.rows[LocalDate(2026, 10, 12)]!.row, 883);
       expect(index.weekTables, 1);
 
       final valuesCall = requested.last;
@@ -230,6 +230,7 @@ void main() {
       expect(valuesCall.queryParameters['dateTimeRenderOption'],
           'SERIAL_NUMBER');
       expect(Uri.decodeComponent(valuesCall.path), contains("'tracker'!A:H"));
+      // Table with only A..H headers → read A:H.
     });
 
     test('missing tab → SheetTabMissing', () async {

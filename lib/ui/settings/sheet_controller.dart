@@ -14,6 +14,7 @@ typedef SheetVerification = ({
   int days,
   LocalDate? first,
   LocalDate? last,
+  Map<LocalDate, List<int>> duplicates,
 });
 
 /// State of Settings → Tabulka.
@@ -87,6 +88,7 @@ class SheetController extends ChangeNotifier {
         days: index.rows.length,
         first: index.firstDate,
         last: index.lastDate,
+        duplicates: index.duplicateRows,
       );
       // Keep a proven write ("verified") — a read check can't downgrade it.
       if (_stored?.state != IntegrationState.verified) {

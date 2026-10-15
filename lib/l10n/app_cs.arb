@@ -84,10 +84,13 @@
       }
     }
   },
-  "issueDateDuplicated": "Datum {date} je v tabulce vícekrát. Nic nebylo zapsáno.",
+  "issueDateDuplicated": "Datum {date} je v tabulce vícekrát (řádky {rows}). Nic nebylo zapsáno.",
   "@issueDateDuplicated": {
     "placeholders": {
       "date": {
+        "type": "String"
+      },
+      "rows": {
         "type": "String"
       }
     }
@@ -194,5 +197,22 @@
     }
   },
   "sheetVerifyNoDates": "V listu nebyla nalezena žádná data.",
-  "sheetEditAccessNote": "Čtení ověřeno; oprávnění k úpravám se ověří při první synchronizaci."
+  "sheetEditAccessNote": "Čtení ověřeno; oprávnění k úpravám se ověří při první synchronizaci.",
+  "sheetDuplicates": "Pozor: {count} dní je v listu vícekrát ({first} – {last}, řádky {rows}). Tyto dny se nebudou synchronizovat, dokud duplicitu neodstraníš.",
+  "@sheetDuplicates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      },
+      "rows": {
+        "type": "String"
+      }
+    }
+  }
 }

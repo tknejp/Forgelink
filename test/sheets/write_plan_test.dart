@@ -65,6 +65,36 @@ void main() {
     expect(rangesOf(plan), ["'tracker'!B883:C883", "'tracker'!H883"]);
   });
 
+  test('old-layout week: KCAL→G, macros→C..F, KROKY→K; manual H..J untouched',
+      () {
+    final oldMon = LocalDate(2025, 11, 10);
+    final idx = TrackerIndex.build(
+      tables: [weekTable(name: 'Tabulka32', headerRow: 448, columnNames: oldLayout)],
+      values: trackerValues(weeks: {448: oldMon}),
+    );
+    final plan =
+        buildWritePlan(tab: 'tracker', index: idx, values: {oldMon: full});
+    expect(rangesOf(plan),
+        ["'tracker'!B449:G449", "'tracker'!K449"]);
+    expect(plan.ranges.first.values, [
+      [106.3, 216, 308, 61, 27, 2700]
+    ]);
+    expect(plan.ranges.last.values, [
+      [8432]
+    ]);
+  });
+
+  test('layout-broken table date → SheetLayoutChanged, nothing written', () {
+    final broken = Map.of(newLayout)..[7] = 'KROKŮ';
+    final idx = TrackerIndex.build(
+      tables: [weekTable(columnNames: broken)],
+      values: trackerValues(),
+    );
+    final plan = buildWritePlan(tab: 'tracker', index: idx, values: {mon: full});
+    expect(plan.days.single.issue, isA<SheetLayoutChanged>());
+    expect(plan.hasWrites, isFalse);
+  });
+
   test('nothing ever lands in A or I..L, and no empty strings are written',
       () {
     final plan = buildWritePlan(
@@ -110,7 +140,7 @@ void main() {
       index: index(),
       values: {mon: full},
       formulas: {
-        883: [null, '=C882*2'],
+        883: [null, null, '=C882*2'], // from column A: C883
       },
     );
     expect(plan.days.single.fields[SheetColumn.kcal]!.outcome,
@@ -129,9 +159,7 @@ void main() {
   test('duplicate date → DateDuplicated, nothing written for it', () {
     final idx = TrackerIndex.build(
       tables: [weekTable(), weekTable(name: 'Tabulka64', headerRow: 892)],
-      values: trackerValues(extraRows: {
-        893: [mon.toSheetSerial()],
-      }),
+      values: trackerValues(weeks: {892: mon}),
     );
     final plan = buildWritePlan(tab: 'tracker', index: idx, values: {mon: full});
     expect(plan.days.single.issue, isA<DateDuplicated>());

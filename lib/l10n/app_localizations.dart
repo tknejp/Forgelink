@@ -379,8 +379,8 @@ abstract class AppLocalizations {
   /// No description provided for @issueDateDuplicated.
   ///
   /// In cs, this message translates to:
-  /// **'Datum {date} je v tabulce vícekrát. Nic nebylo zapsáno.'**
-  String issueDateDuplicated(String date);
+  /// **'Datum {date} je v tabulce vícekrát (řádky {rows}). Nic nebylo zapsáno.'**
+  String issueDateDuplicated(String date, String rows);
 
   /// No description provided for @issueCellHasFormula.
   ///
@@ -633,6 +633,12 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Čtení ověřeno; oprávnění k úpravám se ověří při první synchronizaci.'**
   String get sheetEditAccessNote;
+
+  /// No description provided for @sheetDuplicates.
+  ///
+  /// In cs, this message translates to:
+  /// **'Pozor: {count} dní je v listu vícekrát ({first} – {last}, řádky {rows}). Tyto dny se nebudou synchronizovat, dokud duplicitu neodstraníš.'**
+  String sheetDuplicates(int count, String first, String last, String rows);
 }
 
 class _AppLocalizationsDelegate

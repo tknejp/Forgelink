@@ -163,8 +163,8 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String issueDateDuplicated(String date) {
-    return 'Datum $date je v tabulce vícekrát. Nic nebylo zapsáno.';
+  String issueDateDuplicated(String date, String rows) {
+    return 'Datum $date je v tabulce vícekrát (řádky $rows). Nic nebylo zapsáno.';
   }
 
   @override
@@ -316,4 +316,9 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String get sheetEditAccessNote =>
       'Čtení ověřeno; oprávnění k úpravám se ověří při první synchronizaci.';
+
+  @override
+  String sheetDuplicates(int count, String first, String last, String rows) {
+    return 'Pozor: $count dní je v listu vícekrát ($first – $last, řádky $rows). Tyto dny se nebudou synchronizovat, dokud duplicitu neodstraníš.';
+  }
 }
