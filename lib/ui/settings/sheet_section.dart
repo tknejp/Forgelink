@@ -5,7 +5,7 @@ import '../../l10n/l10n.dart';
 import '../../sync/integration_status.dart';
 import '../issue_presenter.dart';
 import 'sheet_controller.dart';
-import 'status_line.dart';
+import '../widgets/issue_notice.dart';
 
 class SheetSection extends StatefulWidget {
   const SheetSection({super.key});
@@ -46,8 +46,12 @@ class _SheetSectionState extends State<SheetSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        StatusLine(status: c.status),
-        const SizedBox(height: 8),
+        if (c.status.issue case final issue?
+            when c.status.state != IntegrationState.error)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: IssueNotice(issue: issue),
+          ),
         TextField(
           controller: _input,
           enabled: !c.busy,
@@ -57,24 +61,19 @@ class _SheetSectionState extends State<SheetSection> {
             errorText: c.invalidInput ? l10n.sheetInvalidId : null,
           ),
         ),
+        const SizedBox(height: 10),
         TextField(
           controller: _tab,
           enabled: !c.busy,
           decoration: InputDecoration(labelText: l10n.sheetTabLabel),
         ),
-        if (!c.googleConnected)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(l10n.sheetNeedsGoogle,
-                style: Theme.of(context).textTheme.bodySmall),
-          ),
         if (c.lastIssue != null)
           Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(presenter.message(c.lastIssue!), style: errorStyle),
+            padding: const EdgeInsets.only(top: 10),
+            child: IssueNotice(issue: c.lastIssue!, isError: true),
           ),
         if (v != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 10),
           Text(v.days == 0
               ? l10n.sheetVerifyNoDates
               : l10n.sheetVerifyResult(
@@ -101,7 +100,7 @@ class _SheetSectionState extends State<SheetSection> {
         if (readOk && c.status.state != IntegrationState.verified)
           Text(l10n.sheetEditAccessNote,
               style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         FilledButton(
           onPressed: c.busy
               ? null

@@ -90,6 +90,8 @@ void main() {
     ));
     await tester.pump(); // post-frame reveal starts
     await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400)); // second pass
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Diagnostika'), findsOneWidget);
     final rect = tester.getRect(find.text('Diagnostika'));

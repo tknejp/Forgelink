@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import '../../core/log_buffer.dart';
 import '../../core/sync_issue.dart';
 import '../../l10n/l10n.dart';
+import '../../sync/integration_status.dart';
+import '../widgets/section_card.dart';
+import '../widgets/status_pill.dart';
 import 'health_connect_controller.dart';
 import 'health_connect_section.dart';
 import 'kt_controller.dart';
@@ -66,8 +69,12 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Future<void> _reveal(SettingsSection section) async {
-    final ctx = _keys[section]?.currentContext;
-    if (ctx != null) {
+    // Sections above may still grow while their status loads, so scroll
+    // twice: right away and once the content has settled.
+    for (final wait in const [Duration.zero, Duration(milliseconds: 400)]) {
+      await Future<void>.delayed(wait);
+      final ctx = _keys[section]?.currentContext;
+      if (ctx == null || !ctx.mounted) return;
       await Scrollable.ensureVisible(
         ctx,
         duration: const Duration(milliseconds: 300),
@@ -81,43 +88,56 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final hc = context.watch<HealthConnectController>().status;
+    final kt = context.watch<KtController>().status;
+    final google = context.watch<GoogleController>().status;
+    final sheet = context.watch<SheetController>().status;
 
-    Widget section(SettingsSection s, String title, List<Widget> children) =>
-        _SettingsSectionCard(
+    Widget section(
+      SettingsSection s,
+      IconData icon,
+      String title,
+      List<Widget> children, {
+      IntegrationStatus? status,
+    }) =>
+        Padding(
           key: _keys[s],
-          title: title,
-          highlighted: _highlighted == s,
-          children: children,
+          padding: const EdgeInsets.only(bottom: 12),
+          child: SectionCard(
+            icon: icon,
+            title: title,
+            highlighted: _highlighted == s,
+            trailing: status == null ? null : StatusPill(status: status),
+            children: children,
+          ),
         );
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         child: Column(
           children: [
-            section(
-              SettingsSection.healthConnect,
-              l10n.settingsSectionHealthConnect,
-              const [HealthConnectSection()],
-            ),
-            section(SettingsSection.kt, l10n.settingsSectionKt, const [
-              KtSection(),
+            section(SettingsSection.healthConnect, Icons.favorite_outline,
+                l10n.settingsSectionHealthConnect, const [HealthConnectSection()],
+                status: hc),
+            section(SettingsSection.kt, Icons.restaurant_outlined,
+                l10n.settingsSectionKt, const [KtSection()],
+                status: kt),
+            section(SettingsSection.google, Icons.account_circle_outlined,
+                l10n.settingsSectionGoogle, const [GoogleSection()],
+                status: google),
+            section(SettingsSection.sheet, Icons.table_chart_outlined,
+                l10n.settingsSectionSheet, const [SheetSection()],
+                status: sheet),
+            section(SettingsSection.autoSync, Icons.schedule,
+                l10n.settingsSectionAutoSync, [
+              Text(l10n.settingsAutoSyncLater,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant)),
             ]),
-            section(SettingsSection.google, l10n.settingsSectionGoogle, const [
-              GoogleSection(),
-            ]),
-            section(SettingsSection.sheet, l10n.settingsSectionSheet, const [
-              SheetSection(),
-            ]),
-            section(SettingsSection.autoSync, l10n.settingsSectionAutoSync, [
-              Text(l10n.settingsAutoSyncLater),
-            ]),
-            section(
-              SettingsSection.diagnostics,
-              l10n.settingsSectionDiagnostics,
-              const [_DiagnosticsLog()],
-            ),
+            section(SettingsSection.diagnostics, Icons.bug_report_outlined,
+                l10n.settingsSectionDiagnostics, const [_DiagnosticsLog()]),
           ],
         ),
       ),
@@ -125,89 +145,74 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 }
 
-class _SettingsSectionCard extends StatelessWidget {
-  const _SettingsSectionCard({
-    super.key,
-    required this.title,
-    required this.highlighted,
-    required this.children,
-  });
-
-  final String title;
-  final bool highlighted;
-  final List<Widget> children;
+/// Collapsed by default: technical lines are only for troubleshooting.
+class _DiagnosticsLog extends StatefulWidget {
+  const _DiagnosticsLog();
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: highlighted
-            ? scheme.primaryContainer
-            : scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          ...children,
-        ],
-      ),
-    );
-  }
+  State<_DiagnosticsLog> createState() => _DiagnosticsLogState();
 }
 
-class _DiagnosticsLog extends StatelessWidget {
-  const _DiagnosticsLog();
+class _DiagnosticsLogState extends State<_DiagnosticsLog> {
+  bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
     final buffer = context.watch<PersistentLogBuffer>();
     final lines = buffer.lines.reversed.take(100).toList();
+
+    if (lines.isEmpty) {
+      return Text(l10n.diagnosticsEmpty,
+          style: TextStyle(color: theme.colorScheme.onSurfaceVariant));
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (lines.isEmpty)
-          Text(l10n.diagnosticsEmpty)
-        else
+        if (_expanded)
           Container(
-            constraints: const BoxConstraints(maxHeight: 240),
+            constraints: const BoxConstraints(maxHeight: 260),
             width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: SingleChildScrollView(
               child: SelectableText(
                 lines.join('\n'),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(fontFamily: 'monospace'),
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(fontFamily: 'monospace', fontSize: 11),
               ),
             ),
           ),
-        Row(
+        Wrap(
+          spacing: 8,
           children: [
             TextButton(
-              onPressed: lines.isEmpty
-                  ? null
-                  : () async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      await Clipboard.setData(
-                          ClipboardData(text: buffer.lines.join('\n')));
-                      messenger.showSnackBar(
-                          SnackBar(content: Text(l10n.diagnosticsCopied)));
-                    },
-              child: Text(l10n.diagnosticsCopy),
+              onPressed: () => setState(() => _expanded = !_expanded),
+              child: Text(_expanded
+                  ? l10n.diagnosticsHide
+                  : l10n.diagnosticsShow(lines.length)),
             ),
-            TextButton(
-              onPressed: lines.isEmpty ? null : buffer.clear,
-              child: Text(l10n.diagnosticsClear),
-            ),
+            if (_expanded) ...[
+              TextButton(
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  await Clipboard.setData(
+                      ClipboardData(text: buffer.lines.join('\n')));
+                  messenger.showSnackBar(
+                      SnackBar(content: Text(l10n.diagnosticsCopied)));
+                },
+                child: Text(l10n.diagnosticsCopy),
+              ),
+              TextButton(
+                onPressed: buffer.clear,
+                child: Text(l10n.diagnosticsClear),
+              ),
+            ],
           ],
         ),
       ],

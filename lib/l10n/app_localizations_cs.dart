@@ -18,12 +18,6 @@ class AppLocalizationsCs extends AppLocalizations {
   String get homeAllConnected => 'Vše připojeno';
 
   @override
-  String get homeNotConfiguredYet => 'Aplikace zatím není nastavená.';
-
-  @override
-  String get homeOpenSettings => 'Otevřít nastavení';
-
-  @override
   String get homeLastSyncTitle => 'Poslední synchronizace';
 
   @override
@@ -321,4 +315,18 @@ class AppLocalizationsCs extends AppLocalizations {
   String sheetDuplicates(int count, String first, String last, String rows) {
     return 'Pozor: $count dní je v listu vícekrát ($first – $last, řádky $rows). Tyto dny se nebudou synchronizovat, dokud duplicitu neodstraníš.';
   }
+
+  @override
+  String diagnosticsShow(int count) {
+    return 'Zobrazit záznamy ($count)';
+  }
+
+  @override
+  String get diagnosticsHide => 'Skrýt záznamy';
+
+  @override
+  String get homeIntegrationSheets => 'Google Sheets';
+
+  @override
+  String get homeFix => 'Opravit';
 }

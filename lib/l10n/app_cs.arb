@@ -6,8 +6,6 @@
   },
   "homeIntegrationsTitle": "Propojení",
   "homeAllConnected": "Vše připojeno",
-  "homeNotConfiguredYet": "Aplikace zatím není nastavená.",
-  "homeOpenSettings": "Otevřít nastavení",
   "homeLastSyncTitle": "Poslední synchronizace",
   "homeLastSyncNever": "Zatím neproběhla žádná synchronizace.",
   "homeQuickSyncButton": "Synchronizovat",
@@ -214,5 +212,16 @@
         "type": "String"
       }
     }
-  }
+  },
+  "diagnosticsShow": "Zobrazit záznamy ({count})",
+  "@diagnosticsShow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diagnosticsHide": "Skrýt záznamy",
+  "homeIntegrationSheets": "Google Sheets",
+  "homeFix": "Opravit"
 }

@@ -3,10 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../core/app_config.dart';
 import '../../l10n/l10n.dart';
-import '../issue_presenter.dart';
 import 'google_controller.dart';
 import 'sheet_controller.dart';
-import 'status_line.dart';
+import '../widgets/issue_notice.dart';
 
 class GoogleSection extends StatelessWidget {
   const GoogleSection({super.key});
@@ -15,7 +14,6 @@ class GoogleSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final c = context.watch<GoogleController>();
-    final presenter = IssuePresenter(l10n);
 
     Future<void> connect() async {
       await c.connect();
@@ -30,11 +28,10 @@ class GoogleSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        StatusLine(status: c.status),
-        if (c.email != null) ...[
-          const SizedBox(height: 4),
-          Text(l10n.googleConnectedAs(c.email!)),
-        ],
+        if (c.email != null)
+          Text(l10n.googleConnectedAs(c.email!))
+        else if (c.status.issue case final issue?)
+          IssueNotice(issue: issue),
         if (AppConfig.googleWebClientId.isEmpty) ...[
           const SizedBox(height: 4),
           Text(l10n.googleWebClientMissing,
@@ -42,11 +39,10 @@ class GoogleSection extends StatelessWidget {
         ],
         if (c.lastIssue != null)
           Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(presenter.message(c.lastIssue!),
-                style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            padding: const EdgeInsets.only(top: 10),
+            child: IssueNotice(issue: c.lastIssue!, isError: true),
           ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Row(
           children: [
             FilledButton(

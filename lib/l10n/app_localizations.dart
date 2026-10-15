@@ -112,18 +112,6 @@ abstract class AppLocalizations {
   /// **'Vše připojeno'**
   String get homeAllConnected;
 
-  /// No description provided for @homeNotConfiguredYet.
-  ///
-  /// In cs, this message translates to:
-  /// **'Aplikace zatím není nastavená.'**
-  String get homeNotConfiguredYet;
-
-  /// No description provided for @homeOpenSettings.
-  ///
-  /// In cs, this message translates to:
-  /// **'Otevřít nastavení'**
-  String get homeOpenSettings;
-
   /// No description provided for @homeLastSyncTitle.
   ///
   /// In cs, this message translates to:
@@ -639,6 +627,30 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Pozor: {count} dní je v listu vícekrát ({first} – {last}, řádky {rows}). Tyto dny se nebudou synchronizovat, dokud duplicitu neodstraníš.'**
   String sheetDuplicates(int count, String first, String last, String rows);
+
+  /// No description provided for @diagnosticsShow.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zobrazit záznamy ({count})'**
+  String diagnosticsShow(int count);
+
+  /// No description provided for @diagnosticsHide.
+  ///
+  /// In cs, this message translates to:
+  /// **'Skrýt záznamy'**
+  String get diagnosticsHide;
+
+  /// No description provided for @homeIntegrationSheets.
+  ///
+  /// In cs, this message translates to:
+  /// **'Google Sheets'**
+  String get homeIntegrationSheets;
+
+  /// No description provided for @homeFix.
+  ///
+  /// In cs, this message translates to:
+  /// **'Opravit'**
+  String get homeFix;
 }
 
 class _AppLocalizationsDelegate

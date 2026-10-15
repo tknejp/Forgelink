@@ -3,9 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../l10n/l10n.dart';
 import '../../sync/integration_status.dart';
-import '../issue_presenter.dart';
 import 'kt_controller.dart';
-import 'status_line.dart';
+import '../widgets/issue_notice.dart';
 
 class KtSection extends StatefulWidget {
   const KtSection({super.key});
@@ -54,13 +53,15 @@ class _KtSectionState extends State<KtSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        StatusLine(status: c.status),
-        if (c.storedEmail != null && hasStored) ...[
-          const SizedBox(height: 4),
+        if (c.status.issue case final issue?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: IssueNotice(issue: issue, isError: true),
+          ),
+        if (c.storedEmail != null && hasStored)
           Text(l10n.ktSignedInAs(c.storedEmail!)),
-        ],
         if (showForm) ...[
-          const SizedBox(height: 8),
+          if (hasStored) const SizedBox(height: 12),
           TextField(
             controller: _email,
             enabled: !c.busy,
@@ -68,6 +69,7 @@ class _KtSectionState extends State<KtSection> {
             autofillHints: const [AutofillHints.email],
             decoration: InputDecoration(labelText: l10n.ktEmailLabel),
           ),
+          const SizedBox(height: 10),
           TextField(
             controller: _password,
             enabled: !c.busy,
@@ -84,13 +86,10 @@ class _KtSectionState extends State<KtSection> {
             ),
           if (c.lastAttemptIssue != null)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                IssuePresenter(l10n).message(c.lastAttemptIssue!),
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
+              padding: const EdgeInsets.only(top: 10),
+              child: IssueNotice(issue: c.lastAttemptIssue!, isError: true),
             ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Row(
             children: [
               FilledButton(
@@ -116,7 +115,8 @@ class _KtSectionState extends State<KtSection> {
             ],
           ),
         ] else
-          Row(
+          Wrap(
+            spacing: 8,
             children: [
               TextButton(
                 onPressed: () => setState(() {
