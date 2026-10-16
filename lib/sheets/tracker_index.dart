@@ -102,12 +102,16 @@ class TrackerIndex {
   /// Names of weekly Tables missing one of the owned headers.
   final List<String> incompleteTables;
 
+  /// Name of the whole spreadsheet (file), when known.
+  final String? title;
+
   const TrackerIndex({
     required this.rows,
     required this.duplicateRows,
     required this.layoutBroken,
     required this.weekTables,
     required this.incompleteTables,
+    this.title,
   });
 
   /// Highest owned column used by any indexed row (for the formula read).
@@ -128,6 +132,7 @@ class TrackerIndex {
     required List<TableInfo> tables,
     required List<List<Object?>> values,
     int valuesStartRow = 1,
+    String? title,
   }) {
     final weekly = tables.where((t) => t.dateColumn != null).toList()
       ..sort((a, b) => a.startRow.compareTo(b.startRow));
@@ -178,6 +183,7 @@ class TrackerIndex {
       layoutBroken: broken,
       weekTables: weekly.length,
       incompleteTables: incomplete,
+      title: title,
     );
   }
 

@@ -2061,6 +2061,18 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Hotovo'**
   String get syncButtonDone;
+
+  /// No description provided for @daySheetTabRead.
+  ///
+  /// In cs, this message translates to:
+  /// **'List {tab} · stav z tabulky {when}'**
+  String daySheetTabRead(String tab, String when);
+
+  /// No description provided for @rowSheetFile.
+  ///
+  /// In cs, this message translates to:
+  /// **'Soubor'**
+  String get rowSheetFile;
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,6 @@
 import '../core/app_config.dart';
 import '../core/local_date.dart';
+import '../sync/sheet_status.dart';
 import '../sync/sync_models.dart';
 import 'widgets/ds.dart';
 
@@ -52,6 +53,62 @@ bool nutritionMissing(DayResult day) {
   final kt = [for (final c in ktColumns) day.fields[c]].nonNulls.toList();
   return kt.isNotEmpty && kt.every((f) => f.kind == FieldOutcomeKind.missing);
 }
+
+/// Calendar colour of [date]: the sheet's own fill state when it has been
+/// read ([sheet]); a failed last sync stays red until the sheet is full.
+/// Without a snapshot, the last sync result ([day]) decides.
+DayStatus? calendarStatus(
+  LocalDate date,
+  LocalDate today, {
+  DayResult? day,
+  SheetSnapshot? sheet,
+}) {
+  final failedRun =
+      day != null &&
+      (day.status == DayStatus.failed || day.status == DayStatus.partial);
+  if (sheet != null) {
+    final fill = sheet.fillOf(date, today);
+    if (fill == SheetFill.full) return DayStatus.ok;
+    if (failedRun || fill == SheetFill.problem) return DayStatus.failed;
+    return switch (fill) {
+      SheetFill.partial => DayStatus.partial,
+      SheetFill.empty => DayStatus.noData,
+      // Not in the sheet (week not created yet): fall back to history.
+      _ => day?.status,
+    };
+  }
+  if (day == null) return null;
+  // Some cells failed → an error day (red); amber is only for nutrition
+  // that wasn't in Kalorické tabulky yet.
+  if (failedRun) return DayStatus.failed;
+  if (day.status == DayStatus.ok && date != today && nutritionMissing(day)) {
+    return DayStatus.partial;
+  }
+  return day.status;
+}
+
+/// [cellState] with the sheet taking precedence: a filled cell is in the
+/// sheet whatever the last run said.
+CellState cellStateWithSheet(
+  DayResult? day,
+  SheetDay? sheetDay,
+  SheetColumn c, {
+  required bool isToday,
+}) {
+  if (sheetDay != null && sheetDay.filled.contains(c)) return CellState.inSheet;
+  final fromRun = cellState(day, c, isToday: isToday);
+  // The run said "in sheet" but the cell is empty now (deleted by hand).
+  if (sheetDay != null && fromRun == CellState.inSheet) {
+    return isToday && c != SheetColumn.weight
+        ? CellState.afterMidnight
+        : CellState.toWrite;
+  }
+  return fromRun;
+}
+
+/// Value to show for a cell: the sheet's, else the last run's.
+num? cellValue(DayResult? day, SheetDay? sheetDay, SheetColumn c) =>
+    sheetDay?.values[c] ?? day?.fields[c]?.value;
 
 /// Dates of [list] sorted, deduplicated.
 List<LocalDate> sortedDates(Iterable<LocalDate> list) =>

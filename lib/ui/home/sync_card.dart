@@ -1,15 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/app_config.dart';
 import '../../core/local_date.dart';
+import '../../core/system_intents.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
+import '../../sync/sheet_status.dart';
 import '../../sync/sync_controller.dart';
 import '../../sync/sync_models.dart';
 import '../day_view.dart';
+import '../settings/sheet_controller.dart';
 import '../sync_text.dart';
 import '../theme.dart';
 import '../widgets/ds.dart';
@@ -135,33 +139,67 @@ class _SyncCardState extends State<SyncCard> {
             icon: Icons.restaurant_rounded,
             title: l10n.qsYesterday(text.dayShort(yesterday)),
             sub: l10n.qsYesterdaySub,
-            chip: _yesterdayChip(l10n, c.days[yesterday]),
+            chip: _yesterdayChip(
+              l10n,
+              c.days[yesterday],
+              c.sheet?.days[yesterday],
+            ),
           ),
           _QuickRow(
             icon: Icons.monitor_weight_rounded,
             title: l10n.qsToday(text.dayShort(today)),
-            sub: switch (c.days[today]?.fields[SheetColumn.weight]?.value) {
+            sub: switch (cellValue(
+              c.days[today],
+              c.sheet?.days[today],
+              SheetColumn.weight,
+            )) {
               final v? => l10n.qsTodaySub(
                 text.valueWithUnit(SheetColumn.weight, v),
               ),
               null => l10n.qsTodaySubNone,
             },
-            chip: _todayChip(l10n, c.days[today]),
+            chip: _todayChip(l10n, c.days[today], c.sheet?.days[today]),
           ),
           const SizedBox(height: 12),
-          BigButton(
-            icon: _justDone ? Icons.check_rounded : Icons.sync_rounded,
-            label: _buttonLabel(l10n, c),
-            busy: c.busy,
-            progress: c.busy ? _fraction(c.progress) : null,
-            onPressed: widget.onQuickSync,
+          Row(
+            children: [
+              Expanded(
+                child: BigButton(
+                  icon: _justDone ? Icons.check_rounded : Icons.sync_rounded,
+                  label: _buttonLabel(l10n, c),
+                  busy: c.busy,
+                  progress: c.busy ? _fraction(c.progress) : null,
+                  onPressed: widget.onQuickSync,
+                ),
+              ),
+              const SizedBox(width: 10),
+              _OpenSheetButton(
+                spreadsheetId: context.watch<SheetController>().spreadsheetId,
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  (String, Tone) _yesterdayChip(AppLocalizations l10n, DayResult? day) {
+  /// Sheet first (what is really there), then the last run's problems.
+  (String, Tone) _yesterdayChip(
+    AppLocalizations l10n,
+    DayResult? day,
+    SheetDay? sheet,
+  ) {
+    if (sheet != null) {
+      final missingKt = ktColumns.where((k) => !sheet.filled.contains(k));
+      final rest = [SheetColumn.weight].where((k) => !sheet.filled.contains(k));
+      if (missingKt.isEmpty && rest.isEmpty) return (l10n.chipInSheet, Tone.ok);
+      if (day?.status == DayStatus.failed) return (l10n.chipError, Tone.err);
+      if (missingKt.length == ktColumns.length && sheet.filled.isNotEmpty) {
+        return (l10n.chipNutritionMissing, Tone.warn);
+      }
+      if (sheet.filled.isNotEmpty) return (l10n.legendPartial, Tone.warn);
+      return (l10n.chipToWrite, Tone.accent);
+    }
     if (day == null) return (l10n.chipToWrite, Tone.accent);
     if (day.status == DayStatus.failed) return (l10n.chipError, Tone.err);
     if (nutritionMissing(day)) return (l10n.chipNutritionMissing, Tone.warn);
@@ -172,18 +210,70 @@ class _SyncCardState extends State<SyncCard> {
     };
   }
 
-  (String, Tone) _todayChip(AppLocalizations l10n, DayResult? day) {
+  (String, Tone) _todayChip(
+    AppLocalizations l10n,
+    DayResult? day,
+    SheetDay? sheet,
+  ) {
+    if (sheet?.filled.contains(SheetColumn.weight) ?? false) {
+      return (l10n.chipInSheet, Tone.ok);
+    }
     final weight = day?.fields[SheetColumn.weight];
     if (day == null) return (l10n.chipToWrite, Tone.accent);
     if (day.issue != null) return (l10n.chipError, Tone.err);
     return switch (weight?.kind) {
-      FieldOutcomeKind.written ||
-      FieldOutcomeKind.unchanged => (l10n.chipInSheet, Tone.ok),
+      // In the run but no longer in the sheet → needs writing again.
+      FieldOutcomeKind.written || FieldOutcomeKind.unchanged =>
+        sheet == null
+            ? (l10n.chipInSheet, Tone.ok)
+            : (l10n.chipToWrite, Tone.accent),
       FieldOutcomeKind.missing => (l10n.chipNoData, Tone.neutral),
       FieldOutcomeKind.skippedFormula ||
       FieldOutcomeKind.failed => (l10n.chipError, Tone.err),
       null => (l10n.chipToWrite, Tone.accent),
     };
+  }
+}
+
+/// Square green button next to Synchronizovat: opens the coach's sheet in
+/// Google Sheets (or the browser).
+class _OpenSheetButton extends StatelessWidget {
+  const _OpenSheetButton({required this.spreadsheetId});
+
+  final String? spreadsheetId;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    final id = spreadsheetId;
+    return Tooltip(
+      message: context.l10n.actionOpenSheet,
+      child: Material(
+        color: p.okBg,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: id == null
+              ? null
+              : () => context.read<SystemIntents>().openUrl(
+                  'https://docs.google.com/spreadsheets/d/$id/edit',
+                ),
+          child: SizedBox.square(
+            dimension: 56,
+            child: Opacity(
+              opacity: id == null ? 0.4 : 1,
+              child: Center(
+                child: SvgPicture.asset(
+                  BrandLogos.sheets,
+                  width: 22,
+                  height: 29,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -41,6 +41,7 @@ class TrackerSheet {
       tables: tables,
       values: read.values ?? const [],
       valuesStartRow: startRowOfRange(read.range),
+      title: meta.properties?.title,
     );
 
     if (index.weekTables == 0) {

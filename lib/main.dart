@@ -18,6 +18,7 @@ import 'sources/health/health_source.dart';
 import 'sources/kt/kt_client.dart';
 import 'sources/kt/kt_source.dart';
 import 'sync/integration_status.dart';
+import 'sync/sheet_status.dart';
 import 'sync/sync_controller.dart';
 import 'sync/sync_engine.dart';
 import 'sync/sync_history.dart';
@@ -65,6 +66,11 @@ Future<void> main() async {
       title: l10n.syncServiceTitle,
       text: l10n.syncServiceText,
       channelName: l10n.syncServiceChannel,
+    ),
+    // Calendar colours from the sheet itself; never shows Google UI.
+    sheetStatus: SheetStatusSource(
+      prefs,
+      TrackerSheet(SheetsGateway(googleAuth, interactive: false)),
     ),
   );
   await syncController.reload();

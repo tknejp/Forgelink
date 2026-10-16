@@ -33,6 +33,9 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   shared_preferences: ^2.5.5
 
+  # --- Brand logos in Settings (Google, Sheets) ---
+  flutter_svg: ^2.0.17
+
   # --- State / DI ---
   provider: ^6.1.5
 
@@ -51,6 +54,7 @@ flutter:
   generate: true
   assets:
     - assets/branding/logo_fg_384.png
+    - assets/icons/
   # Manrope (SIL OFL, assets/fonts/OFL.txt): static instances of the
   # google/fonts variable font, one file per weight the design uses.
   fonts:

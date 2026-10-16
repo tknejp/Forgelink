@@ -58,7 +58,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     context.read<KtController>().load();
     context.read<GoogleController>().load();
     context.read<SheetController>().load();
-    context.read<SyncController>().reload();
+    final sync = context.read<SyncController>();
+    sync.reload();
+    sync.refreshSheet();
   }
 
   Future<void> _openSettings([SettingsSection? section]) async {

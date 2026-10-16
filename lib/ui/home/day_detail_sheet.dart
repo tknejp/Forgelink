@@ -38,9 +38,13 @@ class _DayDetail extends StatelessWidget {
     final day = c.days[date];
     final isToday = date == c.today;
 
-    final ktGap = day != null && !isToday && nutritionMissing(day);
-    final (String chip, Tone chipTone) = switch (day?.status) {
-      DayStatus.ok when ktGap => (l10n.dayChipPartial, Tone.warn),
+    final sheetDay = c.sheet?.days[date];
+    final (String chip, Tone chipTone) = switch (calendarStatus(
+      date,
+      c.today,
+      day: day,
+      sheet: c.sheet,
+    )) {
       DayStatus.ok => (l10n.dayChipFull, Tone.ok),
       DayStatus.partial => (l10n.dayChipPartial, Tone.warn),
       DayStatus.failed => (l10n.dayChipFailed, Tone.err),
@@ -66,8 +70,8 @@ class _DayDetail extends StatelessWidget {
     };
 
     Widget fieldRow(SheetColumn col) {
-      final f = day?.fields[col];
-      final state = cellState(day, col, isToday: isToday);
+      final value = cellValue(day, sheetDay, col);
+      final state = cellStateWithSheet(day, sheetDay, col, isToday: isToday);
       final (fg, _) = state.tone.colors(p);
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 9),
@@ -83,11 +87,11 @@ class _DayDetail extends StatelessWidget {
               ),
             ),
             Text(
-              f?.value == null ? '—' : text.valueWithUnit(col, f!.value!),
+              value == null ? '—' : text.valueWithUnit(col, value),
               style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w700,
-                color: f?.value == null ? p.faint : p.text,
+                color: value == null ? p.faint : p.text,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
@@ -149,10 +153,13 @@ class _DayDetail extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    l10n.daySheetTab(tab),
-                    style: TextStyle(fontSize: 12.5, color: p.muted),
-                  ),
+                  Text(switch (c.sheet?.at) {
+                    final at? => l10n.daySheetTabRead(
+                      tab,
+                      text.when(at, now: DateTime.now()),
+                    ),
+                    null => l10n.daySheetTab(tab),
+                  }, style: TextStyle(fontSize: 12.5, color: p.muted)),
                 ],
               ),
             ),

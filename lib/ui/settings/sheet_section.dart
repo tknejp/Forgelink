@@ -29,6 +29,7 @@ class SheetSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (c.title case final t?) KvRow(l10n.rowSheetFile, t),
         KvRow(l10n.rowSheetId, c.spreadsheetId ?? '—', mono: true),
         KvRow(l10n.rowTab, c.tab),
         if (v != null)

@@ -7,6 +7,7 @@ import '../core/app_log.dart';
 import '../core/local_date.dart';
 import '../core/sync_issue.dart';
 import 'sync_engine.dart';
+import 'sheet_status.dart';
 import 'sync_history.dart';
 import 'sync_models.dart';
 
@@ -44,13 +45,21 @@ class SyncController extends ChangeNotifier {
     this._history, {
     DateTime Function()? now,
     SyncKeepAlive keepAlive = const _NoKeepAlive(),
+    SheetStatusSource? sheetStatus,
   }) : _now = now ?? DateTime.now,
-       _keepAlive = keepAlive;
+       _keepAlive = keepAlive,
+       _sheetStatus = sheetStatus;
 
   final SyncEngine _engine;
   final SyncHistory _history;
   final DateTime Function() _now;
   final SyncKeepAlive _keepAlive;
+  final SheetStatusSource? _sheetStatus;
+  bool _sheetLoading = false;
+
+  /// What the coach's sheet currently contains (null = never read). The
+  /// calendar prefers it over [days], which only knows Forgelink's own runs.
+  SheetSnapshot? sheet;
 
   final List<_Job> _queue = [];
   bool _draining = false;
@@ -72,6 +81,25 @@ class SyncController extends ChangeNotifier {
   List<RunResult> runs = const [];
 
   LocalDate get today => LocalDate.fromDateTime(_now());
+
+  /// Re-reads the sheet's fill state (app open / resume, after each run).
+  /// Silent: on failure the last snapshot stays.
+  Future<void> refreshSheet() async {
+    final source = _sheetStatus;
+    if (source == null || _sheetLoading) return;
+    _sheetLoading = true;
+    try {
+      sheet ??= await source.cached();
+      notifyListeners();
+      final fresh = await source.load();
+      if (fresh != null) {
+        sheet = fresh;
+        notifyListeners();
+      }
+    } finally {
+      _sheetLoading = false;
+    }
+  }
 
   /// Re-reads everything persisted (start, resume, after a background run).
   Future<void> reload() async {
@@ -171,6 +199,7 @@ class SyncController extends ChangeNotifier {
       running = const {};
       progress = null;
       await reload();
+      unawaited(refreshSheet());
     }
   }
 }

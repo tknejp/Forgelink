@@ -27,6 +27,9 @@ class SheetController extends ChangeNotifier {
   final IntegrationStatusStore _statusStore;
 
   String? spreadsheetId;
+
+  /// File name, known after a successful check.
+  String? title;
   String tab = '';
   bool googleConnected = false;
   IntegrationStatus? _stored;
@@ -53,6 +56,7 @@ class SheetController extends ChangeNotifier {
 
   Future<void> load() async {
     spreadsheetId = await _prefs.spreadsheetId();
+    title = await _prefs.spreadsheetTitle();
     tab = await _prefs.sheetTab();
     googleConnected = await _tokens.accountEmail() != null;
     _stored = await _statusStore.load(Integration.googleSheets);
@@ -73,6 +77,7 @@ class SheetController extends ChangeNotifier {
     await _prefs.setSheetTab(tabInput);
     if (changed) {
       await _statusStore.clear(Integration.googleSheets);
+      await _prefs.setSpreadsheetTitle(null);
       verification = null;
     }
     await load();
@@ -87,6 +92,7 @@ class SheetController extends ChangeNotifier {
     notifyListeners();
     try {
       final index = await _sheet.loadIndex(id, tab);
+      await _prefs.setSpreadsheetTitle(index.title);
       verification = (
         weekTables: index.weekTables,
         days: index.rows.length,

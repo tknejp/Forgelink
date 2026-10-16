@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/local_date.dart';
@@ -328,16 +329,16 @@ class _SyncSheetState extends State<_SyncSheet> {
         ],
         if (_finished) ...[
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                flex: 10,
-                child: SoftButton(
-                  label: l10n.actionClose,
-                  onPressed: () => Navigator.of(context).pop(),
+          if (fixAction != null)
+            Row(
+              children: [
+                Expanded(
+                  flex: 10,
+                  child: SoftButton(
+                    label: l10n.actionClose,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
                 ),
-              ),
-              if (fixAction != null) ...[
                 const SizedBox(width: 10),
                 Expanded(
                   flex: 14,
@@ -353,23 +354,71 @@ class _SyncSheetState extends State<_SyncSheet> {
                     child: Text(text.presenter.actionLabel(fixAction)),
                   ),
                 ),
-              ] else if (status != RunStatus.failed && sheetId != null) ...[
-                const SizedBox(width: 10),
+              ],
+            )
+          else
+            // Closing is the main action; the sheet can be opened, but
+            // quieter (green, on the left).
+            Row(
+              children: [
+                if (status != RunStatus.failed && sheetId != null) ...[
+                  Expanded(flex: 13, child: _OpenSheetButton(sheetId: sheetId)),
+                  const SizedBox(width: 10),
+                ],
                 Expanded(
-                  flex: 14,
-                  child: FilledButton.icon(
-                    onPressed: () => context.read<SystemIntents>().openUrl(
-                      'https://docs.google.com/spreadsheets/d/$sheetId/edit',
-                    ),
-                    icon: const Icon(Icons.open_in_new_rounded, size: 20),
-                    label: Text(l10n.actionOpenSheet),
+                  flex: 10,
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(l10n.actionClose),
                   ),
                 ),
               ],
-            ],
-          ),
+            ),
         ],
       ],
+    );
+  }
+}
+
+/// Green, secondary "Otevřít tabulku" with the Sheets logo.
+class _OpenSheetButton extends StatelessWidget {
+  const _OpenSheetButton({required this.sheetId});
+
+  final String sheetId;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    return Material(
+      color: p.okBg,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.read<SystemIntents>().openUrl(
+          'https://docs.google.com/spreadsheets/d/$sheetId/edit',
+        ),
+        child: SizedBox(
+          height: 52,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(BrandLogos.sheets, width: 16, height: 21),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  context.l10n.actionOpenSheet,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: p.ok,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

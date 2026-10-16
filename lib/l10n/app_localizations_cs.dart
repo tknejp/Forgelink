@@ -1182,4 +1182,12 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get syncButtonDone => 'Hotovo';
+
+  @override
+  String daySheetTabRead(String tab, String when) {
+    return 'List $tab · stav z tabulky $when';
+  }
+
+  @override
+  String get rowSheetFile => 'Soubor';
 }

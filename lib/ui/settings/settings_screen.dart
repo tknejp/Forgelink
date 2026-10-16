@@ -110,11 +110,13 @@ class _SettingsScreenState extends State<SettingsScreen>
       String title,
       Widget body, {
       IntegrationStatus? status,
+      String? logo,
     }) => Padding(
       key: _keys[s],
       padding: const EdgeInsets.only(bottom: 10),
       child: SectionCard(
         icon: icon,
+        logo: logo,
         title: title,
         highlighted: _highlighted == s,
         trailing: status == null ? null : StatusPill(status: status),
@@ -178,6 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               l10n.settingsSectionHealthConnect,
               const HealthConnectSection(),
               status: hc,
+              logo: BrandLogos.healthConnect,
             ),
             section(
               SettingsSection.kt,
@@ -185,6 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               l10n.settingsSectionKt,
               const KtSection(),
               status: kt,
+              logo: BrandLogos.kt,
             ),
             GroupLabel(l10n.settingsGroupTarget),
             section(
@@ -193,6 +197,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               l10n.settingsSectionGoogle,
               const GoogleSection(),
               status: google,
+              logo: BrandLogos.google,
             ),
             section(
               SettingsSection.sheet,
@@ -200,6 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               l10n.settingsSectionSheet,
               const SheetSection(),
               status: sheet,
+              logo: BrandLogos.sheets,
             ),
             GroupLabel(l10n.settingsSectionAutoSync),
             Padding(

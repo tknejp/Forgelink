@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme.dart';
 
@@ -156,6 +157,36 @@ class IconTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Icon(icon, size: iconSize, color: p.accentText),
+    );
+  }
+}
+
+/// Brand logos under `assets/icons/`.
+abstract final class BrandLogos {
+  static const healthConnect = 'assets/icons/health_connect_logo.png';
+  static const kt = 'assets/icons/kaloricke_tabulky.png';
+  static const google = 'assets/icons/google_logo.svg';
+  static const sheets = 'assets/icons/sheets_logo.svg';
+}
+
+/// A plain brand logo (PNG or SVG), in the same 40 px slot as [IconTile]
+/// so card headers line up.
+class BrandTile extends StatelessWidget {
+  const BrandTile(this.asset, {super.key, this.size = 40});
+
+  final String asset;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final inner = size * 0.8;
+    return SizedBox.square(
+      dimension: size,
+      child: Center(
+        child: asset.endsWith('.svg')
+            ? SvgPicture.asset(asset, width: inner, height: inner)
+            : Image.asset(asset, width: inner, height: inner),
+      ),
     );
   }
 }

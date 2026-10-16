@@ -316,17 +316,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
       running: c.running.contains(date),
       queued: c.queued.contains(date),
       selected: selected,
-      status: switch (c.days[date]) {
-        final d?
-            when d.status == DayStatus.ok &&
-                date != today &&
-                nutritionMissing(d) =>
-          DayStatus.partial,
-        // Some cells failed → an error day (red); amber is only for
-        // nutrition that wasn't in Kalorické tabulky yet.
-        DayResult(status: DayStatus.partial) => DayStatus.failed,
-        final d => d?.status,
-      },
+      status: calendarStatus(date, today, day: c.days[date], sheet: c.sheet),
       height: _rowHeight,
       onTap: () => widget.onTapDay(date),
     );

@@ -25,6 +25,13 @@ class PrefsStore {
 
   Future<String?> spreadsheetId() => _prefs.getString(_kSpreadsheetId);
 
+  /// File name of the chosen spreadsheet, saved when it is verified.
+  Future<String?> spreadsheetTitle() => _prefs.getString('sheet.title');
+
+  Future<void> setSpreadsheetTitle(String? title) => title == null
+      ? _prefs.remove('sheet.title')
+      : _prefs.setString('sheet.title', title);
+
   Future<void> setSpreadsheetId(String? id) => id == null || id.isEmpty
       ? _prefs.remove(_kSpreadsheetId)
       : _prefs.setString(_kSpreadsheetId, id);

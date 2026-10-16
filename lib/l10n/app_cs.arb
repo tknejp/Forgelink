@@ -790,5 +790,17 @@
     }
   },
   "syncButtonWriting": "Zapisuji…",
-  "syncButtonDone": "Hotovo"
+  "syncButtonDone": "Hotovo",
+  "daySheetTabRead": "List {tab} · stav z tabulky {when}",
+  "@daySheetTabRead": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "rowSheetFile": "Soubor"
 }

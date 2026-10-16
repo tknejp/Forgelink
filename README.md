@@ -10,6 +10,7 @@ Status: **all planned phases shipped (2026-10-16).** Open setup items: [docs/sta
 
 - **Quick Sync** — one button: yesterday in full plus today's weight.
 - **Calendar** — tap a day to sync it; hold for its per-field detail (value and state of every cell); hold and drag to sync a range (with a confirmation); swipe between months. "Období" opens a range screen with presets (last 3 / 7 days, this month).
+- **Sheet status** — the calendar colours come from the sheet itself (read on open / resume and after every sync, cached for offline): green = everything filled (steps optional), amber = partly, red = a failed sync or a duplicated date. The day detail shows the values that are in the sheet.
 - **Progress sheet** — Quick Sync and range syncs show a per-day progress sheet (can be swiped away; the sync continues) with the result and "Otevřít tabulku".
 - **First launch** — a 5-step setup (Health Connect, Kalorické tabulky, Google + sheet, automatic sync), shown only while nothing is configured.
 - **Queue + background-safe** — taps during a running sync are queued and merged; a foreground service keeps a sync running when you leave the app.

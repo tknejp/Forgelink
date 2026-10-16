@@ -14,9 +14,13 @@ class SectionCard extends StatelessWidget {
     required this.children,
     this.trailing,
     this.highlighted = false,
+    this.logo,
   });
 
   final IconData icon;
+
+  /// Brand logo asset shown instead of [icon] (see [BrandLogos]).
+  final String? logo;
   final String title;
   final Widget? trailing;
   final List<Widget> children;
@@ -32,7 +36,7 @@ class SectionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              IconTile(icon),
+              if (logo case final l?) BrandTile(l) else IconTile(icon),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
