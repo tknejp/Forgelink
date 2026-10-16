@@ -616,4 +616,28 @@ class AppLocalizationsCs extends AppLocalizations {
   String whenTomorrow(String time) {
     return 'zítra $time';
   }
+
+  @override
+  String get issueDriveApiDisabled =>
+      'Google Drive API není v projektu Google Cloud povolené.';
+
+  @override
+  String get driveChooseButton => 'Vybrat z Google Disku';
+
+  @override
+  String get driveChooserTitle => 'Vyber tabulku';
+
+  @override
+  String get driveSearchHint => 'Hledat podle názvu';
+
+  @override
+  String get driveEmpty => 'Žádné tabulky nenalezeny.';
+
+  @override
+  String get driveReadOnly => 'Jen ke čtení';
+
+  @override
+  String driveOwnerModified(String owner, String when) {
+    return '$owner · upraveno $when';
+  }
 }

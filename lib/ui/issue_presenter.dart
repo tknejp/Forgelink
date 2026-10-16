@@ -26,6 +26,7 @@ class IssuePresenter {
     SheetNotFound() => l10n.issueSheetNotFound,
     SheetNoEditAccess(:final email) => l10n.issueSheetNoEditAccess(email),
     SheetsApiDisabled() => l10n.issueSheetsApiDisabled,
+    DriveApiDisabled() => l10n.issueDriveApiDisabled,
     SheetTabMissing(:final tab) => l10n.issueSheetTabMissing(tab),
     SheetLayoutChanged(:final tab) => l10n.issueSheetLayoutChanged(tab),
     DateNotInSheet(:final date) => l10n.issueDateNotInSheet(formatDate(date)),

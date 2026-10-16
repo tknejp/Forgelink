@@ -13,6 +13,11 @@ abstract final class AppConfig {
 
   static const sheetsScope = 'https://www.googleapis.com/auth/spreadsheets';
 
+  /// Only for "Vybrat z Google Disku" (Phase 7): file names and metadata,
+  /// never contents. Requested on demand, not for syncing.
+  static const driveMetadataScope =
+      'https://www.googleapis.com/auth/drive.metadata.readonly';
+
   /// Default name of the coach's tab; editable in Settings → Tabulka.
   static const defaultSheetTab = 'tracker';
 

@@ -469,5 +469,22 @@
         "type": "String"
       }
     }
+  },
+  "issueDriveApiDisabled": "Google Drive API není v projektu Google Cloud povolené.",
+  "driveChooseButton": "Vybrat z Google Disku",
+  "driveChooserTitle": "Vyber tabulku",
+  "driveSearchHint": "Hledat podle názvu",
+  "driveEmpty": "Žádné tabulky nenalezeny.",
+  "driveReadOnly": "Jen ke čtení",
+  "driveOwnerModified": "{owner} · upraveno {when}",
+  "@driveOwnerModified": {
+    "placeholders": {
+      "owner": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
   }
 }

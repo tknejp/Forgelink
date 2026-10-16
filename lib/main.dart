@@ -10,6 +10,7 @@ import 'core/prefs_store.dart';
 import 'core/secure_store.dart';
 import 'core/system_intents.dart';
 import 'l10n/app_localizations.dart';
+import 'sheets/drive_chooser.dart';
 import 'sheets/google_auth.dart';
 import 'sheets/sheets_gateway.dart';
 import 'sheets/tracker_sheet.dart';
@@ -92,6 +93,7 @@ Future<void> main() async {
         ),
         Provider<GoogleAuth>.value(value: googleAuth),
         Provider<TrackerSheet>.value(value: trackerSheet),
+        Provider<DriveChooser>(create: (_) => DriveChooser(googleAuth)),
         ChangeNotifierProvider(
           create: (_) => GoogleController(googleAuth, statusStore),
         ),

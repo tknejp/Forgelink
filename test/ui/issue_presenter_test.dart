@@ -28,6 +28,7 @@ void main() {
     const SheetNotFound(),
     const SheetNoEditAccess('t***@gmail.com'),
     const SheetsApiDisabled(),
+    const DriveApiDisabled(),
     const SheetTabMissing('tracker'),
     const SheetLayoutChanged('tracker'),
     DateNotInSheet(date),

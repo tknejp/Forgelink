@@ -92,7 +92,16 @@ class GoogleAuth implements TokenProvider {
   }
 
   @override
-  Future<String> accessToken({required bool interactive}) async {
+  Future<String> accessToken({required bool interactive}) =>
+      tokenForScopes(_scopes, interactive: interactive);
+
+  /// Token for [scopes] (e.g. the Drive chooser's extra
+  /// `drive.metadata.readonly`), for the pinned account. Interactive requests
+  /// show Google's consent for scopes not granted yet.
+  Future<String> tokenForScopes(
+    List<String> scopes, {
+    required bool interactive,
+  }) async {
     await initialize();
     final account = await _prefs.googleAccount();
     if (account == null) {
@@ -103,7 +112,7 @@ class GoogleAuth implements TokenProvider {
         GoogleSignInPlatform.instance.clientAuthorizationTokensForScopes(
           ClientAuthorizationTokensForScopesParameters(
             request: AuthorizationRequestDetails(
-              scopes: _scopes,
+              scopes: scopes,
               userId: account.userId,
               email: account.email,
               promptIfUnauthorized: prompt,

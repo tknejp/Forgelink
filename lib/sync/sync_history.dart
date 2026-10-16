@@ -27,6 +27,7 @@ IssueArea areaOf(SyncIssue i) => switch (i) {
   SheetNotFound() ||
   SheetNoEditAccess() ||
   SheetsApiDisabled() ||
+  DriveApiDisabled() ||
   SheetTabMissing() ||
   SheetLayoutChanged() ||
   SheetsUnavailable() => IssueArea.sheets,

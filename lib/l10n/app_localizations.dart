@@ -1095,6 +1095,48 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'zítra {time}'**
   String whenTomorrow(String time);
+
+  /// No description provided for @issueDriveApiDisabled.
+  ///
+  /// In cs, this message translates to:
+  /// **'Google Drive API není v projektu Google Cloud povolené.'**
+  String get issueDriveApiDisabled;
+
+  /// No description provided for @driveChooseButton.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vybrat z Google Disku'**
+  String get driveChooseButton;
+
+  /// No description provided for @driveChooserTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vyber tabulku'**
+  String get driveChooserTitle;
+
+  /// No description provided for @driveSearchHint.
+  ///
+  /// In cs, this message translates to:
+  /// **'Hledat podle názvu'**
+  String get driveSearchHint;
+
+  /// No description provided for @driveEmpty.
+  ///
+  /// In cs, this message translates to:
+  /// **'Žádné tabulky nenalezeny.'**
+  String get driveEmpty;
+
+  /// No description provided for @driveReadOnly.
+  ///
+  /// In cs, this message translates to:
+  /// **'Jen ke čtení'**
+  String get driveReadOnly;
+
+  /// No description provided for @driveOwnerModified.
+  ///
+  /// In cs, this message translates to:
+  /// **'{owner} · upraveno {when}'**
+  String driveOwnerModified(String owner, String when);
 }
 
 class _AppLocalizationsDelegate

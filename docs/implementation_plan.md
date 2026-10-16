@@ -816,6 +816,15 @@ The research verified this is feasible against the plugin sources:
 
 ### Phase 7 — Optional: choose from Google Drive
 
+**Status: code done 2026-10-16.** 166 tests pass. Waiting on the GCP steps: enable the Drive API, and add `drive.metadata.readonly` under Data Access.
+
+- `sheets/drive_chooser.dart` lists spreadsheets, newest-viewed first, with a name search.
+- `ui/settings/drive_picker_sheet.dart` greys out files that are view-only.
+- The extra scope is requested only when the picker opens: `GoogleAuth.tokenForScopes`.
+- A disabled Drive API shows as its own issue, `DriveApiDisabled`.
+
+Phase 6 update: automatic sync now runs at fixed times (00:30 and 12:30) through self-rebooking one-off tasks, and notifies after every run (the success notification can be turned off).
+
 - Add the `drive.metadata.readonly` scope (restricted, so personal-use path only; re-consent).
 - List spreadsheets with `files.list(q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false", orderBy: 'recency desc', fields: 'files(id,name,owners(displayName),modifiedTime,capabilities(canEdit))')` and show them in a bottom-sheet list.
 - Pick → fill in the ID → "Ověřit". Files with `canEdit == false` are shown disabled.

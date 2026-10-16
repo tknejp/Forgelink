@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../l10n/l10n.dart';
 import '../../sync/integration_status.dart';
 import '../issue_presenter.dart';
+import 'drive_picker_sheet.dart';
 import 'sheet_controller.dart';
 import '../widgets/issue_notice.dart';
 
@@ -111,6 +112,23 @@ class _SheetSectionState extends State<SheetSection> {
           Text(
             l10n.sheetEditAccessNote,
             style: Theme.of(context).textTheme.bodySmall,
+          ),
+        if (c.googleConnected)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              style: TextButton.styleFrom(padding: EdgeInsets.zero),
+              icon: const Icon(Icons.folder_open_outlined, size: 18),
+              label: Text(l10n.driveChooseButton),
+              onPressed: c.busy
+                  ? null
+                  : () async {
+                      final id = await showDrivePicker(context);
+                      if (id == null || !mounted) return;
+                      _input.text = id;
+                      await c.saveAndVerify(id, _tab.text);
+                    },
+            ),
           ),
         const SizedBox(height: 12),
         FilledButton(

@@ -77,6 +77,7 @@ sealed class SyncIssue {
     'sheetNotConfigured' => const SheetNotConfigured(),
     'sheetNotFound' => const SheetNotFound(),
     'sheetsApiDisabled' => const SheetsApiDisabled(),
+    'driveApiDisabled' => const DriveApiDisabled(),
     'sheetsUnavailable' => const SheetsUnavailable(),
     'hcNotAvailable' => const HcNotAvailable(),
     'hcHistoryPermissionMissing' => const HcHistoryPermissionMissing(),
@@ -180,6 +181,14 @@ final class SheetsApiDisabled extends SyncIssue {
   IssueAction? get action => null;
   @override
   String get code => 'sheetsApiDisabled';
+}
+
+final class DriveApiDisabled extends SyncIssue {
+  const DriveApiDisabled();
+  @override
+  IssueAction? get action => null;
+  @override
+  String get code => 'driveApiDisabled';
 }
 
 final class SheetTabMissing extends SyncIssue {
