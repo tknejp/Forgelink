@@ -61,6 +61,23 @@ abstract final class BackgroundSync {
     }
   }
 
+  /// Debug aid: runs the same headless worker once, [delay] from now, so it
+  /// can be observed with the app closed (periodic work can't be forced
+  /// before its window).
+  static Future<void> runOnceForTest({
+    Duration delay = const Duration(seconds: 10),
+  }) async {
+    await Workmanager().initialize(backgroundSyncCallback);
+    await Workmanager().registerOneOffTask(
+      'forgelink_test_run',
+      taskName,
+      initialDelay: delay,
+      constraints: Constraints(networkType: NetworkType.connected),
+      existingWorkPolicy: ExistingWorkPolicy.replace,
+    );
+    AppLog.sync.info('Test background run scheduled in ${delay.inSeconds} s');
+  }
+
   /// Dates one background run covers: the last [lookbackDays] days in full
   /// and today (weight only, by the engine's rules).
   static List<LocalDate> datesFor(LocalDate today) => [

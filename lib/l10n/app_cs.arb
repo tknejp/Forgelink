@@ -428,5 +428,7 @@
   "autoSyncUnusedHint": "V nastavení aplikace vypni „Pozastavit aktivitu, pokud se aplikace nepoužívá“, jinak Android po delší době automatickou synchronizaci zastaví.",
   "autoSyncNeedsHcBackground": "Health Connect na pozadí: povol „Čtení na pozadí“ v sekci Health Connect.",
   "bgFailureTitle": "Automatická synchronizace se nezdařila",
-  "bgChannelName": "Problémy se synchronizací"
+  "bgChannelName": "Problémy se synchronizací",
+  "diagnosticsBgTest": "Test synchronizace na pozadí",
+  "diagnosticsBgTestScheduled": "Spustí se za 10 s – teď můžeš aplikaci opustit."
 }

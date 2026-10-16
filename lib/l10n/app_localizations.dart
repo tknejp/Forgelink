@@ -1035,6 +1035,18 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Problémy se synchronizací'**
   String get bgChannelName;
+
+  /// No description provided for @diagnosticsBgTest.
+  ///
+  /// In cs, this message translates to:
+  /// **'Test synchronizace na pozadí'**
+  String get diagnosticsBgTest;
+
+  /// No description provided for @diagnosticsBgTestScheduled.
+  ///
+  /// In cs, this message translates to:
+  /// **'Spustí se za 10 s – teď můžeš aplikaci opustit.'**
+  String get diagnosticsBgTestScheduled;
 }
 
 class _AppLocalizationsDelegate

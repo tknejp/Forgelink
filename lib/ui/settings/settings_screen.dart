@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../background/background_sync.dart';
 import '../../core/log_buffer.dart';
 import '../../core/sync_issue.dart';
 import '../../l10n/l10n.dart';
@@ -225,6 +227,17 @@ class _DiagnosticsLogState extends State<_DiagnosticsLog> {
                     : l10n.diagnosticsShow(lines.length),
               ),
             ),
+            if (kDebugMode)
+              TextButton(
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  await BackgroundSync.runOnceForTest();
+                  messenger.showSnackBar(
+                    SnackBar(content: Text(l10n.diagnosticsBgTestScheduled)),
+                  );
+                },
+                child: Text(l10n.diagnosticsBgTest),
+              ),
             if (_expanded) ...[
               TextButton(
                 onPressed: () async {

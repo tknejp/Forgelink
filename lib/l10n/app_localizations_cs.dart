@@ -570,4 +570,11 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get bgChannelName => 'Problémy se synchronizací';
+
+  @override
+  String get diagnosticsBgTest => 'Test synchronizace na pozadí';
+
+  @override
+  String get diagnosticsBgTestScheduled =>
+      'Spustí se za 10 s – teď můžeš aplikaci opustit.';
 }
