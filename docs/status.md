@@ -18,7 +18,10 @@ Development has run against the test copy `<test copy ID>`.
 
 The OAuth consent screen of `forgelink-511721` is in **Testing** (test user = your Google account). Test-user authorizations expire 7 days after consent, so roughly weekly the automatic runs fail with "Přihlášení ke Googlu vypršelo" (notified); Settings → Google účet → **Znovu připojit** fixes it for another week.
 
-- [ ] Permanent fix: publish to **In production** (unverified). Google requires a homepage URL and a privacy-policy URL on the Branding page first (two small static pages, e.g. GitHub Pages; add the domain under Authorized domains). Don't upload a logo — that forces verification.
+- [x] Homepage + privacy policy pages: [docs/index.html](index.html), [docs/privacy.html](privacy.html) (GitHub Pages from `main` → `/docs`; `.nojekyll` serves files as-is).
+- [ ] GitHub → Settings → Pages: Deploy from a branch, `main`, `/docs`.
+- [ ] Branding: homepage `https://tknejp.github.io/Forgelink/`, privacy `https://tknejp.github.io/Forgelink/privacy.html`, authorized domain `tknejp.github.io`. Don't upload a logo — that forces verification.
+- [ ] Audience → Publish app → **In production** (don't submit for verification), then reconnect Google in the app once.
 
 ### 3. Release build
 
