@@ -208,12 +208,6 @@ abstract class AppLocalizations {
   /// **'Otevřít Health Connect'**
   String get settingsOpenHealthConnect;
 
-  /// No description provided for @settingsAutoSyncLater.
-  ///
-  /// In cs, this message translates to:
-  /// **'Automatická synchronizace přibude v pozdější fázi.'**
-  String get settingsAutoSyncLater;
-
   /// No description provided for @diagnosticsEmpty.
   ///
   /// In cs, this message translates to:
@@ -975,6 +969,72 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Rychlá synchronizace včerejška'**
   String get homeQuickSyncLabel;
+
+  /// No description provided for @autoSyncSwitch.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizovat automaticky'**
+  String get autoSyncSwitch;
+
+  /// No description provided for @autoSyncDescription.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zhruba dvakrát denně doplní poslední 3 dny a dnešní váhu. Android může běh posunout, ruční synchronizace funguje vždy.'**
+  String get autoSyncDescription;
+
+  /// No description provided for @autoSyncLastRun.
+  ///
+  /// In cs, this message translates to:
+  /// **'Poslední běh na pozadí: {when} · {status}'**
+  String autoSyncLastRun(String when, String status);
+
+  /// No description provided for @autoSyncNeverRan.
+  ///
+  /// In cs, this message translates to:
+  /// **'Na pozadí zatím neběžela.'**
+  String get autoSyncNeverRan;
+
+  /// No description provided for @autoSyncBattery.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vypnout optimalizaci baterie'**
+  String get autoSyncBattery;
+
+  /// No description provided for @autoSyncBatteryOk.
+  ///
+  /// In cs, this message translates to:
+  /// **'Optimalizace baterie je pro Forgelink vypnutá.'**
+  String get autoSyncBatteryOk;
+
+  /// No description provided for @autoSyncUnused.
+  ///
+  /// In cs, this message translates to:
+  /// **'Otevřít nastavení aplikace'**
+  String get autoSyncUnused;
+
+  /// No description provided for @autoSyncUnusedHint.
+  ///
+  /// In cs, this message translates to:
+  /// **'V nastavení aplikace vypni „Pozastavit aktivitu, pokud se aplikace nepoužívá“, jinak Android po delší době automatickou synchronizaci zastaví.'**
+  String get autoSyncUnusedHint;
+
+  /// No description provided for @autoSyncNeedsHcBackground.
+  ///
+  /// In cs, this message translates to:
+  /// **'Health Connect na pozadí: povol „Čtení na pozadí“ v sekci Health Connect.'**
+  String get autoSyncNeedsHcBackground;
+
+  /// No description provided for @bgFailureTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Automatická synchronizace se nezdařila'**
+  String get bgFailureTitle;
+
+  /// No description provided for @bgChannelName.
+  ///
+  /// In cs, this message translates to:
+  /// **'Problémy se synchronizací'**
+  String get bgChannelName;
 }
 
 class _AppLocalizationsDelegate

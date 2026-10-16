@@ -40,6 +40,13 @@ class PersistentLogBuffer extends ChangeNotifier implements LogSink {
     notifyListeners();
   }
 
+  /// Writes pending lines now (the background worker ends before the
+  /// debounce timer would fire).
+  Future<void> flush() async {
+    _flushTimer?.cancel();
+    await _prefs.setLogLines(List.of(_lines));
+  }
+
   Future<void> clear() async {
     _lines.clear();
     await _prefs.setLogLines(const []);

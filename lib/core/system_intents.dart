@@ -45,6 +45,39 @@ class SystemIntents {
     }
   }
 
+  Future<bool> isIgnoringBatteryOptimizations() async {
+    try {
+      return await _channel.invokeMethod<bool>(
+            'isIgnoringBatteryOptimizations',
+          ) ??
+          false;
+    } catch (_) {
+      return false; // no channel (tests, headless engine)
+    }
+  }
+
+  /// System dialog that exempts Forgelink from battery optimisation, which
+  /// also keeps it out of the restricted standby bucket.
+  Future<void> requestIgnoreBatteryOptimizations() async {
+    try {
+      await _channel.invokeMethod<void>('requestIgnoreBatteryOptimizations');
+    } on PlatformException catch (e) {
+      AppLog.sync.warn(
+        'requestIgnoreBatteryOptimizations failed',
+        payload: '$e',
+      );
+    }
+  }
+
+  /// App details screen ("Pause app activity if unused" lives there).
+  Future<void> openAppDetails() async {
+    try {
+      await _channel.invokeMethod<void>('openAppDetails');
+    } catch (e) {
+      AppLog.sync.warn('openAppDetails failed', payload: '$e');
+    }
+  }
+
   Future<void> stopSyncService() async {
     try {
       await _channel.invokeMethod<void>('stopSyncService');

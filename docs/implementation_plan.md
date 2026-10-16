@@ -730,6 +730,17 @@ Deviations:
 
 ### Phase 6 — Background sync (runs with the app closed)
 
+**Status: code done 2026-10-16** (Strategy A only). 155 tests pass.
+
+- `background/background_sync.dart`: registration on every start, the headless callback, and lookback dates.
+- `background/failure_notifier.dart`: notifies on user-fixable issues, once a day.
+- Settings → Automatická synchronizace: on/off switch, last background run, battery exemption, app-details link for "Pause app activity if unused", and a Health Connect background-read hint.
+
+Device checklist items 1–13 below are still open. Phase 6 is also preceded by a manual-sync change:
+- Manual syncs are queued, not blocking. Waiting requests merge into the next run.
+- Manual syncs run inside a `dataSync` foreground service, so leaving the app no longer kills the network mid-request. Verified on the device.
+- The engine reads Health Connect for all dates before any network call.
+
 The research verified this is feasible against the plugin sources:
 
 - `workmanager` runs every task in a headless `FlutterEngine(applicationContext)`;

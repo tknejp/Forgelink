@@ -46,14 +46,19 @@ class SyncForegroundService : Service() {
             PendingIntent.FLAG_IMMUTABLE,
         )
 
-        val notification = Notification.Builder(this, CHANNEL_ID)
+        val builder = Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_notify_sync)
             .setContentTitle(title)
             .setContentText(text)
             .setOngoing(true)
             .setProgress(0, 0, true)
             .setContentIntent(openApp)
-            .build()
+        // Android 12+ delays foreground-service notifications by up to 10 s;
+        // syncs often finish sooner, so show it right away.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+        }
+        val notification = builder.build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(

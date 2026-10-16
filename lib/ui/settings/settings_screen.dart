@@ -11,6 +11,8 @@ import '../widgets/status_pill.dart';
 import 'health_connect_controller.dart';
 import 'health_connect_section.dart';
 import 'kt_controller.dart';
+import 'auto_sync_controller.dart';
+import 'auto_sync_section.dart';
 import 'google_controller.dart';
 import 'google_section.dart';
 import 'kt_section.dart';
@@ -66,6 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     context.read<KtController>().load();
     context.read<GoogleController>().load();
     context.read<SheetController>().load();
+    context.read<AutoSyncController>().load();
   }
 
   Future<void> _reveal(SettingsSection section) async {
@@ -149,14 +152,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               SettingsSection.autoSync,
               Icons.schedule,
               l10n.settingsSectionAutoSync,
-              [
-                Text(
-                  l10n.settingsAutoSyncLater,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
+              const [AutoSyncSection()],
             ),
             section(
               SettingsSection.diagnostics,

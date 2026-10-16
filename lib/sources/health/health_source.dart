@@ -19,9 +19,15 @@ class HealthSource {
     required PrefsStore prefs,
     HcReadClient? client,
     DateTime Function()? now,
+    this.requireBackgroundPermission = false,
   }) : _prefs = prefs,
        _client = client ?? HcReadClient(),
        _now = now ?? DateTime.now;
+
+  /// True in the Phase 6 worker: reads there only work with Health Connect's
+  /// background-read permission, and without it the plugin would return
+  /// empty results that look like "no data".
+  final bool requireBackgroundPermission;
 
   final PrefsStore _prefs;
   final HcReadClient _client;
@@ -103,6 +109,11 @@ class HealthSource {
     }
     final missing = await missingPermissions(needed);
     if (missing.isNotEmpty) return HcPermissionMissing(missing);
+    if (requireBackgroundPermission &&
+        !(await _client.isBackgroundAvailable() &&
+            await _client.isBackgroundAuthorized())) {
+      return const HcBackgroundPermissionMissing();
+    }
     return null;
   }
 

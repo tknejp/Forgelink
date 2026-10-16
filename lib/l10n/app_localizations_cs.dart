@@ -66,10 +66,6 @@ class AppLocalizationsCs extends AppLocalizations {
   String get settingsOpenHealthConnect => 'Otevřít Health Connect';
 
   @override
-  String get settingsAutoSyncLater =>
-      'Automatická synchronizace přibude v pozdější fázi.';
-
-  @override
   String get diagnosticsEmpty => 'Žádné záznamy.';
 
   @override
@@ -535,4 +531,43 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get homeQuickSyncLabel => 'Rychlá synchronizace včerejška';
+
+  @override
+  String get autoSyncSwitch => 'Synchronizovat automaticky';
+
+  @override
+  String get autoSyncDescription =>
+      'Zhruba dvakrát denně doplní poslední 3 dny a dnešní váhu. Android může běh posunout, ruční synchronizace funguje vždy.';
+
+  @override
+  String autoSyncLastRun(String when, String status) {
+    return 'Poslední běh na pozadí: $when · $status';
+  }
+
+  @override
+  String get autoSyncNeverRan => 'Na pozadí zatím neběžela.';
+
+  @override
+  String get autoSyncBattery => 'Vypnout optimalizaci baterie';
+
+  @override
+  String get autoSyncBatteryOk =>
+      'Optimalizace baterie je pro Forgelink vypnutá.';
+
+  @override
+  String get autoSyncUnused => 'Otevřít nastavení aplikace';
+
+  @override
+  String get autoSyncUnusedHint =>
+      'V nastavení aplikace vypni „Pozastavit aktivitu, pokud se aplikace nepoužívá“, jinak Android po delší době automatickou synchronizaci zastaví.';
+
+  @override
+  String get autoSyncNeedsHcBackground =>
+      'Health Connect na pozadí: povol „Čtení na pozadí“ v sekci Health Connect.';
+
+  @override
+  String get bgFailureTitle => 'Automatická synchronizace se nezdařila';
+
+  @override
+  String get bgChannelName => 'Problémy se synchronizací';
 }

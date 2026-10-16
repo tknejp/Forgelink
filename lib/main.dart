@@ -3,6 +3,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 import 'app.dart';
+import 'background/background_sync.dart';
 import 'core/app_log.dart';
 import 'core/log_buffer.dart';
 import 'core/prefs_store.dart';
@@ -20,6 +21,7 @@ import 'sync/sync_controller.dart';
 import 'sync/sync_engine.dart';
 import 'sync/sync_history.dart';
 import 'ui/settings/health_connect_controller.dart';
+import 'ui/settings/auto_sync_controller.dart';
 import 'ui/settings/google_controller.dart';
 import 'ui/settings/kt_controller.dart';
 import 'ui/settings/sheet_controller.dart';
@@ -65,6 +67,8 @@ Future<void> main() async {
     ),
   );
   await syncController.reload();
+  // Register (or cancel) the automatic sync on every start (plan Phase 6).
+  await BackgroundSync.apply(prefs);
 
   runApp(
     MultiProvider(
@@ -75,6 +79,9 @@ Future<void> main() async {
         Provider<KtClient>.value(value: ktClient),
         Provider<KtSource>.value(value: ktSource),
         ChangeNotifierProvider<SyncController>.value(value: syncController),
+        ChangeNotifierProvider(
+          create: (_) => AutoSyncController(prefs, intents),
+        ),
         Provider<HealthSource>.value(value: healthSource),
         ChangeNotifierProvider<PersistentLogBuffer>.value(value: logBuffer),
         ChangeNotifierProvider(

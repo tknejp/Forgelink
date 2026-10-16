@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -26,6 +27,25 @@ class MainActivity : FlutterFragmentActivity() {
                             call.argument<String>("title") ?: "Forgelink",
                             call.argument<String>("text") ?: "",
                             call.argument<String>("channel") ?: "Sync",
+                        )
+                        result.success(null)
+                    }
+                    "isIgnoringBatteryOptimizations" -> {
+                        val pm = getSystemService(PowerManager::class.java)
+                        result.success(pm.isIgnoringBatteryOptimizations(packageName))
+                    }
+                    "requestIgnoreBatteryOptimizations" -> {
+                        startActivity(
+                            Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                                .setData(Uri.parse("package:$packageName"))
+                        )
+                        result.success(null)
+                    }
+                    "openAppDetails" -> {
+                        // Holds "Pause app activity if unused" (hibernation).
+                        startActivity(
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                                .setData(Uri.parse("package:$packageName"))
                         )
                         result.success(null)
                     }

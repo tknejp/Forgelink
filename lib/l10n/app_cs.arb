@@ -22,7 +22,6 @@
   "statusVerified": "Ověřeno",
   "statusError": "Chyba",
   "settingsOpenHealthConnect": "Otevřít Health Connect",
-  "settingsAutoSyncLater": "Automatická synchronizace přibude v pozdější fázi.",
   "diagnosticsEmpty": "Žádné záznamy.",
   "diagnosticsCopy": "Kopírovat",
   "diagnosticsCopied": "Zkopírováno do schránky.",
@@ -408,5 +407,26 @@
       }
     }
   },
-  "homeQuickSyncLabel": "Rychlá synchronizace včerejška"
+  "homeQuickSyncLabel": "Rychlá synchronizace včerejška",
+  "autoSyncSwitch": "Synchronizovat automaticky",
+  "autoSyncDescription": "Zhruba dvakrát denně doplní poslední 3 dny a dnešní váhu. Android může běh posunout, ruční synchronizace funguje vždy.",
+  "autoSyncLastRun": "Poslední běh na pozadí: {when} · {status}",
+  "@autoSyncLastRun": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "autoSyncNeverRan": "Na pozadí zatím neběžela.",
+  "autoSyncBattery": "Vypnout optimalizaci baterie",
+  "autoSyncBatteryOk": "Optimalizace baterie je pro Forgelink vypnutá.",
+  "autoSyncUnused": "Otevřít nastavení aplikace",
+  "autoSyncUnusedHint": "V nastavení aplikace vypni „Pozastavit aktivitu, pokud se aplikace nepoužívá“, jinak Android po delší době automatickou synchronizaci zastaví.",
+  "autoSyncNeedsHcBackground": "Health Connect na pozadí: povol „Čtení na pozadí“ v sekci Health Connect.",
+  "bgFailureTitle": "Automatická synchronizace se nezdařila",
+  "bgChannelName": "Problémy se synchronizací"
 }
