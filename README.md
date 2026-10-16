@@ -4,18 +4,18 @@ A small Android utility for personal use. It copies daily data from **Health Con
 
 It writes **values only**, into the row whose date matches, and never touches the date column, the manual columns (hunger, hydration, training, notes), formulas or formatting. Missing data is never written as 0 or blank; repeated syncs give the same result.
 
-Status: **all planned phases shipped (2026-10-16).** Open setup items: [docs/status.md](docs/status.md). Design record: [docs/archive/implementation_plan.md](docs/archive/implementation_plan.md).
+Status: **1.0.0 in daily use (2026-10-16).** Open items: [docs/status.md](docs/status.md). Design record: [docs/archive/implementation_plan.md](docs/archive/implementation_plan.md).
 
 ## What it does
 
 - **Quick Sync** — one button: yesterday in full plus today's weight.
 - **Calendar** — tap a day to sync it; hold for its per-field detail (value and state of every cell); hold and drag to sync a range (with a confirmation); swipe between months. "Období" opens a range screen with presets (last 3 / 7 days, this month).
-- **Sheet status** — the calendar colours come from the sheet itself (read on open / resume and after every sync, cached for offline): green = everything filled (steps optional), amber = partly, red = a failed sync or a duplicated date. The day detail shows the values that are in the sheet.
-- **Progress sheet** — Quick Sync and range syncs show a per-day progress sheet (can be swiped away; the sync continues) with the result and "Otevřít tabulku".
+- **Sheet status** — the calendar colours come from the sheet itself (read on open / resume and after every sync, cached for offline): green = everything filled (steps optional), amber = partly, red = a problem with that date (duplicated / missing in the sheet, formula). The day detail shows the values that are in the sheet.
+- **Progress** — inside the Synchronizovat button; Quick Sync and range syncs also show a per-day progress sheet (can be swiped away; the sync continues). A green button next to Synchronizovat opens the sheet.
 - **First launch** — a 5-step setup (Health Connect, Kalorické tabulky, Google + sheet, automatic sync), shown only while nothing is configured.
 - **Queue + background-safe** — taps during a running sync are queued and merged; a foreground service keeps a sync running when you leave the app.
 - **Automatic sync** — about **00:30** (the finished day) and **12:30** (after the morning weigh-in), each re-syncing the last 3 days plus today's weight, with a notification afterwards (success notifications can be turned off).
-- **Clear errors** — Czech messages with a direct action (open the right Settings section, grant a permission, reconnect Google, retry); unresolved problems stay on Home until fixed.
+- **Calm errors** — no popups. Connection problems are retried automatically (WorkManager, once online; notification at the end) and shown only as "Čeká na připojení"; problems to fix (sign-in expired, permission, login) appear once in the status card on Home with a direct action.
 - **Settings** — Health Connect permissions (incl. history and background reading), Kalorické tabulky login, Google account, destination sheet (paste a link or "Vybrat z Google Disku"), automatic sync, diagnostics log (own screen, filterable).
 - Light/dark theme from the design handoff (Manrope font, `lib/ui/theme.dart` tokens); Czech UI via ARB.
 
@@ -25,7 +25,7 @@ The coach's `tracker` tab is a stack of weekly Google Sheets **Tables**. Forgeli
 
 ## Setup
 
-1. **Google Cloud** project `forgelink-511721`: Sheets API and Drive API enabled; OAuth consent screen with scopes `spreadsheets` and `drive.metadata.readonly`; Android OAuth client for `com.knejp.forgelink` + debug SHA-1; Web client whose ID is `AppConfig.googleWebClientId`. While the consent screen is in Testing, re-connect Google weekly (see [docs/status.md](docs/status.md)).
+1. **Google Cloud** project `forgelink-511721`: Sheets API and Drive API enabled; OAuth consent screen **In production** (unverified) with scopes `spreadsheets` and `drive.metadata.readonly`; two Android OAuth clients for `com.knejp.forgelink` (debug and release SHA-1); Web client whose ID is `AppConfig.googleWebClientId`.
 2. **Health Connect** installed; grant steps + weight (and optionally history and background reading) in Settings.
 3. In the app: Kalorické tabulky login → connect Google → pick the sheet → Ověřit → optionally enable automatic sync and the battery exemption.
 
@@ -40,6 +40,21 @@ flutter run        # or VS Code: "Forgelink (debug)"
 ```
 
 VS Code tasks (Terminal → Run Task) cover analyze, test, gen-l10n, building/installing the debug APK and device logs. In debug builds, Settings → Diagnostika has **"Test synchronizace na pozadí"**, which runs the background worker once 10 s later so it can be observed with the app closed.
+
+## Releases
+
+Release builds are signed with a keystore kept outside the repo; `android/key.properties` (gitignored) points to it. Locally: `flutter build apk --release`.
+
+Pushing a tag `vX.Y.Z` runs [.github/workflows/release.yml](.github/workflows/release.yml): analyze, test, build the signed APK and attach it to a GitHub Release. Bump `version:` in `pubspec.yaml` and `AppConfig.version` first. The workflow needs these repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | the `.jks` file, base64-encoded |
+| `ANDROID_KEYSTORE_PASSWORD` | `storePassword` from `key.properties` |
+| `ANDROID_KEY_PASSWORD` | `keyPassword` from `key.properties` |
+| `ANDROID_KEY_ALIAS` | `keyAlias` from `key.properties` |
+
+Install an update on the phone by downloading the APK from the release (same key → it updates in place and keeps the data).
 
 ## Layout
 
