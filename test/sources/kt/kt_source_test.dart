@@ -24,9 +24,9 @@ void main() {
         ..beginRun();
 
   Future<SyncIssue?> issueOf(Future<Object?> f) => f.then<SyncIssue?>(
-        (_) => null,
-        onError: (Object e) => (e as SyncIssueException).issue,
-      );
+    (_) => null,
+    onError: (Object e) => (e as SyncIssueException).issue,
+  );
 
   test('no stored credentials → KtCredentialsMissing', () async {
     FlutterSecureStorage.setMockInitialValues({});

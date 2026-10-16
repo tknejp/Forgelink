@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           IconButton(
                             tooltip: l10n.homeRangeSync,
                             visualDensity: VisualDensity.compact,
-                            onPressed: sync.busy ? null : _pickRange,
+                            onPressed: _pickRange,
                             icon: const Icon(Icons.date_range_outlined),
                           ),
                           IconButton(

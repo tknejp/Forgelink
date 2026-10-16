@@ -23,19 +23,21 @@ class FieldOutcome {
       kind == FieldOutcomeKind.written || kind == FieldOutcomeKind.unchanged;
 
   Map<String, Object?> toJson() => {
-        'k': kind.name,
-        if (value != null) 'v': value,
-        if (issue != null) 'i': SyncIssueCodec.encode(issue!),
-      };
+    'k': kind.name,
+    if (value != null) 'v': value,
+    if (issue != null) 'i': SyncIssueCodec.encode(issue!),
+  };
 
   static FieldOutcome fromJson(Map<String, Object?> j) => FieldOutcome(
-        FieldOutcomeKind.values.firstWhere((k) => k.name == j['k'],
-            orElse: () => FieldOutcomeKind.failed),
-        value: j['v'] as num?,
-        issue: j['i'] == null
-            ? null
-            : SyncIssueCodec.decode((j['i'] as Map).cast<String, Object?>()),
-      );
+    FieldOutcomeKind.values.firstWhere(
+      (k) => k.name == j['k'],
+      orElse: () => FieldOutcomeKind.failed,
+    ),
+    value: j['v'] as num?,
+    issue: j['i'] == null
+        ? null
+        : SyncIssueCodec.decode((j['i'] as Map).cast<String, Object?>()),
+  );
 }
 
 enum DayStatus { ok, partial, noData, failed }
@@ -65,14 +67,21 @@ class DayResult {
 
   /// Per-date rule from plan §4: `missing` alone never makes a day partial.
   static DayStatus statusOf(
-      Map<SheetColumn, FieldOutcome> fields, SyncIssue? issue) {
+    Map<SheetColumn, FieldOutcome> fields,
+    SyncIssue? issue,
+  ) {
     if (issue != null) return DayStatus.failed;
     final kinds = fields.values.map((f) => f.kind).toList();
-    final ok = kinds.where((k) =>
-        k == FieldOutcomeKind.written || k == FieldOutcomeKind.unchanged);
-    final bad = kinds.where((k) =>
-        k == FieldOutcomeKind.failed || k == FieldOutcomeKind.skippedFormula);
-    if (bad.isNotEmpty) return ok.isEmpty ? DayStatus.failed : DayStatus.partial;
+    final ok = kinds.where(
+      (k) => k == FieldOutcomeKind.written || k == FieldOutcomeKind.unchanged,
+    );
+    final bad = kinds.where(
+      (k) =>
+          k == FieldOutcomeKind.failed || k == FieldOutcomeKind.skippedFormula,
+    );
+    if (bad.isNotEmpty) {
+      return ok.isEmpty ? DayStatus.failed : DayStatus.partial;
+    }
     if (ok.isEmpty) return DayStatus.noData;
     return DayStatus.ok;
   }
@@ -81,32 +90,34 @@ class DayResult {
       fields.entries.where((e) => test(e.value)).map((e) => e.key);
 
   Map<String, Object?> toJson() => {
-        'd': date.isoKey,
-        's': status.name,
-        'f': {for (final e in fields.entries) e.key.name: e.value.toJson()},
-        if (issue != null) 'i': SyncIssueCodec.encode(issue!),
-        if (notes.isNotEmpty)
-          'n': [for (final n in notes) SyncIssueCodec.encode(n)],
-      };
+    'd': date.isoKey,
+    's': status.name,
+    'f': {for (final e in fields.entries) e.key.name: e.value.toJson()},
+    if (issue != null) 'i': SyncIssueCodec.encode(issue!),
+    if (notes.isNotEmpty)
+      'n': [for (final n in notes) SyncIssueCodec.encode(n)],
+  };
 
   static DayResult fromJson(Map<String, Object?> j) => DayResult(
-        date: LocalDate.tryParseIso(j['d'] as String) ?? LocalDate(2000, 1, 1),
-        status: DayStatus.values.firstWhere((s) => s.name == j['s'],
-            orElse: () => DayStatus.failed),
-        fields: {
-          for (final e in ((j['f'] as Map?) ?? const {}).entries)
-            for (final c in SheetColumn.values)
-              if (c.name == e.key)
-                c: FieldOutcome.fromJson((e.value as Map).cast()),
-        },
-        issue: j['i'] == null
-            ? null
-            : SyncIssueCodec.decode((j['i'] as Map).cast()),
-        notes: [
-          for (final n in (j['n'] as List? ?? const []))
-            SyncIssueCodec.decode((n as Map).cast()),
-        ],
-      );
+    date: LocalDate.tryParseIso(j['d'] as String) ?? LocalDate(2000, 1, 1),
+    status: DayStatus.values.firstWhere(
+      (s) => s.name == j['s'],
+      orElse: () => DayStatus.failed,
+    ),
+    fields: {
+      for (final e in ((j['f'] as Map?) ?? const {}).entries)
+        for (final c in SheetColumn.values)
+          if (c.name == e.key)
+            c: FieldOutcome.fromJson((e.value as Map).cast()),
+    },
+    issue: j['i'] == null
+        ? null
+        : SyncIssueCodec.decode((j['i'] as Map).cast()),
+    notes: [
+      for (final n in (j['n'] as List? ?? const []))
+        SyncIssueCodec.decode((n as Map).cast()),
+    ],
+  );
 }
 
 enum RunStatus { success, noData, partial, failed }
@@ -135,7 +146,8 @@ class RunResult {
     if (days.isEmpty) return RunStatus.failed;
     final statuses = days.map((d) => d.status).toSet();
     final anyOk = statuses.contains(DayStatus.ok);
-    final anyBad = statuses.contains(DayStatus.partial) ||
+    final anyBad =
+        statuses.contains(DayStatus.partial) ||
         statuses.contains(DayStatus.failed);
     final anyWritten = days.any((d) => d.fields.values.any((f) => f.succeeded));
     if (!anyBad) return anyOk ? RunStatus.success : RunStatus.noData;
@@ -146,41 +158,44 @@ class RunResult {
   /// (plan §7 `lastSuccessAt`).
   bool get countsAsSuccess =>
       days.any((d) => d.fields.values.any((f) => f.succeeded)) &&
-      !days.any((d) =>
-          d.issue != null ||
-          d.fields.values.any((f) => f.kind == FieldOutcomeKind.failed));
+      !days.any(
+        (d) =>
+            d.issue != null ||
+            d.fields.values.any((f) => f.kind == FieldOutcomeKind.failed),
+      );
 
   int get cellsWritten => days.fold(
-      0,
-      (n, d) =>
-          n +
-          d.fields.values
-              .where((f) => f.kind == FieldOutcomeKind.written)
-              .length);
+    0,
+    (n, d) =>
+        n +
+        d.fields.values.where((f) => f.kind == FieldOutcomeKind.written).length,
+  );
 
   Map<String, Object?> toJson() => {
-        't': trigger.name,
-        'a': startedAt.toIso8601String(),
-        'b': finishedAt.toIso8601String(),
-        'd': [for (final d in days) d.toJson()],
-        if (issues.isNotEmpty)
-          'i': [for (final i in issues) SyncIssueCodec.encode(i)],
-      };
+    't': trigger.name,
+    'a': startedAt.toIso8601String(),
+    'b': finishedAt.toIso8601String(),
+    'd': [for (final d in days) d.toJson()],
+    if (issues.isNotEmpty)
+      'i': [for (final i in issues) SyncIssueCodec.encode(i)],
+  };
 
   static RunResult fromJson(Map<String, Object?> j) => RunResult(
-        trigger: SyncTrigger.values.firstWhere((t) => t.name == j['t'],
-            orElse: () => SyncTrigger.quick),
-        startedAt: DateTime.parse(j['a'] as String),
-        finishedAt: DateTime.parse(j['b'] as String),
-        days: [
-          for (final d in (j['d'] as List? ?? const []))
-            DayResult.fromJson((d as Map).cast()),
-        ],
-        issues: [
-          for (final i in (j['i'] as List? ?? const []))
-            SyncIssueCodec.decode((i as Map).cast()),
-        ],
-      );
+    trigger: SyncTrigger.values.firstWhere(
+      (t) => t.name == j['t'],
+      orElse: () => SyncTrigger.quick,
+    ),
+    startedAt: DateTime.parse(j['a'] as String),
+    finishedAt: DateTime.parse(j['b'] as String),
+    days: [
+      for (final d in (j['d'] as List? ?? const []))
+        DayResult.fromJson((d as Map).cast()),
+    ],
+    issues: [
+      for (final i in (j['i'] as List? ?? const []))
+        SyncIssueCodec.decode((i as Map).cast()),
+    ],
+  );
 }
 
 /// Progress of a running sync, for the Home card.

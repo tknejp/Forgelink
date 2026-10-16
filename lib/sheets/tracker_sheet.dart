@@ -44,20 +44,28 @@ class TrackerSheet {
     );
 
     if (index.weekTables == 0) {
-      AppLog.sheets.warn('No weekly Table (with a $dateHeader column) on "$tab"');
+      AppLog.sheets.warn(
+        'No weekly Table (with a $dateHeader column) on "$tab"',
+      );
       throw SyncIssueException(SheetLayoutChanged(tab));
     }
-    AppLog.sheets.info('Index built',
-        payload: 'weekTables=${index.weekTables}, dates=${index.rows.length}, '
-            'range=${index.firstDate}..${index.lastDate}, '
-            'duplicates=${index.duplicateRows}, '
-            'incompleteTables=${index.incompleteTables}');
+    AppLog.sheets.info(
+      'Index built',
+      payload:
+          'weekTables=${index.weekTables}, dates=${index.rows.length}, '
+          'range=${index.firstDate}..${index.lastDate}, '
+          'duplicates=${index.duplicateRows}, '
+          'incompleteTables=${index.incompleteTables}',
+    );
     return index;
   }
 
   /// Cells from column A with `FORMULA` rendering → 1-based row → cells.
   Future<Map<int, List<Object?>>> loadFormulas(
-      String spreadsheetId, String tab, TrackerIndex index) async {
+    String spreadsheetId,
+    String tab,
+    TrackerIndex index,
+  ) async {
     final read = await _gateway.values(
       spreadsheetId,
       '${quoteSheetName(tab)}!A:${columnLetter(index.maxColumn)}',
@@ -87,11 +95,14 @@ class TrackerSheet {
       final cols = t.ownedColumns.entries
           .map((e) => '${e.key.header}=${columnLetter(e.value)}')
           .join(' ');
-      final key = 'date=${t.dateColumn == null ? '-' : columnLetter(t.dateColumn!)} $cols';
+      final key =
+          'date=${t.dateColumn == null ? '-' : columnLetter(t.dateColumn!)} $cols';
       layouts[key] = (layouts[key] ?? 0) + 1;
     }
-    AppLog.sheets.info('Tables on "$tab": ${tables.length}',
-        payload: layouts.entries.map((e) => '${e.value}x [${e.key}]').join(' | '));
+    AppLog.sheets.info(
+      'Tables on "$tab": ${tables.length}',
+      payload: layouts.entries.map((e) => '${e.value}x [${e.key}]').join(' | '),
+    );
   }
 
   /// Sends the plan's ranges in one values-only request. No-op without writes.
@@ -99,7 +110,9 @@ class TrackerSheet {
     if (!plan.hasWrites) return 0;
     final res = await _gateway.writeValues(spreadsheetId, plan.ranges);
     final updated = res.totalUpdatedCells ?? 0;
-    AppLog.sheets.success('Wrote $updated cells in ${plan.ranges.length} ranges');
+    AppLog.sheets.success(
+      'Wrote $updated cells in ${plan.ranges.length} ranges',
+    );
     return updated;
   }
 }

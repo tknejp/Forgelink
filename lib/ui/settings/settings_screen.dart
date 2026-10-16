@@ -99,18 +99,17 @@ class _SettingsScreenState extends State<SettingsScreen>
       String title,
       List<Widget> children, {
       IntegrationStatus? status,
-    }) =>
-        Padding(
-          key: _keys[s],
-          padding: const EdgeInsets.only(bottom: 12),
-          child: SectionCard(
-            icon: icon,
-            title: title,
-            highlighted: _highlighted == s,
-            trailing: status == null ? null : StatusPill(status: status),
-            children: children,
-          ),
-        );
+    }) => Padding(
+      key: _keys[s],
+      padding: const EdgeInsets.only(bottom: 12),
+      child: SectionCard(
+        icon: icon,
+        title: title,
+        highlighted: _highlighted == s,
+        trailing: status == null ? null : StatusPill(status: status),
+        children: children,
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
@@ -118,26 +117,53 @@ class _SettingsScreenState extends State<SettingsScreen>
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         child: Column(
           children: [
-            section(SettingsSection.healthConnect, Icons.favorite_outline,
-                l10n.settingsSectionHealthConnect, const [HealthConnectSection()],
-                status: hc),
-            section(SettingsSection.kt, Icons.restaurant_outlined,
-                l10n.settingsSectionKt, const [KtSection()],
-                status: kt),
-            section(SettingsSection.google, Icons.account_circle_outlined,
-                l10n.settingsSectionGoogle, const [GoogleSection()],
-                status: google),
-            section(SettingsSection.sheet, Icons.table_chart_outlined,
-                l10n.settingsSectionSheet, const [SheetSection()],
-                status: sheet),
-            section(SettingsSection.autoSync, Icons.schedule,
-                l10n.settingsSectionAutoSync, [
-              Text(l10n.settingsAutoSyncLater,
+            section(
+              SettingsSection.healthConnect,
+              Icons.favorite_outline,
+              l10n.settingsSectionHealthConnect,
+              const [HealthConnectSection()],
+              status: hc,
+            ),
+            section(
+              SettingsSection.kt,
+              Icons.restaurant_outlined,
+              l10n.settingsSectionKt,
+              const [KtSection()],
+              status: kt,
+            ),
+            section(
+              SettingsSection.google,
+              Icons.account_circle_outlined,
+              l10n.settingsSectionGoogle,
+              const [GoogleSection()],
+              status: google,
+            ),
+            section(
+              SettingsSection.sheet,
+              Icons.table_chart_outlined,
+              l10n.settingsSectionSheet,
+              const [SheetSection()],
+              status: sheet,
+            ),
+            section(
+              SettingsSection.autoSync,
+              Icons.schedule,
+              l10n.settingsSectionAutoSync,
+              [
+                Text(
+                  l10n.settingsAutoSyncLater,
                   style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant)),
-            ]),
-            section(SettingsSection.diagnostics, Icons.bug_report_outlined,
-                l10n.settingsSectionDiagnostics, const [_DiagnosticsLog()]),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            section(
+              SettingsSection.diagnostics,
+              Icons.bug_report_outlined,
+              l10n.settingsSectionDiagnostics,
+              const [_DiagnosticsLog()],
+            ),
           ],
         ),
       ),
@@ -164,8 +190,10 @@ class _DiagnosticsLogState extends State<_DiagnosticsLog> {
     final lines = buffer.lines.reversed.take(100).toList();
 
     if (lines.isEmpty) {
-      return Text(l10n.diagnosticsEmpty,
-          style: TextStyle(color: theme.colorScheme.onSurfaceVariant));
+      return Text(
+        l10n.diagnosticsEmpty,
+        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+      );
     }
 
     return Column(
@@ -183,8 +211,10 @@ class _DiagnosticsLogState extends State<_DiagnosticsLog> {
             child: SingleChildScrollView(
               child: SelectableText(
                 lines.join('\n'),
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(fontFamily: 'monospace', fontSize: 11),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontFamily: 'monospace',
+                  fontSize: 11,
+                ),
               ),
             ),
           ),
@@ -193,18 +223,22 @@ class _DiagnosticsLogState extends State<_DiagnosticsLog> {
           children: [
             TextButton(
               onPressed: () => setState(() => _expanded = !_expanded),
-              child: Text(_expanded
-                  ? l10n.diagnosticsHide
-                  : l10n.diagnosticsShow(lines.length)),
+              child: Text(
+                _expanded
+                    ? l10n.diagnosticsHide
+                    : l10n.diagnosticsShow(lines.length),
+              ),
             ),
             if (_expanded) ...[
               TextButton(
                 onPressed: () async {
                   final messenger = ScaffoldMessenger.of(context);
                   await Clipboard.setData(
-                      ClipboardData(text: buffer.lines.join('\n')));
+                    ClipboardData(text: buffer.lines.join('\n')),
+                  );
                   messenger.showSnackBar(
-                      SnackBar(content: Text(l10n.diagnosticsCopied)));
+                    SnackBar(content: Text(l10n.diagnosticsCopied)),
+                  );
                 },
                 child: Text(l10n.diagnosticsCopy),
               ),

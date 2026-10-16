@@ -24,7 +24,9 @@ class SectionCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       decoration: BoxDecoration(
-        color: highlighted ? scheme.primaryContainer : scheme.surfaceContainerLow,
+        color: highlighted
+            ? scheme.primaryContainer
+            : scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: highlighted ? scheme.primary : scheme.outlineVariant,
@@ -47,16 +49,15 @@ class SectionCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(title,
-                    style: Theme.of(context).textTheme.titleMedium),
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
               ?trailing,
             ],
           ),
-          if (children.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            ...children,
-          ],
+          if (children.isNotEmpty) ...[const SizedBox(height: 14), ...children],
         ],
       ),
     );

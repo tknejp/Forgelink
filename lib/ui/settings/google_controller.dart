@@ -18,7 +18,9 @@ class GoogleController extends ChangeNotifier {
 
   IntegrationStatus get status => email == null
       ? const IntegrationStatus(
-          IntegrationState.notConfigured, GoogleNotConnected())
+          IntegrationState.notConfigured,
+          GoogleNotConnected(),
+        )
       : IntegrationStatus.configured;
 
   Future<void> load() async {

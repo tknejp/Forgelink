@@ -7,7 +7,13 @@ import '../core/sync_issue.dart';
 enum Integration { healthConnect, kt, googleSheets }
 
 /// docs/implementation_plan.md §7. `readVerified` is used by Google Sheets only.
-enum IntegrationState { notConfigured, configured, readVerified, verified, error }
+enum IntegrationState {
+  notConfigured,
+  configured,
+  readVerified,
+  verified,
+  error,
+}
 
 @immutable
 class IntegrationStatus {
@@ -19,7 +25,9 @@ class IntegrationStatus {
 
   const IntegrationStatus(this.state, [this.issue]);
 
-  static const notConfigured = IntegrationStatus(IntegrationState.notConfigured);
+  static const notConfigured = IntegrationStatus(
+    IntegrationState.notConfigured,
+  );
   static const configured = IntegrationStatus(IntegrationState.configured);
   static const verified = IntegrationStatus(IntegrationState.verified);
 

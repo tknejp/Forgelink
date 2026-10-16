@@ -7,7 +7,7 @@
   "homeIntegrationsTitle": "Propojení",
   "homeAllConnected": "Vše připojeno",
   "homeLastSyncNever": "Zatím neproběhla žádná synchronizace.",
-  "homeQuickSyncButton": "Synchronizovat včerejšek",
+  "homeQuickSyncButton": "Synchronizovat",
   "homeRangeSync": "Synchronizovat období",
   "homeHistory": "Historie synchronizací",
   "settingsSectionHealthConnect": "Health Connect",
@@ -393,5 +393,20 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsHcBackground": "Povolit čtení na pozadí",
+  "settingsHcBackgroundGranted": "Čtení na pozadí je povolené – synchronizace doběhne, i když aplikaci opustíš.",
+  "settingsHcBackgroundUnavailable": "Tato verze Health Connect čtení na pozadí nepodporuje.",
+  "syncServiceTitle": "Forgelink synchronizuje…",
+  "syncServiceText": "Zapisuji data do tabulky.",
+  "syncServiceChannel": "Probíhající synchronizace",
+  "syncQueued": "+{count} ve frontě",
+  "@syncQueued": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeQuickSyncLabel": "Rychlá synchronizace včerejška"
 }

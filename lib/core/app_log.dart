@@ -26,28 +26,28 @@ enum LogLevel {
   error;
 
   String get _prefix => switch (this) {
-        debug => '·',
-        info => 'ℹ',
-        success => '✓',
-        warn => '⚠',
-        error => '✖',
-      };
+    debug => '·',
+    info => 'ℹ',
+    success => '✓',
+    warn => '⚠',
+    error => '✖',
+  };
 
   String get _tag => switch (this) {
-        debug => 'DEBUG',
-        info => 'INFO ',
-        success => 'OK   ',
-        warn => 'WARN ',
-        error => 'ERROR',
-      };
+    debug => 'DEBUG',
+    info => 'INFO ',
+    success => 'OK   ',
+    warn => 'WARN ',
+    error => 'ERROR',
+  };
 
   String get _ansiColor => switch (this) {
-        debug => _Ansi.gray,
-        info => _Ansi.blue,
-        success => _Ansi.green,
-        warn => _Ansi.yellow,
-        error => _Ansi.red,
-      };
+    debug => _Ansi.gray,
+    info => _Ansi.blue,
+    success => _Ansi.green,
+    warn => _Ansi.yellow,
+    error => _Ansi.red,
+  };
 }
 
 bool _shouldPrint(LogLevel level) {
@@ -78,7 +78,8 @@ class AppLogger {
     StackTrace? stackTrace,
   }) {
     final now = DateTime.now();
-    final ts = '${now.hour.toString().padLeft(2, '0')}:'
+    final ts =
+        '${now.hour.toString().padLeft(2, '0')}:'
         '${now.minute.toString().padLeft(2, '0')}:'
         '${now.second.toString().padLeft(2, '0')}.'
         '${now.millisecond.toString().padLeft(3, '0')}';
@@ -93,7 +94,8 @@ class AppLogger {
     if (!_shouldPrint(level)) return;
 
     debugPrint(
-        '${level._ansiColor}${level._prefix} [Forgelink]$line${_Ansi.reset}');
+      '${level._ansiColor}${level._prefix} [Forgelink]$line${_Ansi.reset}',
+    );
 
     if (stackTrace != null) {
       for (final frame in stackTrace.toString().trimRight().split('\n')) {
@@ -119,14 +121,13 @@ class AppLogger {
     Object? payload,
     Object? err,
     StackTrace? stackTrace,
-  }) =>
-      _emit(
-        LogLevel.error,
-        message,
-        payload: payload,
-        err: err,
-        stackTrace: stackTrace,
-      );
+  }) => _emit(
+    LogLevel.error,
+    message,
+    payload: payload,
+    err: err,
+    stackTrace: stackTrace,
+  );
 }
 
 // ─── Namespace ────────────────────────────────────────────────────────────────

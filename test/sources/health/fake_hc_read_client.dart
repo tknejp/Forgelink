@@ -33,8 +33,19 @@ class FakeHcReadClient implements HcReadClient {
   Future<bool> isHistoryAuthorized() async => historyAuthorized;
 
   @override
-  Future<bool> requestHistoryAuthorization() async =>
-      historyAuthorized = true;
+  Future<bool> requestHistoryAuthorization() async => historyAuthorized = true;
+
+  bool backgroundAuthorized = false;
+
+  @override
+  Future<bool> isBackgroundAvailable() async => true;
+
+  @override
+  Future<bool> isBackgroundAuthorized() async => backgroundAuthorized;
+
+  @override
+  Future<bool> requestBackgroundAuthorization() async =>
+      backgroundAuthorized = true;
 
   @override
   Future<int?> totalSteps(DateTime start, DateTime end) async {
@@ -44,6 +55,8 @@ class FakeHcReadClient implements HcReadClient {
   }
 
   @override
-  Future<List<WeightSample>> weightSamples(DateTime start, DateTime end) async =>
-      weights;
+  Future<List<WeightSample>> weightSamples(
+    DateTime start,
+    DateTime end,
+  ) async => weights;
 }

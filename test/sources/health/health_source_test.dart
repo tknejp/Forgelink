@@ -34,8 +34,10 @@ void main() {
     test('queries local midnight to next midnight', () async {
       client.stepsValue = 8432;
       expect(await source.steps(day), 8432);
-      expect(client.stepCalls.single,
-          (DateTime(2026, 10, 12), DateTime(2026, 10, 13)));
+      expect(client.stepCalls.single, (
+        DateTime(2026, 10, 12),
+        DateTime(2026, 10, 13),
+      ));
     });
 
     test('0 means no data → null (cell untouched)', () async {
@@ -43,15 +45,22 @@ void main() {
       expect(await source.steps(day), isNull);
     });
 
-    test('null (native error swallowed by the plugin) → HcReadFailed',
-        () async {
-      client.stepsValue = null;
-      await expectLater(
-        source.steps(day),
-        throwsA(isA<SyncIssueException>()
-            .having((e) => e.issue, 'issue', isA<HcReadFailed>())),
-      );
-    });
+    test(
+      'null (native error swallowed by the plugin) → HcReadFailed',
+      () async {
+        client.stepsValue = null;
+        await expectLater(
+          source.steps(day),
+          throwsA(
+            isA<SyncIssueException>().having(
+              (e) => e.issue,
+              'issue',
+              isA<HcReadFailed>(),
+            ),
+          ),
+        );
+      },
+    );
 
     test('PlatformException → HcReadFailed', () async {
       client.stepsError = PlatformException(code: 'x');
@@ -103,16 +112,20 @@ void main() {
   });
 
   group('preflight', () {
-    test('ok when available and granted; records the first-grant date',
-        () async {
-      expect(await source.preflight(HcDataType.values.toSet()), isNull);
-      expect(await prefs.hcFirstGrantDate(), today);
-    });
+    test(
+      'ok when available and granted; records the first-grant date',
+      () async {
+        expect(await source.preflight(HcDataType.values.toSet()), isNull);
+        expect(await prefs.hcFirstGrantDate(), today);
+      },
+    );
 
     test('not available → HcNotAvailable', () async {
       client.availabilityValue = HcAvailability.notInstalled;
-      expect(await source.preflight({HcDataType.weight}),
-          isA<HcNotAvailable>());
+      expect(
+        await source.preflight({HcDataType.weight}),
+        isA<HcNotAvailable>(),
+      );
     });
 
     test('missing WEIGHT → HcPermissionMissing({weight})', () async {
@@ -140,12 +153,16 @@ void main() {
       expect(await source.historyGate(today.addDays(-30)), isNull);
     });
 
-    test('before the window without permission → HcHistoryPermissionMissing',
-        () async {
-      await prefs.recordHcFirstGrant(today);
-      expect(await source.historyGate(today.addDays(-31)),
-          isA<HcHistoryPermissionMissing>());
-    });
+    test(
+      'before the window without permission → HcHistoryPermissionMissing',
+      () async {
+        await prefs.recordHcFirstGrant(today);
+        expect(
+          await source.historyGate(today.addDays(-31)),
+          isA<HcHistoryPermissionMissing>(),
+        );
+      },
+    );
 
     test('before the window with permission → ok', () async {
       await prefs.recordHcFirstGrant(today);

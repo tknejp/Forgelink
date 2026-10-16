@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 
+import '../sync/sync_controller.dart';
 import 'app_log.dart';
 
 /// Native intents the plugins don't cover. Backed by the
@@ -16,9 +17,64 @@ class SystemIntents {
       return await _channel.invokeMethod<bool>('openHealthConnectSettings') ??
           false;
     } on PlatformException catch (e, st) {
-      AppLog.health.error('openHealthConnectSettings failed',
-          err: e, stackTrace: st);
+      AppLog.health.error(
+        'openHealthConnectSettings failed',
+        err: e,
+        stackTrace: st,
+      );
       return false;
     }
   }
+
+  /// Starts the foreground service that keeps a manual sync alive in the
+  /// background (`SyncForegroundService.kt`).
+  Future<void> startSyncService({
+    required String title,
+    required String text,
+    required String channelName,
+  }) async {
+    try {
+      await _channel.invokeMethod<void>('startSyncService', {
+        'title': title,
+        'text': text,
+        'channel': channelName,
+      });
+    } on PlatformException catch (e) {
+      // Not fatal: the sync still runs, it just may be paused in background.
+      AppLog.sync.warn('startSyncService failed', payload: '$e');
+    }
+  }
+
+  Future<void> stopSyncService() async {
+    try {
+      await _channel.invokeMethod<void>('stopSyncService');
+    } on PlatformException catch (e) {
+      AppLog.sync.warn('stopSyncService failed', payload: '$e');
+    }
+  }
+}
+
+/// [SyncKeepAlive] backed by the Android foreground service.
+class ForegroundServiceKeepAlive implements SyncKeepAlive {
+  const ForegroundServiceKeepAlive(
+    this._intents, {
+    required this.title,
+    required this.text,
+    required this.channelName,
+  });
+
+  final SystemIntents _intents;
+  final String title;
+  final String text;
+  final String channelName;
+
+  @override
+  Future<void> start() => _intents.startSyncService(
+    title: title,
+    text: text,
+    channelName: channelName,
+  );
+
+  @override
+  Future<void> stop() => _intents.stopSyncService();
 }

@@ -25,7 +25,8 @@ class KtController extends ChangeNotifier {
     if (storedEmail == null || !await _client.hasStoredCredentials()) {
       status = IntegrationStatus.notConfigured;
     } else {
-      status = await _statusStore.load(Integration.kt) ??
+      status =
+          await _statusStore.load(Integration.kt) ??
           IntegrationStatus.configured;
     }
     notifyListeners();

@@ -8,6 +8,7 @@ import 'core/log_buffer.dart';
 import 'core/prefs_store.dart';
 import 'core/secure_store.dart';
 import 'core/system_intents.dart';
+import 'l10n/app_localizations.dart';
 import 'sheets/google_auth.dart';
 import 'sheets/sheets_gateway.dart';
 import 'sheets/tracker_sheet.dart';
@@ -34,6 +35,8 @@ Future<void> main() async {
   AppLog.app.info('Forgelink starting');
 
   const intents = SystemIntents();
+  // Notification texts for the sync foreground service (no BuildContext yet).
+  final l10n = lookupAppLocalizations(const Locale('cs'));
   final statusStore = IntegrationStatusStore(prefs);
   final ktClient = KtClient(storage: SecureStore.instance);
   final healthSource = HealthSource(prefs: prefs);
@@ -54,6 +57,12 @@ Future<void> main() async {
       sheet: trackerSheet,
     ),
     SyncHistory(prefs, statusStore),
+    keepAlive: ForegroundServiceKeepAlive(
+      intents,
+      title: l10n.syncServiceTitle,
+      text: l10n.syncServiceText,
+      channelName: l10n.syncServiceChannel,
+    ),
   );
   await syncController.reload();
 

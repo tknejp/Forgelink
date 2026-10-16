@@ -47,18 +47,18 @@ class SyncText {
       : l10n.triggerManualShort;
 
   String trigger(SyncTrigger t) => switch (t) {
-        SyncTrigger.quick => l10n.triggerQuick,
-        SyncTrigger.calendar => l10n.triggerCalendar,
-        SyncTrigger.range => l10n.triggerRange,
-        SyncTrigger.background => l10n.triggerBackground,
-      };
+    SyncTrigger.quick => l10n.triggerQuick,
+    SyncTrigger.calendar => l10n.triggerCalendar,
+    SyncTrigger.range => l10n.triggerRange,
+    SyncTrigger.background => l10n.triggerBackground,
+  };
 
   String runStatus(RunStatus s) => switch (s) {
-        RunStatus.success => l10n.runStatusSuccess,
-        RunStatus.noData => l10n.runStatusNoData,
-        RunStatus.partial => l10n.runStatusPartial,
-        RunStatus.failed => l10n.runStatusFailed,
-      };
+    RunStatus.success => l10n.runStatusSuccess,
+    RunStatus.noData => l10n.runStatusNoData,
+    RunStatus.partial => l10n.runStatusPartial,
+    RunStatus.failed => l10n.runStatusFailed,
+  };
 
   /// One-line summary of a run (plan §6 run messages).
   String runSummary(RunResult r) {
@@ -72,22 +72,22 @@ class SyncText {
   }
 
   String field(SheetColumn c) => switch (c) {
-        SheetColumn.weight => l10n.fieldWeight,
-        SheetColumn.kcal => l10n.fieldKcal,
-        SheetColumn.protein => l10n.fieldProtein,
-        SheetColumn.carbs => l10n.fieldCarbs,
-        SheetColumn.fat => l10n.fieldFat,
-        SheetColumn.fiber => l10n.fieldFiber,
-        SheetColumn.steps => l10n.fieldSteps,
-      };
+    SheetColumn.weight => l10n.fieldWeight,
+    SheetColumn.kcal => l10n.fieldKcal,
+    SheetColumn.protein => l10n.fieldProtein,
+    SheetColumn.carbs => l10n.fieldCarbs,
+    SheetColumn.fat => l10n.fieldFat,
+    SheetColumn.fiber => l10n.fieldFiber,
+    SheetColumn.steps => l10n.fieldSteps,
+  };
 
   String outcome(FieldOutcomeKind k) => switch (k) {
-        FieldOutcomeKind.written => l10n.outcomeWritten,
-        FieldOutcomeKind.unchanged => l10n.outcomeUnchanged,
-        FieldOutcomeKind.missing => l10n.outcomeMissing,
-        FieldOutcomeKind.skippedFormula => l10n.outcomeSkippedFormula,
-        FieldOutcomeKind.failed => l10n.outcomeFailed,
-      };
+    FieldOutcomeKind.written => l10n.outcomeWritten,
+    FieldOutcomeKind.unchanged => l10n.outcomeUnchanged,
+    FieldOutcomeKind.missing => l10n.outcomeMissing,
+    FieldOutcomeKind.skippedFormula => l10n.outcomeSkippedFormula,
+    FieldOutcomeKind.failed => l10n.outcomeFailed,
+  };
 
   String _fields(Iterable<SheetColumn> cols) => cols.map(field).join(', ');
 
@@ -98,11 +98,15 @@ class SyncText {
     }
     final parts = <String>[];
     final written = d.fieldsWhere((f) => f.kind == FieldOutcomeKind.written);
-    final unchanged = d.fieldsWhere((f) => f.kind == FieldOutcomeKind.unchanged);
+    final unchanged = d.fieldsWhere(
+      (f) => f.kind == FieldOutcomeKind.unchanged,
+    );
     final missing = d.fieldsWhere((f) => f.kind == FieldOutcomeKind.missing);
-    final failed = d.fieldsWhere((f) =>
-        f.kind == FieldOutcomeKind.failed ||
-        f.kind == FieldOutcomeKind.skippedFormula);
+    final failed = d.fieldsWhere(
+      (f) =>
+          f.kind == FieldOutcomeKind.failed ||
+          f.kind == FieldOutcomeKind.skippedFormula,
+    );
     if (written.isNotEmpty) parts.add(l10n.runDayWritten(_fields(written)));
     if (unchanged.isNotEmpty) {
       parts.add(l10n.runDayUnchanged(_fields(unchanged)));
@@ -113,8 +117,10 @@ class SyncText {
         for (final c in failed)
           if (d.fields[c]!.issue case final i?) presenter.message(i),
       };
-      parts.add('${l10n.runDayFailed(_fields(failed))}'
-          '${reasons.isEmpty ? '' : ' – ${reasons.join(' ')}'}');
+      parts.add(
+        '${l10n.runDayFailed(_fields(failed))}'
+        '${reasons.isEmpty ? '' : ' – ${reasons.join(' ')}'}',
+      );
     }
     return '${date(d.date)}: ${parts.join('; ')}';
   }

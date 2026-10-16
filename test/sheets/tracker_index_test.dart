@@ -12,8 +12,10 @@ void main() {
   final sun = LocalDate(2026, 10, 18);
 
   test('serial dates inside the week table → rows 883..889', () {
-    final index =
-        TrackerIndex.build(tables: [weekTable()], values: trackerValues());
+    final index = TrackerIndex.build(
+      tables: [weekTable()],
+      values: trackerValues(),
+    );
     expect(index.weekTables, 1);
     expect(index.incompleteTables, isEmpty);
     expect(index.rows[mon]!.row, 883);
@@ -25,7 +27,9 @@ void main() {
 
   test('text dates (12.10.2026) are accepted too', () {
     final index = TrackerIndex.build(
-        tables: [weekTable()], values: trackerValues(textDates: true));
+      tables: [weekTable()],
+      values: trackerValues(textDates: true),
+    );
     expect(index.rows[mon]!.row, 883);
     expect(index.rows, hasLength(7));
   });
@@ -51,32 +55,45 @@ void main() {
   });
 
   test('CÍLE, header and footer rows are never targets', () {
-    final index =
-        TrackerIndex.build(tables: [weekTable()], values: trackerValues());
-    expect(index.rows.values.map((r) => r.row),
-        everyElement(inInclusiveRange(883, 889)));
+    final index = TrackerIndex.build(
+      tables: [weekTable()],
+      values: trackerValues(),
+    );
+    expect(
+      index.rows.values.map((r) => r.row),
+      everyElement(inInclusiveRange(883, 889)),
+    );
   });
 
   test('a date outside every weekly table is ignored', () {
     final index = TrackerIndex.build(
       tables: [weekTable()],
-      values: trackerValues(extraRows: {
-        5: [LocalDate(2026, 10, 20).toSheetSerial()],
-      }),
+      values: trackerValues(
+        extraRows: {
+          5: [LocalDate(2026, 10, 20).toSheetSerial()],
+        },
+      ),
     );
     expect(index.rows.containsKey(LocalDate(2026, 10, 20)), isFalse);
   });
 
-  test('footer not flagged by the API: a dateless last row is still skipped',
-      () {
-    final index = TrackerIndex.build(
-        tables: [weekTable(hasFooter: false)], values: trackerValues());
-    expect(index.rows, hasLength(7));
-  });
+  test(
+    'footer not flagged by the API: a dateless last row is still skipped',
+    () {
+      final index = TrackerIndex.build(
+        tables: [weekTable(hasFooter: false)],
+        values: trackerValues(),
+      );
+      expect(index.rows, hasLength(7));
+    },
+  );
 
   test('duplicate dates are reported, never resolved', () {
     final index = TrackerIndex.build(
-      tables: [weekTable(), weekTable(name: 'Tabulka64', headerRow: 892)],
+      tables: [
+        weekTable(),
+        weekTable(name: 'Tabulka64', headerRow: 892),
+      ],
       values: trackerValues(weeks: {892: mon}),
     );
     expect(index.duplicates, containsAll([mon, sun]));
@@ -99,10 +116,12 @@ void main() {
 
   test('headers are compared trimmed and case-insensitive', () {
     final messy = {
-      for (final e in newLayout.entries) e.key: ' ${e.value.toLowerCase()} '
+      for (final e in newLayout.entries) e.key: ' ${e.value.toLowerCase()} ',
     };
     final index = TrackerIndex.build(
-        tables: [weekTable(columnNames: messy)], values: trackerValues());
+      tables: [weekTable(columnNames: messy)],
+      values: trackerValues(),
+    );
     expect(index.incompleteTables, isEmpty);
     expect(index.rows, hasLength(7));
   });
@@ -117,7 +136,9 @@ void main() {
       columnNames: {0: 'KCAL'},
     );
     final index = TrackerIndex.build(
-        tables: [goals, weekTable()], values: trackerValues());
+      tables: [goals, weekTable()],
+      values: trackerValues(),
+    );
     expect(index.weekTables, 1);
   });
 
@@ -129,9 +150,7 @@ void main() {
 
   test('current values are captured per field from the right columns', () {
     final index = TrackerIndex.build(
-      tables: [
-        weekTable(name: 'Old', headerRow: 448, columnNames: oldLayout),
-      ],
+      tables: [weekTable(name: 'Old', headerRow: 448, columnNames: oldLayout)],
       values: trackerValues(
         weeks: {448: LocalDate(2025, 11, 10)},
         extraRows: {
@@ -155,7 +174,10 @@ void main() {
       for (var i = 0; i < 7; i++) [mon.addDays(i).toSheetSerial()],
     ];
     final index = TrackerIndex.build(
-        tables: [weekTable()], values: values, valuesStartRow: 882);
+      tables: [weekTable()],
+      values: values,
+      valuesStartRow: 882,
+    );
     expect(index.rows[mon]!.row, 883);
   });
 
@@ -205,13 +227,16 @@ void main() {
 
     test('parseSpreadsheetId', () {
       expect(
-        parseSpreadsheetId('https://docs.google.com/spreadsheets/d/'
-            '1ExampleSpreadsheetId_abcdefghijklmnopqrstuv/edit#gid=0'),
+        parseSpreadsheetId(
+          'https://docs.google.com/spreadsheets/d/'
+          '1ExampleSpreadsheetId_abcdefghijklmnopqrstuv/edit#gid=0',
+        ),
         '1ExampleSpreadsheetId_abcdefghijklmnopqrstuv',
       );
       expect(
-          parseSpreadsheetId(' 1ExampleSpreadsheetId_abcdefghijklmnopqrstuv '),
-          '1ExampleSpreadsheetId_abcdefghijklmnopqrstuv');
+        parseSpreadsheetId(' 1ExampleSpreadsheetId_abcdefghijklmnopqrstuv '),
+        '1ExampleSpreadsheetId_abcdefghijklmnopqrstuv',
+      );
       expect(parseSpreadsheetId('not a sheet'), isNull);
       expect(parseSpreadsheetId('https://example.com/x'), isNull);
     });

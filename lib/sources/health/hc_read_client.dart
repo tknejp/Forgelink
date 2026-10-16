@@ -74,6 +74,15 @@ class HcReadClient {
   Future<bool> requestHistoryAuthorization() =>
       _health.requestHealthDataHistoryAuthorization();
 
+  Future<bool> isBackgroundAvailable() =>
+      _health.isHealthDataInBackgroundAvailable();
+
+  Future<bool> isBackgroundAuthorized() =>
+      _health.isHealthDataInBackgroundAuthorized();
+
+  Future<bool> requestBackgroundAuthorization() =>
+      _health.requestHealthDataInBackgroundAuthorization();
+
   /// De-duplicated step total (Health Connect Aggregate API). 0 = no data,
   /// null = native error.
   Future<int?> totalSteps(DateTime start, DateTime end) =>

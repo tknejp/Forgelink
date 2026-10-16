@@ -121,7 +121,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeQuickSyncButton.
   ///
   /// In cs, this message translates to:
-  /// **'Synchronizovat včerejšek'**
+  /// **'Synchronizovat'**
   String get homeQuickSyncButton;
 
   /// No description provided for @homeRangeSync.
@@ -927,6 +927,54 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'{yesterday} kompletně · {today} jen váha'**
   String homeQuickSyncCaption(String yesterday, String today);
+
+  /// No description provided for @settingsHcBackground.
+  ///
+  /// In cs, this message translates to:
+  /// **'Povolit čtení na pozadí'**
+  String get settingsHcBackground;
+
+  /// No description provided for @settingsHcBackgroundGranted.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čtení na pozadí je povolené – synchronizace doběhne, i když aplikaci opustíš.'**
+  String get settingsHcBackgroundGranted;
+
+  /// No description provided for @settingsHcBackgroundUnavailable.
+  ///
+  /// In cs, this message translates to:
+  /// **'Tato verze Health Connect čtení na pozadí nepodporuje.'**
+  String get settingsHcBackgroundUnavailable;
+
+  /// No description provided for @syncServiceTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Forgelink synchronizuje…'**
+  String get syncServiceTitle;
+
+  /// No description provided for @syncServiceText.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zapisuji data do tabulky.'**
+  String get syncServiceText;
+
+  /// No description provided for @syncServiceChannel.
+  ///
+  /// In cs, this message translates to:
+  /// **'Probíhající synchronizace'**
+  String get syncServiceChannel;
+
+  /// No description provided for @syncQueued.
+  ///
+  /// In cs, this message translates to:
+  /// **'+{count} ve frontě'**
+  String syncQueued(int count);
+
+  /// No description provided for @homeQuickSyncLabel.
+  ///
+  /// In cs, this message translates to:
+  /// **'Rychlá synchronizace včerejška'**
+  String get homeQuickSyncLabel;
 }
 
 class _AppLocalizationsDelegate

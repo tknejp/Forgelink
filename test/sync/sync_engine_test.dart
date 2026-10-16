@@ -43,8 +43,10 @@ void main() {
     );
   });
 
-  List<String> ranges() =>
-      [for (final p in sheet.writes) for (final ValueRange r in p.ranges) r.range!];
+  List<String> ranges() => [
+    for (final p in sheet.writes)
+      for (final ValueRange r in p.ranges) r.range!,
+  ];
 
   test('quick sync: yesterday in full, today weight only', () async {
     health.weights[yesterday] = 106.3;
@@ -59,26 +61,28 @@ void main() {
     expect(health.calls, isNot(contains('steps:$today')));
     expect(ranges(), ["'tracker'!B885:H885", "'tracker'!B886"]);
     expect(sheet.writes.single.ranges.first.values, [
-      [106.3, 2700, 216, 308, 61, 27, 8432]
+      [106.3, 2700, 216, 308, 61, 27, 8432],
     ]);
     expect(r.days.last.fields.keys, [SheetColumn.weight]);
     expect(r.countsAsSuccess, isTrue);
   });
 
-  test('missing data is never written and does not make the day partial',
-      () async {
-    health.weights[yesterday] = null; // no weigh-in
-    health.stepCounts[yesterday] = null; // 0 steps → null from HealthSource
-    kt.days[yesterday] = loggedDay;
+  test(
+    'missing data is never written and does not make the day partial',
+    () async {
+      health.weights[yesterday] = null; // no weigh-in
+      health.stepCounts[yesterday] = null; // 0 steps → null from HealthSource
+      kt.days[yesterday] = loggedDay;
 
-    final r = await engine.run(SyncTrigger.calendar, [yesterday]);
+      final r = await engine.run(SyncTrigger.calendar, [yesterday]);
 
-    expect(ranges(), ["'tracker'!C885:G885"]);
-    final d = r.days.single;
-    expect(d.status, DayStatus.ok);
-    expect(d.fields[SheetColumn.weight]!.kind, FieldOutcomeKind.missing);
-    expect(d.fields[SheetColumn.steps]!.kind, FieldOutcomeKind.missing);
-  });
+      expect(ranges(), ["'tracker'!C885:G885"]);
+      final d = r.days.single;
+      expect(d.status, DayStatus.ok);
+      expect(d.fields[SheetColumn.weight]!.kind, FieldOutcomeKind.missing);
+      expect(d.fields[SheetColumn.steps]!.kind, FieldOutcomeKind.missing);
+    },
+  );
 
   test('empty KT day → NoData note, KT cells untouched', () async {
     health.weights[yesterday] = 106.3;
@@ -88,8 +92,12 @@ void main() {
   });
 
   test('a single absent macro stays missing; a real 0 is written', () async {
-    kt.days[yesterday] =
-        const KtDayNutrition(kcal: 1800, protein: 120, carbs: 200, fat: 0);
+    kt.days[yesterday] = const KtDayNutrition(
+      kcal: 1800,
+      protein: 120,
+      carbs: 200,
+      fat: 0,
+    );
     final r = await engine.run(SyncTrigger.calendar, [yesterday]);
     final f = r.days.single.fields;
     expect(f[SheetColumn.fat]!.kind, FieldOutcomeKind.written);
@@ -97,22 +105,26 @@ void main() {
     expect(f[SheetColumn.fiber]!.kind, FieldOutcomeKind.missing);
   });
 
-  test('WEIGHT permission missing → C–H written, B failed, run partial',
-      () async {
-    health.preflightIssue = const HcPermissionMissing({HcDataType.weight});
-    health.stepCounts[yesterday] = 8432;
-    kt.days[yesterday] = loggedDay;
+  test(
+    'WEIGHT permission missing → C–H written, B failed, run partial',
+    () async {
+      health.preflightIssue = const HcPermissionMissing({HcDataType.weight});
+      health.stepCounts[yesterday] = 8432;
+      kt.days[yesterday] = loggedDay;
 
-    final r = await engine.run(SyncTrigger.calendar, [yesterday]);
+      final r = await engine.run(SyncTrigger.calendar, [yesterday]);
 
-    expect(ranges(), ["'tracker'!C885:H885"]);
-    expect(r.days.single.fields[SheetColumn.weight]!.kind,
-        FieldOutcomeKind.failed);
-    expect(r.days.single.status, DayStatus.partial);
-    expect(r.status, RunStatus.partial);
-    expect(r.issues.single, isA<HcPermissionMissing>());
-    expect(health.calls, isNot(contains('weight:$yesterday')));
-  });
+      expect(ranges(), ["'tracker'!C885:H885"]);
+      expect(
+        r.days.single.fields[SheetColumn.weight]!.kind,
+        FieldOutcomeKind.failed,
+      );
+      expect(r.days.single.status, DayStatus.partial);
+      expect(r.status, RunStatus.partial);
+      expect(r.issues.single, isA<HcPermissionMissing>());
+      expect(health.calls, isNot(contains('weight:$yesterday')));
+    },
+  );
 
   test('KT credentials missing → B and H written, C–G failed', () async {
     kt.credentials = false;
@@ -127,14 +139,16 @@ void main() {
     expect(r.status, RunStatus.partial);
   });
 
-  test('today only needs no KT, so missing KT credentials do not matter',
-      () async {
-    kt.credentials = false;
-    health.weights[today] = 105.9;
-    final r = await engine.run(SyncTrigger.calendar, [today]);
-    expect(r.status, RunStatus.success);
-    expect(r.issues, isEmpty);
-  });
+  test(
+    'today only needs no KT, so missing KT credentials do not matter',
+    () async {
+      kt.credentials = false;
+      health.weights[today] = 105.9;
+      final r = await engine.run(SyncTrigger.calendar, [today]);
+      expect(r.status, RunStatus.success);
+      expect(r.issues, isEmpty);
+    },
+  );
 
   test('every needed source blocked → failed run, nothing fetched', () async {
     health.preflightIssue = const HcNotAvailable();
@@ -146,8 +160,10 @@ void main() {
 
   test('KT failure blocks KT for the rest of the run', () async {
     kt.failWith = const Offline();
-    final r = await engine.run(
-        SyncTrigger.range, [today.addDays(-3), today.addDays(-2)]);
+    final r = await engine.run(SyncTrigger.range, [
+      today.addDays(-3),
+      today.addDays(-2),
+    ]);
     expect(kt.calls, hasLength(1));
     expect(r.issues.single, isA<Offline>());
   });
@@ -156,7 +172,10 @@ void main() {
     health.failing.add(yesterday);
     kt.days[yesterday] = loggedDay;
     final r = await engine.run(SyncTrigger.calendar, [yesterday]);
-    expect(r.days.single.fields[SheetColumn.weight]!.issue, isA<HcReadFailed>());
+    expect(
+      r.days.single.fields[SheetColumn.weight]!.issue,
+      isA<HcReadFailed>(),
+    );
     expect(r.days.single.status, DayStatus.partial);
   });
 
@@ -164,8 +183,10 @@ void main() {
     health.historyIssue = const HcHistoryPermissionMissing();
     kt.days[yesterday] = loggedDay;
     final r = await engine.run(SyncTrigger.calendar, [yesterday]);
-    expect(r.days.single.fields[SheetColumn.weight]!.issue,
-        isA<HcHistoryPermissionMissing>());
+    expect(
+      r.days.single.fields[SheetColumn.weight]!.issue,
+      isA<HcHistoryPermissionMissing>(),
+    );
     expect(r.issues.single, isA<HcHistoryPermissionMissing>());
   });
 
@@ -190,20 +211,29 @@ void main() {
     expect(r.days.single.issue, isA<SheetTabMissing>());
   });
 
-  test('date not in sheet → day failed, sources not called', () async {
+  test('date not in sheet → day failed, KT not called', () async {
     final outside = LocalDate(2026, 9, 1);
     final r = await engine.run(SyncTrigger.calendar, [outside]);
     expect(r.days.single.issue, isA<DateNotInSheet>());
     expect(kt.calls, isEmpty);
-    expect(health.calls.where((c) => c.startsWith('weight')), isEmpty);
+    expect(sheet.writes, isEmpty);
+  });
+
+  test('Health Connect is read before the sheet is touched', () async {
+    sheet.loadError = const Offline();
+    health.weights[yesterday] = 106.3;
+    await engine.run(SyncTrigger.calendar, [yesterday]);
+    expect(health.calls, contains('weight:$yesterday'));
   });
 
   test('write failure (403) marks written cells failed', () async {
     sheet.writeError = const SheetNoEditAccess('tom@example.com');
     health.weights[yesterday] = 106.3;
     final r = await engine.run(SyncTrigger.calendar, [yesterday]);
-    expect(r.days.single.fields[SheetColumn.weight]!.kind,
-        FieldOutcomeKind.failed);
+    expect(
+      r.days.single.fields[SheetColumn.weight]!.kind,
+      FieldOutcomeKind.failed,
+    );
     expect(r.issues, contains(isA<SheetNoEditAccess>()));
     expect(r.status, RunStatus.failed);
   });
@@ -211,9 +241,11 @@ void main() {
   test('idempotent second run → all unchanged and no write request', () async {
     final idx = TrackerIndex.build(
       tables: [weekTable()],
-      values: trackerValues(extraRows: {
-        885: [yesterday.toSheetSerial(), 106.3, 2700, 216, 308, 61, 27, 8432],
-      }),
+      values: trackerValues(
+        extraRows: {
+          885: [yesterday.toSheetSerial(), 106.3, 2700, 216, 308, 61, 27, 8432],
+        },
+      ),
     );
     sheet.index = idx;
     health.weights[yesterday] = 106.3;
@@ -223,8 +255,10 @@ void main() {
     final r = await engine.run(SyncTrigger.calendar, [yesterday]);
 
     expect(sheet.writes, isEmpty);
-    expect(r.days.single.fields.values.map((f) => f.kind),
-        everyElement(FieldOutcomeKind.unchanged));
+    expect(
+      r.days.single.fields.values.map((f) => f.kind),
+      everyElement(FieldOutcomeKind.unchanged),
+    );
     expect(r.status, RunStatus.success);
   });
 
@@ -242,8 +276,10 @@ void main() {
 
   test('progress reports each date', () async {
     final seen = <SyncProgress>[];
-    await engine.run(SyncTrigger.range, [yesterday, today],
-        onProgress: seen.add);
+    await engine.run(SyncTrigger.range, [
+      yesterday,
+      today,
+    ], onProgress: seen.add);
     expect(seen.map((p) => p.done), [0, 1, 2]);
   });
 }

@@ -19,9 +19,9 @@ class HealthSource {
     required PrefsStore prefs,
     HcReadClient? client,
     DateTime Function()? now,
-  })  : _prefs = prefs,
-        _client = client ?? HcReadClient(),
-        _now = now ?? DateTime.now;
+  }) : _prefs = prefs,
+       _client = client ?? HcReadClient(),
+       _now = now ?? DateTime.now;
 
   final PrefsStore _prefs;
   final HcReadClient _client;
@@ -51,8 +51,9 @@ class HealthSource {
 
   /// Read types (of [needed]) that are not granted. Records the first-grant
   /// date the first time everything Forgelink needs is granted.
-  Future<Set<HcDataType>> missingPermissions(
-      [Set<HcDataType> needed = const {HcDataType.steps, HcDataType.weight}]) async {
+  Future<Set<HcDataType>> missingPermissions([
+    Set<HcDataType> needed = const {HcDataType.steps, HcDataType.weight},
+  ]) async {
     final missing = <HcDataType>{};
     for (final type in needed) {
       if (!await _client.hasReadPermission(_typeMap[type]!)) missing.add(type);
@@ -66,8 +67,9 @@ class HealthSource {
   /// Opens the Health Connect permission dialog for steps + weight.
   /// Returns true when both end up granted.
   Future<bool> requestPermissions() async {
-    await _client.requestReadPermissions(
-        [for (final t in HcDataType.values) _typeMap[t]!]);
+    await _client.requestReadPermissions([
+      for (final t in HcDataType.values) _typeMap[t]!,
+    ]);
     // The request's own Boolean is unreliable — re-check.
     return (await missingPermissions()).isEmpty;
   }
@@ -79,6 +81,17 @@ class HealthSource {
   Future<bool> requestHistoryAuthorization() async {
     await _client.requestHistoryAuthorization();
     return _client.isHistoryAuthorized();
+  }
+
+  Future<bool> isBackgroundAvailable() => _client.isBackgroundAvailable();
+
+  Future<bool> isBackgroundAuthorized() => _client.isBackgroundAuthorized();
+
+  /// Lets reads continue after the user leaves the app (manual sync in the
+  /// background now, automatic sync in Phase 6).
+  Future<bool> requestBackgroundAuthorization() async {
+    await _client.requestBackgroundAuthorization();
+    return _client.isBackgroundAuthorized();
   }
 
   /// Run-level preflight for the [needed] types. Returns the blocking issue
@@ -135,13 +148,14 @@ class HealthSource {
       throw SyncIssueException(HcReadFailed(day), e);
     }
 
-    final inDay = samples
-        .where((s) => !s.time.isBefore(start) && s.time.isBefore(end))
-        .toList()
-      ..sort((a, b) {
-        final byTime = a.time.compareTo(b.time);
-        return byTime != 0 ? byTime : a.source.compareTo(b.source);
-      });
+    final inDay =
+        samples
+            .where((s) => !s.time.isBefore(start) && s.time.isBefore(end))
+            .toList()
+          ..sort((a, b) {
+            final byTime = a.time.compareTo(b.time);
+            return byTime != 0 ? byTime : a.source.compareTo(b.source);
+          });
     if (inDay.isEmpty) {
       AppLog.health.debug('lastWeight($day): no readings');
       return null;
@@ -149,8 +163,10 @@ class HealthSource {
     final last = inDay.last;
     if (last.kg <= 0) return null;
     final rounded = (last.kg * 10).round() / 10;
-    AppLog.health.debug('lastWeight($day) = $rounded',
-        payload: 'readings=${inDay.length}, source=${last.source}');
+    AppLog.health.debug(
+      'lastWeight($day) = $rounded',
+      payload: 'readings=${inDay.length}, source=${last.source}',
+    );
     return rounded;
   }
 }

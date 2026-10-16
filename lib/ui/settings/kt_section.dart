@@ -81,8 +81,10 @@ class _KtSectionState extends State<KtSection> {
           if (_missingFields)
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: Text(l10n.ktFieldsRequired,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              child: Text(
+                l10n.ktFieldsRequired,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
             ),
           if (c.lastAttemptIssue != null)
             Padding(
@@ -97,7 +99,8 @@ class _KtSectionState extends State<KtSection> {
                 child: c.busy
                     ? const SizedBox.square(
                         dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2))
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : Text(l10n.ktLoginButton),
               ),
               if (_editing) ...[
@@ -106,9 +109,9 @@ class _KtSectionState extends State<KtSection> {
                   onPressed: c.busy
                       ? null
                       : () => setState(() {
-                            _editing = false;
-                            _password.clear();
-                          }),
+                          _editing = false;
+                          _password.clear();
+                        }),
                   child: Text(l10n.ktCancel),
                 ),
               ],

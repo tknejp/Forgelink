@@ -29,11 +29,12 @@ void main() {
     DateTime now() => DateTime(2026, 10, 16, 9);
     final controller = SyncController(
       SyncEngine(
-          prefs: prefs,
-          health: FakeHealth(),
-          kt: FakeKt(),
-          sheet: FakeSheet(),
-          now: now),
+        prefs: prefs,
+        health: FakeHealth(),
+        kt: FakeKt(),
+        sheet: FakeSheet(),
+        now: now,
+      ),
       SyncHistory(prefs, IntegrationStatusStore(prefs)),
       now: now,
     );
@@ -42,23 +43,25 @@ void main() {
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(ChangeNotifierProvider.value(
-      value: controller,
-      child: MaterialApp(
-        locale: const Locale('cs'),
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: MonthCalendar(
-              onTapDay: (d) => events.add('tap $d'),
-              onLongPressDay: (d) => events.add('detail $d'),
-              onSelectRange: (a, b) => events.add('range $a..$b'),
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: controller,
+        child: MaterialApp(
+          locale: const Locale('cs'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: MonthCalendar(
+                onTapDay: (d) => events.add('tap $d'),
+                onLongPressDay: (d) => events.add('detail $d'),
+                onSelectRange: (a, b) => events.add('range $a..$b'),
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
   }
 
@@ -94,14 +97,18 @@ void main() {
 
   testWidgets('dragging into the future stops at today', (tester) async {
     await pump(tester);
-    final gesture = await tester.startGesture(tester.getCenter(find.text('14')));
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text('14')),
+    );
     await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
     await gesture.moveTo(tester.getCenter(find.text('20')));
     await tester.pump();
     await gesture.up();
     await tester.pump();
-    expect(events.single,
-        'range ${LocalDate(2026, 10, 14)}..${LocalDate(2026, 10, 16)}');
+    expect(
+      events.single,
+      'range ${LocalDate(2026, 10, 14)}..${LocalDate(2026, 10, 16)}',
+    );
   });
 
   testWidgets('future days ignore taps', (tester) async {

@@ -9,7 +9,7 @@ import 'local_date.dart';
 /// the Phase 6 background worker are visible to the UI isolate on the next read.
 class PrefsStore {
   PrefsStore([SharedPreferencesAsync? prefs])
-      : _prefs = prefs ?? SharedPreferencesAsync();
+    : _prefs = prefs ?? SharedPreferencesAsync();
 
   final SharedPreferencesAsync _prefs;
 
@@ -84,8 +84,8 @@ class PrefsStore {
 
   Future<void> setIntegrationStatusRaw(String integration, String? raw) =>
       raw == null
-          ? _prefs.remove('status.$integration')
-          : _prefs.setString('status.$integration', raw);
+      ? _prefs.remove('status.$integration')
+      : _prefs.setString('status.$integration', raw);
 
   // ─── Raw JSON blobs (sync/sync_history.dart) ────────────────────────────
 

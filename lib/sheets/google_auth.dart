@@ -39,10 +39,10 @@ class GoogleAuth implements TokenProvider {
 
   /// Must run once per isolate before any other call.
   Future<void> initialize() => _init ??= _gsi.initialize(
-        serverClientId: AppConfig.googleWebClientId.isEmpty
-            ? null
-            : AppConfig.googleWebClientId,
-      );
+    serverClientId: AppConfig.googleWebClientId.isEmpty
+        ? null
+        : AppConfig.googleWebClientId,
+  );
 
   @override
   Future<String?> accountEmail() async => (await _prefs.googleAccount())?.email;
@@ -55,19 +55,26 @@ class GoogleAuth implements TokenProvider {
       final account = await _gsi.authenticate();
       await account.authorizationClient.authorizeScopes(_scopes);
       await _prefs.setGoogleAccount(email: account.email, userId: account.id);
-      AppLog.auth.success('Google account connected: ${maskEmail(account.email)}');
+      AppLog.auth.success(
+        'Google account connected: ${maskEmail(account.email)}',
+      );
       return account.email;
     } on GoogleSignInException catch (e) {
       // Leaving the consent page surfaces as unknownError "[16] Cancelled by
       // user" on Android, not as `canceled`.
       if (e.code == GoogleSignInExceptionCode.canceled ||
           (e.description ?? '').contains('Cancelled by user')) {
-        AppLog.auth.info('Google connect cancelled by user',
-            payload: '${e.code}: ${e.description}');
+        AppLog.auth.info(
+          'Google connect cancelled by user',
+          payload: '${e.code}: ${e.description}',
+        );
         return null;
       }
-      AppLog.auth.error('Google connect failed',
-          payload: '${e.code}: ${e.description}', err: e);
+      AppLog.auth.error(
+        'Google connect failed',
+        payload: '${e.code}: ${e.description}',
+        err: e,
+      );
       throw SyncIssueException(const UnexpectedIssue(), e);
     }
   }
@@ -108,8 +115,10 @@ class GoogleAuth implements TokenProvider {
       var tokens = await request(false);
       if (tokens == null && interactive) tokens = await request(true);
       if (tokens == null) {
-        AppLog.auth.warn('No token for ${maskEmail(account.email)} '
-            '(interactive=$interactive)');
+        AppLog.auth.warn(
+          'No token for ${maskEmail(account.email)} '
+          '(interactive=$interactive)',
+        );
         throw const SyncIssueException(GoogleReauthRequired());
       }
       return tokens.accessToken;
@@ -118,12 +127,13 @@ class GoogleAuth implements TokenProvider {
         GoogleSignInExceptionCode.canceled ||
         GoogleSignInExceptionCode.uiUnavailable ||
         GoogleSignInExceptionCode.userMismatch ||
-        GoogleSignInExceptionCode.interrupted =>
-          const GoogleReauthRequired(),
+        GoogleSignInExceptionCode.interrupted => const GoogleReauthRequired(),
         _ => const UnexpectedIssue(),
       };
-      AppLog.auth.error('Token request failed → ${issue.code}',
-          payload: '${e.code}: ${e.description}');
+      AppLog.auth.error(
+        'Token request failed → ${issue.code}',
+        payload: '${e.code}: ${e.description}',
+      );
       throw SyncIssueException(issue, e);
     }
   }

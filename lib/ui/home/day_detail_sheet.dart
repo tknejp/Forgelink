@@ -14,12 +14,11 @@ Future<void> showDayDetail(
   BuildContext context,
   LocalDate date, {
   required VoidCallback onSync,
-}) =>
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (ctx) => _DayDetail(date: date, onSync: onSync),
-    );
+}) => showModalBottomSheet<void>(
+  context: context,
+  showDragHandle: true,
+  builder: (ctx) => _DayDetail(date: date, onSync: onSync),
+);
 
 class _DayDetail extends StatelessWidget {
   const _DayDetail({required this.date, required this.onSync});
@@ -37,11 +36,11 @@ class _DayDetail extends StatelessWidget {
     final day = c.days[date];
 
     Color colorOf(FieldOutcomeKind k) => switch (k) {
-          FieldOutcomeKind.written || FieldOutcomeKind.unchanged => colors.ok,
-          FieldOutcomeKind.missing => colors.neutral,
-          FieldOutcomeKind.skippedFormula => colors.warn,
-          FieldOutcomeKind.failed => colors.error,
-        };
+      FieldOutcomeKind.written || FieldOutcomeKind.unchanged => colors.ok,
+      FieldOutcomeKind.missing => colors.neutral,
+      FieldOutcomeKind.skippedFormula => colors.warn,
+      FieldOutcomeKind.failed => colors.error,
+    };
 
     return SafeArea(
       child: Padding(
@@ -55,14 +54,18 @@ class _DayDetail extends StatelessWidget {
             if (date == c.today)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Text(l10n.dayTodayWeightOnly,
-                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+                child: Text(
+                  l10n.dayTodayWeightOnly,
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                ),
               ),
             if (day == null)
               Text(l10n.dayNeverSynced)
             else if (day.issue != null)
-              Text(text.presenter.message(day.issue!),
-                  style: TextStyle(color: colors.error))
+              Text(
+                text.presenter.message(day.issue!),
+                style: TextStyle(color: colors.error),
+              )
             else
               for (final col in SheetColumn.values)
                 if (day.fields[col] case final f?)
@@ -74,20 +77,28 @@ class _DayDetail extends StatelessWidget {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                              color: colorOf(f.kind), shape: BoxShape.circle),
+                            color: colorOf(f.kind),
+                            shape: BoxShape.circle,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(child: Text(text.field(col))),
                         if (f.value != null)
                           Padding(
                             padding: const EdgeInsets.only(right: 12),
-                            child: Text(text.value(col, f.value!),
-                                style: theme.textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600)),
+                            child: Text(
+                              text.value(col, f.value!),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        Text(text.outcome(f.kind),
-                            style: theme.textTheme.bodySmall
-                                ?.copyWith(color: colorOf(f.kind))),
+                        Text(
+                          text.outcome(f.kind),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorOf(f.kind),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -95,8 +106,10 @@ class _DayDetail extends StatelessWidget {
               for (final n in day.notes)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Text(text.presenter.message(n),
-                      style: theme.textTheme.bodySmall),
+                  child: Text(
+                    text.presenter.message(n),
+                    style: theme.textTheme.bodySmall,
+                  ),
                 ),
             const SizedBox(height: 16),
             SizedBox(

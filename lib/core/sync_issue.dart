@@ -33,7 +33,7 @@ class IssueAction {
   const IssueAction(this.kind, {this.section});
 
   const IssueAction.openSettings(SettingsSection this.section)
-      : kind = IssueActionKind.openSettings;
+    : kind = IssueActionKind.openSettings;
 
   @override
   bool operator ==(Object other) =>
@@ -69,23 +69,22 @@ sealed class SyncIssue {
   /// Rebuilds a persisted issue from its [code]. Only parameterless issues
   /// can be restored; anything else returns null.
   static SyncIssue? parameterlessFromCode(String code) => switch (code) {
-        'ktCredentialsMissing' => const KtCredentialsMissing(),
-        'ktAuthRejected' => const KtAuthRejected(),
-        'ktUnavailable' => const KtUnavailable(),
-        'googleNotConnected' => const GoogleNotConnected(),
-        'googleReauthRequired' => const GoogleReauthRequired(),
-        'sheetNotConfigured' => const SheetNotConfigured(),
-        'sheetNotFound' => const SheetNotFound(),
-        'sheetsApiDisabled' => const SheetsApiDisabled(),
-        'sheetsUnavailable' => const SheetsUnavailable(),
-        'hcNotAvailable' => const HcNotAvailable(),
-        'hcHistoryPermissionMissing' => const HcHistoryPermissionMissing(),
-        'hcBackgroundPermissionMissing' =>
-          const HcBackgroundPermissionMissing(),
-        'offline' => const Offline(),
-        'unexpected' => const UnexpectedIssue(),
-        _ => null,
-      };
+    'ktCredentialsMissing' => const KtCredentialsMissing(),
+    'ktAuthRejected' => const KtAuthRejected(),
+    'ktUnavailable' => const KtUnavailable(),
+    'googleNotConnected' => const GoogleNotConnected(),
+    'googleReauthRequired' => const GoogleReauthRequired(),
+    'sheetNotConfigured' => const SheetNotConfigured(),
+    'sheetNotFound' => const SheetNotFound(),
+    'sheetsApiDisabled' => const SheetsApiDisabled(),
+    'sheetsUnavailable' => const SheetsUnavailable(),
+    'hcNotAvailable' => const HcNotAvailable(),
+    'hcHistoryPermissionMissing' => const HcHistoryPermissionMissing(),
+    'hcBackgroundPermissionMissing' => const HcBackgroundPermissionMissing(),
+    'offline' => const Offline(),
+    'unexpected' => const UnexpectedIssue(),
+    _ => null,
+  };
 }
 
 /// Carries a classified [SyncIssue] out of a source or the sheet layer.

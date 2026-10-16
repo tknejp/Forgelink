@@ -35,8 +35,12 @@ class _KtSummaryParser {
     );
     AppLog.ktParse.debug(
       'summary → $parsed',
-      payload: _describeFields(
-          data, ['foodstuffEnergyTotal', 'energyUnit', 'items', 'itemsDynamic']),
+      payload: _describeFields(data, [
+        'foodstuffEnergyTotal',
+        'energyUnit',
+        'items',
+        'itemsDynamic',
+      ]),
     );
     return parsed;
   }

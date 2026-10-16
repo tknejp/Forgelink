@@ -3,8 +3,7 @@ part of 'kt_client.dart';
 // Trimmed port of Forgetrack's kt_service_formatter.dart.
 
 String _shortBody(String body, {int max = 300}) {
-  final normalized =
-      body.replaceAll('\n', ' ').replaceAll(RegExp(r'\s+'), ' ');
+  final normalized = body.replaceAll('\n', ' ').replaceAll(RegExp(r'\s+'), ' ');
   if (normalized.length <= max) return normalized;
   return '${normalized.substring(0, max)}...';
 }

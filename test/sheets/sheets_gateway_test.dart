@@ -31,27 +31,27 @@ class FakeTokens implements TokenProvider {
   Future<void> invalidate(String token) async => invalidated.add(token);
 }
 
-http.Response json(Object body, {int status = 200, Map<String, String>? headers}) =>
-    http.Response(jsonEncode(body), status,
-        headers: {'content-type': 'application/json', ...?headers});
+http.Response json(
+  Object body, {
+  int status = 200,
+  Map<String, String>? headers,
+}) => http.Response(
+  jsonEncode(body),
+  status,
+  headers: {'content-type': 'application/json', ...?headers},
+);
 
-http.Response apiError(int status, String errStatus, [String? reason]) => json(
-      {
-        'error': {
-          'code': status,
-          'message': 'err',
-          'status': errStatus,
-          if (reason != null)
-            'details': [
-              {
-                '@type': 'type.googleapis.com/google.rpc.ErrorInfo',
-                'reason': reason,
-              }
-            ],
-        }
-      },
-      status: status,
-    );
+http.Response apiError(int status, String errStatus, [String? reason]) => json({
+  'error': {
+    'code': status,
+    'message': 'err',
+    'status': errStatus,
+    if (reason != null)
+      'details': [
+        {'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': reason},
+      ],
+  },
+}, status: status);
 
 void main() {
   const id = 'sheet-id';
@@ -71,9 +71,9 @@ void main() {
       );
 
   Future<SyncIssue?> issueOf(Future<Object?> f) => f.then<SyncIssue?>(
-        (_) => null,
-        onError: (Object e) => (e as SyncIssueException).issue,
-      );
+    (_) => null,
+    onError: (Object e) => (e as SyncIssueException).issue,
+  );
 
   test('sends the bearer token', () async {
     String? auth;
@@ -89,9 +89,11 @@ void main() {
     var calls = 0;
     final g = gatewayWith((r) async {
       if (++calls == 1) {
-        return http.Response('', 401, headers: {
-          'www-authenticate': 'Bearer error="invalid_token"',
-        });
+        return http.Response(
+          '',
+          401,
+          headers: {'www-authenticate': 'Bearer error="invalid_token"'},
+        );
       }
       return json({'sheets': []});
     });
@@ -101,28 +103,37 @@ void main() {
   });
 
   test('persistent invalid_token → GoogleReauthRequired', () async {
-    final g = gatewayWith((r) async => http.Response('', 401, headers: {
-          'www-authenticate': 'Bearer error="invalid_token"',
-        }));
+    final g = gatewayWith(
+      (r) async => http.Response(
+        '',
+        401,
+        headers: {'www-authenticate': 'Bearer error="invalid_token"'},
+      ),
+    );
     expect(await issueOf(g.metadata(id)), isA<GoogleReauthRequired>());
   });
 
-  test('insufficient_scope → GoogleReauthRequired without retry loop',
-      () async {
-    var calls = 0;
-    final g = gatewayWith((r) async {
-      calls++;
-      return http.Response('', 403, headers: {
-        'www-authenticate': 'Bearer error="insufficient_scope"',
+  test(
+    'insufficient_scope → GoogleReauthRequired without retry loop',
+    () async {
+      var calls = 0;
+      final g = gatewayWith((r) async {
+        calls++;
+        return http.Response(
+          '',
+          403,
+          headers: {'www-authenticate': 'Bearer error="insufficient_scope"'},
+        );
       });
-    });
-    expect(await issueOf(g.metadata(id)), isA<GoogleReauthRequired>());
-    expect(calls, 1);
-  });
+      expect(await issueOf(g.metadata(id)), isA<GoogleReauthRequired>());
+      expect(calls, 1);
+    },
+  );
 
   test('403 SERVICE_DISABLED → SheetsApiDisabled', () async {
     final g = gatewayWith(
-        (r) async => apiError(403, 'PERMISSION_DENIED', 'SERVICE_DISABLED'));
+      (r) async => apiError(403, 'PERMISSION_DENIED', 'SERVICE_DISABLED'),
+    );
     expect(await issueOf(g.metadata(id)), isA<SheetsApiDisabled>());
   });
 
@@ -155,8 +166,11 @@ void main() {
 
   test('429 waits at least 60 s', () async {
     var calls = 0;
-    final g = gatewayWith((r) async =>
-        ++calls == 1 ? apiError(429, 'RESOURCE_EXHAUSTED') : json({'sheets': []}));
+    final g = gatewayWith(
+      (r) async => ++calls == 1
+          ? apiError(429, 'RESOURCE_EXHAUSTED')
+          : json({'sheets': []}),
+    );
     await g.metadata(id);
     expect(delays, [const Duration(seconds: 60)]);
   });
@@ -167,47 +181,49 @@ void main() {
   });
 
   test('not connected → GoogleNotConnected surfaces unchanged', () async {
-    final g = SheetsGateway(_NoAccount(),
-        httpClient: () => MockClient((r) async => json({})));
+    final g = SheetsGateway(
+      _NoAccount(),
+      httpClient: () => MockClient((r) async => json({})),
+    );
     expect(await issueOf(g.metadata(id)), isA<GoogleNotConnected>());
   });
 
   group('TrackerSheet over HTTP', () {
     Map<String, dynamic> metadataJson({String tab = 'tracker'}) => {
-          'sheets': [
+      'sheets': [
+        {
+          'properties': {'sheetId': 1, 'title': 'weightlog'},
+        },
+        {
+          'properties': {'sheetId': 2, 'title': tab},
+          'tables': [
             {
-              'properties': {'sheetId': 1, 'title': 'weightlog'},
-            },
-            {
-              'properties': {'sheetId': 2, 'title': tab},
-              'tables': [
-                {
-                  'tableId': 't63',
-                  'name': 'Tabulka63',
-                  'range': {
-                    'sheetId': 2,
-                    'startRowIndex': 881,
-                    'endRowIndex': 890,
-                    'startColumnIndex': 0,
-                    'endColumnIndex': 12,
-                  },
-                  'rowsProperties': {
-                    'footerColorStyle': {
-                      'rgbColor': {'red': 1}
-                    }
-                  },
-                  'columnProperties': [
-                    for (final (i, n) in const [
-                      'DATUM', 'VÁHA', 'KCAL', 'BÍLKOVINY', 'SACHARIDY', //
-                      'TUKY', 'VLÁKNINA', 'KROKY',
-                    ].indexed)
-                      {'columnIndex': i, 'columnName': n},
-                  ],
-                }
+              'tableId': 't63',
+              'name': 'Tabulka63',
+              'range': {
+                'sheetId': 2,
+                'startRowIndex': 881,
+                'endRowIndex': 890,
+                'startColumnIndex': 0,
+                'endColumnIndex': 12,
+              },
+              'rowsProperties': {
+                'footerColorStyle': {
+                  'rgbColor': {'red': 1},
+                },
+              },
+              'columnProperties': [
+                for (final (i, n) in const [
+                  'DATUM', 'VÁHA', 'KCAL', 'BÍLKOVINY', 'SACHARIDY', //
+                  'TUKY', 'VLÁKNINA', 'KROKY',
+                ].indexed)
+                  {'columnIndex': i, 'columnName': n},
               ],
             },
           ],
-        };
+        },
+      ],
+    };
 
     test('loadIndex reads metadata + A:H and builds the index', () async {
       final requested = <Uri>[];
@@ -225,10 +241,14 @@ void main() {
       expect(index.weekTables, 1);
 
       final valuesCall = requested.last;
-      expect(valuesCall.queryParameters['valueRenderOption'],
-          'UNFORMATTED_VALUE');
-      expect(valuesCall.queryParameters['dateTimeRenderOption'],
-          'SERIAL_NUMBER');
+      expect(
+        valuesCall.queryParameters['valueRenderOption'],
+        'UNFORMATTED_VALUE',
+      );
+      expect(
+        valuesCall.queryParameters['dateTimeRenderOption'],
+        'SERIAL_NUMBER',
+      );
       expect(Uri.decodeComponent(valuesCall.path), contains("'tracker'!A:H"));
       // Table with only A..H headers → read A:H.
     });
@@ -239,33 +259,37 @@ void main() {
       expect(issue, isA<SheetTabMissing>());
     });
 
-    test('write sends one RAW batchUpdate with only the planned ranges',
-        () async {
-      Map<String, dynamic>? body;
-      var calls = 0;
-      final g = gatewayWith((r) async {
-        calls++;
-        body = jsonDecode(r.body) as Map<String, dynamic>;
-        return json({'totalUpdatedCells': 7});
-      });
-      final plan = buildWritePlan(
-        tab: 'tracker',
-        index: _indexFor(),
-        values: {
-          LocalDate(2026, 10, 12): {
-            SheetColumn.weight: 106.3,
-            SheetColumn.kcal: 2700,
-            SheetColumn.steps: 8432,
+    test(
+      'write sends one RAW batchUpdate with only the planned ranges',
+      () async {
+        Map<String, dynamic>? body;
+        var calls = 0;
+        final g = gatewayWith((r) async {
+          calls++;
+          body = jsonDecode(r.body) as Map<String, dynamic>;
+          return json({'totalUpdatedCells': 7});
+        });
+        final plan = buildWritePlan(
+          tab: 'tracker',
+          index: _indexFor(),
+          values: {
+            LocalDate(2026, 10, 12): {
+              SheetColumn.weight: 106.3,
+              SheetColumn.kcal: 2700,
+              SheetColumn.steps: 8432,
+            },
           },
-        },
-      );
-      final updated = await TrackerSheet(g).write(id, plan);
-      expect(updated, 7);
-      expect(calls, 1);
-      expect(body!['valueInputOption'], 'RAW');
-      expect([for (final d in body!['data'] as List) (d as Map)['range']],
-          ["'tracker'!B883:C883", "'tracker'!H883"]);
-    });
+        );
+        final updated = await TrackerSheet(g).write(id, plan);
+        expect(updated, 7);
+        expect(calls, 1);
+        expect(body!['valueInputOption'], 'RAW');
+        expect(
+          [for (final d in body!['data'] as List) (d as Map)['range']],
+          ["'tracker'!B883:C883", "'tracker'!H883"],
+        );
+      },
+    );
 
     test('no writes → no request at all', () async {
       var calls = 0;
@@ -274,7 +298,10 @@ void main() {
         return json({});
       });
       final plan = buildWritePlan(
-          tab: 'tracker', index: _indexFor(), values: const {});
+        tab: 'tracker',
+        index: _indexFor(),
+        values: const {},
+      );
       expect(await TrackerSheet(g).write(id, plan), 0);
       expect(calls, 0);
     });

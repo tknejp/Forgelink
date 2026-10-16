@@ -19,9 +19,12 @@ void main() {
       KtClient(storage: storage, client: MockClient(handler));
 
   group('summary parsing', () {
-    Future<KtDayNutrition> parse(
-        [void Function(Map<String, dynamic>)? mutate]) async {
-      final c = clientWith((r) async => isLogin(r) ? loginOk() : summary(mutate));
+    Future<KtDayNutrition> parse([
+      void Function(Map<String, dynamic>)? mutate,
+    ]) async {
+      final c = clientWith(
+        (r) async => isLogin(r) ? loginOk() : summary(mutate),
+      );
       await c.login('jan@example.com', 'secret');
       return c.fetchDaySummary(day);
     }
@@ -54,8 +57,9 @@ void main() {
     test('a present 0 is a real zero', () async {
       final n = await parse((data) {
         final first = (data['itemsDynamic'] as List).first as List;
-        final fiber = first.firstWhere((e) => (e as Map)['code'] == 'fiber')
-            as Map<String, dynamic>;
+        final fiber =
+            first.firstWhere((e) => (e as Map)['code'] == 'fiber')
+                as Map<String, dynamic>;
         fiber['actualValue'] = 0.0;
         fiber['actual'] = '0';
       });
@@ -87,14 +91,18 @@ void main() {
       expect(n.kcal!.round(), 1000);
     });
 
-    test('code 0 with no expected keys → treated as an invalid session',
-        () async {
-      final c = clientWith((r) async => isLogin(r)
-          ? loginOk()
-          : jsonResponse({'code': 0, 'data': <String, dynamic>{}}));
-      await c.login('jan@example.com', 'secret');
-      expect(() => c.fetchDaySummary(day), throwsA(isA<KtAuthException>()));
-    });
+    test(
+      'code 0 with no expected keys → treated as an invalid session',
+      () async {
+        final c = clientWith(
+          (r) async => isLogin(r)
+              ? loginOk()
+              : jsonResponse({'code': 0, 'data': <String, dynamic>{}}),
+        );
+        await c.login('jan@example.com', 'secret');
+        expect(() => c.fetchDaySummary(day), throwsA(isA<KtAuthException>()));
+      },
+    );
 
     test('date is sent as dd.MM.yyyy', () async {
       Uri? requested;
@@ -123,38 +131,49 @@ void main() {
       expect(cookie, 'PHPSESSID=abc123');
       expect(await storage.read(key: 'kt_email'), 'jan@example.com');
       // md5('secret')
-      expect(await storage.read(key: 'kt_pwd_hash'),
-          '5ebe2294ecd0e0f08eab7690d2a6ee69');
+      expect(
+        await storage.read(key: 'kt_pwd_hash'),
+        '5ebe2294ecd0e0f08eab7690d2a6ee69',
+      );
     });
 
     test('rejected login → KtAuthException and nothing stored', () async {
       final c = clientWith((r) async => loginRejected());
       await expectLater(
-          c.login('jan@example.com', 'wrong'), throwsA(isA<KtAuthException>()));
+        c.login('jan@example.com', 'wrong'),
+        throwsA(isA<KtAuthException>()),
+      );
       expect(await c.hasStoredCredentials(), isFalse);
     });
 
     test('401 on GET → KtAuthException and session invalidated', () async {
-      final c = clientWith((r) async =>
-          isLogin(r) ? loginOk() : http.Response('', 401));
+      final c = clientWith(
+        (r) async => isLogin(r) ? loginOk() : http.Response('', 401),
+      );
       await c.login('jan@example.com', 'secret');
       await expectLater(
-          c.fetchDaySummary(day), throwsA(isA<KtAuthException>()));
+        c.fetchDaySummary(day),
+        throwsA(isA<KtAuthException>()),
+      );
       expect(c.isLoggedIn, isFalse);
     });
 
     test('socket error → KtNetworkException', () async {
       final c = clientWith((r) async => throw const SocketException('down'));
-      await expectLater(c.login('jan@example.com', 'secret'),
-          throwsA(isA<KtNetworkException>()));
+      await expectLater(
+        c.login('jan@example.com', 'secret'),
+        throwsA(isA<KtNetworkException>()),
+      );
     });
 
     test('HTTP 500 → KtApiException (not network)', () async {
-      final c = clientWith((r) async =>
-          isLogin(r) ? loginOk() : http.Response('oops', 500));
+      final c = clientWith(
+        (r) async => isLogin(r) ? loginOk() : http.Response('oops', 500),
+      );
       await c.login('jan@example.com', 'secret');
-      final e = await c.fetchDaySummary(day).then<Object?>((_) => null,
-          onError: (Object e) => e);
+      final e = await c
+          .fetchDaySummary(day)
+          .then<Object?>((_) => null, onError: (Object e) => e);
       expect(e, isA<KtApiException>());
       expect(e, isNot(isA<KtNetworkException>()));
     });

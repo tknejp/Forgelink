@@ -46,19 +46,23 @@ Widget _withProviders(Widget child) {
       Provider<SystemIntents>.value(value: intents),
       ChangeNotifierProvider(create: (_) => PersistentLogBuffer(prefs)),
       ChangeNotifierProvider(
-          create: (_) => HealthConnectController(health, intents)),
+        create: (_) => HealthConnectController(health, intents),
+      ),
       ChangeNotifierProvider(
-          create: (_) => KtController(kt, IntegrationStatusStore(prefs))),
+        create: (_) => KtController(kt, IntegrationStatusStore(prefs)),
+      ),
       ChangeNotifierProvider(
-          create: (_) =>
-              GoogleController(GoogleAuth(prefs), IntegrationStatusStore(prefs))),
+        create: (_) =>
+            GoogleController(GoogleAuth(prefs), IntegrationStatusStore(prefs)),
+      ),
       ChangeNotifierProvider(
-          create: (_) => SheetController(
-                prefs,
-                TrackerSheet(SheetsGateway(_NoTokens())),
-                _NoTokens(),
-                IntegrationStatusStore(prefs),
-              )),
+        create: (_) => SheetController(
+          prefs,
+          TrackerSheet(SheetsGateway(_NoTokens())),
+          _NoTokens(),
+          IntegrationStatusStore(prefs),
+        ),
+      ),
     ],
     child: ChangeNotifierProvider(
       create: (_) => SyncController(
@@ -91,21 +95,27 @@ void main() {
     expect(find.text('Forgelink'), findsOneWidget);
     expect(find.byTooltip('Synchronizovat období'), findsOneWidget);
     expect(find.byTooltip('Historie synchronizací'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Synchronizovat včerejšek'), 300);
-    expect(find.text('Synchronizovat včerejšek'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Rychlá synchronizace včerejška'),
+      300,
+    );
+    expect(find.text('Rychlá synchronizace včerejška'), findsOneWidget);
     expect(find.textContaining('kompletně'), findsOneWidget);
   });
 
-  testWidgets('settings deep link scrolls to the target section',
-      (tester) async {
-    await tester.pumpWidget(_withProviders(
-      const MaterialApp(
-        locale: Locale('cs'),
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        home: SettingsScreen(initialSection: SettingsSection.diagnostics),
+  testWidgets('settings deep link scrolls to the target section', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _withProviders(
+        const MaterialApp(
+          locale: Locale('cs'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: SettingsScreen(initialSection: SettingsSection.diagnostics),
+        ),
       ),
-    ));
+    );
     await tester.pump(); // post-frame reveal starts
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400)); // second pass

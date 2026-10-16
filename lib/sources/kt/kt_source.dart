@@ -52,8 +52,10 @@ class KtSource {
   Future<KtDayNutrition> _refreshAndRetry(LocalDate date, Object first) async {
     if (_refreshUsed) throw first;
     _refreshUsed = true;
-    AppLog.kt.info('KT fetch failed for $date — refreshing session once',
-        payload: '$first');
+    AppLog.kt.info(
+      'KT fetch failed for $date — refreshing session once',
+      payload: '$first',
+    );
     final refreshed = await _client.refreshSession();
     if (!refreshed) throw const SyncIssueException(KtCredentialsMissing());
     return _client.fetchDaySummary(date);
@@ -66,8 +68,11 @@ class KtSource {
       KtApiException() => const KtUnavailable(),
       _ => const UnexpectedIssue(),
     };
-    AppLog.kt.error('KT fetch for $date → ${issue.code}',
-        err: e, stackTrace: issue is UnexpectedIssue ? st : null);
+    AppLog.kt.error(
+      'KT fetch for $date → ${issue.code}',
+      err: e,
+      stackTrace: issue is UnexpectedIssue ? st : null,
+    );
     return issue;
   }
 }

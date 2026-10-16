@@ -27,11 +27,11 @@ class SyncEngine {
     required KtSource kt,
     required TrackerSheet sheet,
     DateTime Function()? now,
-  })  : _prefs = prefs,
-        _health = health,
-        _kt = kt,
-        _sheet = sheet,
-        _now = now ?? DateTime.now;
+  }) : _prefs = prefs,
+       _health = health,
+       _kt = kt,
+       _sheet = sheet,
+       _now = now ?? DateTime.now;
 
   final PrefsStore _prefs;
   final HealthSource _health;
@@ -52,8 +52,10 @@ class SyncEngine {
     final today = LocalDate.fromDateTime(startedAt);
     final dates = (requested.toSet().where((d) => !d.isAfter(today)).toList()
       ..sort());
-    AppLog.sync.info('Run ${trigger.name}: ${dates.length} dates',
-        payload: dates.isEmpty ? '' : '${dates.first}..${dates.last}');
+    AppLog.sync.info(
+      'Run ${trigger.name}: ${dates.length} dates',
+      payload: dates.isEmpty ? '' : '${dates.first}..${dates.last}',
+    );
 
     RunResult finish(List<DayResult> days, List<SyncIssue> issues) {
       final r = RunResult(
@@ -63,34 +65,39 @@ class SyncEngine {
         days: days,
         issues: _dedupe(issues),
       );
-      AppLog.sync.success('Run ${trigger.name} → ${r.status.name}',
-          payload: 'days=${days.length}, written=${r.cellsWritten}, '
-              'issues=${r.issues.map((i) => i.code).join(',')}');
+      AppLog.sync.success(
+        'Run ${trigger.name} → ${r.status.name}',
+        payload:
+            'days=${days.length}, written=${r.cellsWritten}, '
+            'issues=${r.issues.map((i) => i.code).join(',')}',
+      );
       return r;
     }
 
     List<DayResult> failAll(SyncIssue issue) => [
-          for (final d in dates)
-            DayResult(
-              date: d,
-              status: DayStatus.failed,
-              fields: {
-                for (final f in fieldsFor(d, today))
-                  f: FieldOutcome(FieldOutcomeKind.failed, issue: issue),
-              },
-              issue: issue,
-            ),
-        ];
+      for (final d in dates)
+        DayResult(
+          date: d,
+          status: DayStatus.failed,
+          fields: {
+            for (final f in fieldsFor(d, today))
+              f: FieldOutcome(FieldOutcomeKind.failed, issue: issue),
+          },
+          issue: issue,
+        ),
+    ];
 
     // ── 1. Run-blocking preflight (local) ──────────────────────────────────
     final spreadsheetId = await _prefs.spreadsheetId();
     if (spreadsheetId == null) {
-      return finish(failAll(const SheetNotConfigured()),
-          const [SheetNotConfigured()]);
+      return finish(failAll(const SheetNotConfigured()), const [
+        SheetNotConfigured(),
+      ]);
     }
     if (await _prefs.googleAccount() == null) {
-      return finish(failAll(const GoogleNotConnected()),
-          const [GoogleNotConnected()]);
+      return finish(failAll(const GoogleNotConnected()), const [
+        GoogleNotConnected(),
+      ]);
     }
     final tab = await _prefs.sheetTab();
 
@@ -125,23 +132,59 @@ class SyncEngine {
     }
 
     if (needed.every(blocked.containsKey)) {
-      return finish(
-        [
-          for (final d in dates)
-            DayResult(
-              date: d,
-              status: DayStatus.failed,
-              fields: {
-                for (final f in fieldsFor(d, today))
-                  f: FieldOutcome(FieldOutcomeKind.failed, issue: blocked[f]),
-              },
-            ),
-        ],
-        runIssues,
-      );
+      return finish([
+        for (final d in dates)
+          DayResult(
+            date: d,
+            status: DayStatus.failed,
+            fields: {
+              for (final f in fieldsFor(d, today))
+                f: FieldOutcome(FieldOutcomeKind.failed, issue: blocked[f]),
+            },
+          ),
+      ], runIssues);
     }
 
-    // ── 3. Sheet index (blocking on failure) ───────────────────────────────
+    // ── 3. Health Connect first, for every date ────────────────────────────
+    // Health Connect only allows reads while the app is in the foreground
+    // (unless the background-read permission is granted), so these local,
+    // fast reads happen right after the tap — before any network call.
+    final values = <LocalDate, Map<SheetColumn, num?>>{};
+    final failed = <LocalDate, Map<SheetColumn, SyncIssue>>{};
+    final notes = <LocalDate, List<SyncIssue>>{};
+
+    for (final date in dates) {
+      final want = fieldsFor(date, today);
+      final v = values[date] = <SheetColumn, num?>{};
+      final f = failed[date] = <SheetColumn, SyncIssue>{
+        for (final c in want)
+          if (blocked[c] != null) c: blocked[c]!,
+      };
+      final hcWanted = want
+          .where((c) => c == SheetColumn.weight || c == SheetColumn.steps)
+          .where((c) => !f.containsKey(c))
+          .toList();
+      if (hcWanted.isEmpty) continue;
+      final gate = await _health.historyGate(date);
+      if (gate != null) {
+        for (final c in hcWanted) {
+          f[c] = gate;
+        }
+        runIssues.add(gate);
+        continue;
+      }
+      for (final c in hcWanted) {
+        try {
+          v[c] = c == SheetColumn.weight
+              ? await _health.lastWeight(date)
+              : await _health.steps(date);
+        } on SyncIssueException catch (e) {
+          f[c] = e.issue;
+        }
+      }
+    }
+
+    // ── 4. Sheet index (blocking on failure) ───────────────────────────────
     final TrackerIndex index;
     final Map<int, List<Object?>> formulas;
     try {
@@ -151,53 +194,23 @@ class SyncEngine {
       return finish(failAll(e.issue), [...runIssues, e.issue]);
     }
 
-    // ── 4. Fetch sources, date by date ─────────────────────────────────────
-    final values = <LocalDate, Map<SheetColumn, num?>>{};
-    final failed = <LocalDate, Map<SheetColumn, SyncIssue>>{};
-    final notes = <LocalDate, List<SyncIssue>>{};
-
+    // ── 4b. Kalorické tabulky, only for dates the sheet can take ───────────
     for (var i = 0; i < dates.length; i++) {
       final date = dates[i];
       onProgress?.call(SyncProgress(i, dates.length, date));
       final want = fieldsFor(date, today);
-      final v = <SheetColumn, num?>{};
-      final f = <SheetColumn, SyncIssue>{
-        for (final c in want)
-          if (blocked[c] != null) c: blocked[c]!,
-      };
+      final v = values[date]!;
+      final f = failed[date]!;
 
-      // Skip fetching dates the sheet can't take anyway.
-      final writable = index.rows.containsKey(date);
+      // A KT failure on an earlier date blocks KT for the rest of the run.
+      for (final c in want) {
+        if (_ktFields.contains(c) && blocked[c] != null) f[c] ??= blocked[c]!;
+      }
 
-      if (writable) {
-        // Health Connect
-        final hcWanted = want
-            .where((c) => c == SheetColumn.weight || c == SheetColumn.steps)
-            .where((c) => !f.containsKey(c))
-            .toList();
-        if (hcWanted.isNotEmpty) {
-          final gate = await _health.historyGate(date);
-          if (gate != null) {
-            for (final c in hcWanted) {
-              f[c] = gate;
-            }
-            runIssues.add(gate);
-          } else {
-            for (final c in hcWanted) {
-              try {
-                v[c] = c == SheetColumn.weight
-                    ? await _health.lastWeight(date)
-                    : await _health.steps(date);
-              } on SyncIssueException catch (e) {
-                f[c] = e.issue;
-              }
-            }
-          }
-        }
-
-        // Kalorické tabulky
-        final ktWanted =
-            want.where((c) => _ktFields.contains(c) && !f.containsKey(c));
+      if (index.rows.containsKey(date)) {
+        final ktWanted = want.where(
+          (c) => _ktFields.contains(c) && !f.containsKey(c),
+        );
         if (ktWanted.isNotEmpty) {
           try {
             final n = await _kt.fetchDay(date);
@@ -222,13 +235,16 @@ class SyncEngine {
       }
 
       values[date] = {for (final c in want) c: f.containsKey(c) ? null : v[c]};
-      failed[date] = f;
     }
     onProgress?.call(SyncProgress(dates.length, dates.length));
 
     // ── 5. Plan + write ────────────────────────────────────────────────────
     final plan = buildWritePlan(
-        tab: tab, index: index, values: values, formulas: formulas);
+      tab: tab,
+      index: index,
+      values: values,
+      formulas: formulas,
+    );
 
     SyncIssue? writeIssue;
     if (plan.hasWrites) {
@@ -245,12 +261,14 @@ class SyncEngine {
     for (final p in plan.days) {
       final want = fieldsFor(p.date, today);
       if (p.issue != null) {
-        days.add(DayResult(
-          date: p.date,
-          status: DayStatus.failed,
-          fields: const {},
-          issue: p.issue,
-        ));
+        days.add(
+          DayResult(
+            date: p.date,
+            status: DayStatus.failed,
+            fields: const {},
+            issue: p.issue,
+          ),
+        );
         continue;
       }
       final f = failed[p.date] ?? const {};
@@ -262,26 +280,38 @@ class SyncEngine {
           continue;
         }
         fields[c] = switch (planned.outcome) {
-          PlannedOutcome.missing => const FieldOutcome(FieldOutcomeKind.missing),
-          PlannedOutcome.unchanged =>
-            FieldOutcome(FieldOutcomeKind.unchanged, value: planned.value),
+          PlannedOutcome.missing => const FieldOutcome(
+            FieldOutcomeKind.missing,
+          ),
+          PlannedOutcome.unchanged => FieldOutcome(
+            FieldOutcomeKind.unchanged,
+            value: planned.value,
+          ),
           PlannedOutcome.skippedFormula => FieldOutcome(
-              FieldOutcomeKind.skippedFormula,
-              value: planned.value,
-              issue: CellHasFormula(
-                  '${columnLetter(index.rows[p.date]!.columns[c]!)}${p.row}')),
-          PlannedOutcome.write => writeIssue == null
-              ? FieldOutcome(FieldOutcomeKind.written, value: planned.value)
-              : FieldOutcome(FieldOutcomeKind.failed,
-                  value: planned.value, issue: writeIssue),
+            FieldOutcomeKind.skippedFormula,
+            value: planned.value,
+            issue: CellHasFormula(
+              '${columnLetter(index.rows[p.date]!.columns[c]!)}${p.row}',
+            ),
+          ),
+          PlannedOutcome.write =>
+            writeIssue == null
+                ? FieldOutcome(FieldOutcomeKind.written, value: planned.value)
+                : FieldOutcome(
+                    FieldOutcomeKind.failed,
+                    value: planned.value,
+                    issue: writeIssue,
+                  ),
         };
       }
-      days.add(DayResult(
-        date: p.date,
-        status: DayResult.statusOf(fields, null),
-        fields: fields,
-        notes: notes[p.date] ?? const [],
-      ));
+      days.add(
+        DayResult(
+          date: p.date,
+          status: DayResult.statusOf(fields, null),
+          fields: fields,
+          notes: notes[p.date] ?? const [],
+        ),
+      );
     }
 
     return finish(days, runIssues);

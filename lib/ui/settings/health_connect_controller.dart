@@ -19,6 +19,8 @@ class HealthConnectController extends ChangeNotifier {
   Set<HcDataType> missing = const {};
   bool historyAvailable = false;
   bool historyAuthorized = false;
+  bool backgroundAvailable = false;
+  bool backgroundAuthorized = false;
   bool busy = false;
   bool _loaded = false;
 
@@ -28,11 +30,15 @@ class HealthConnectController extends ChangeNotifier {
     if (!_loaded) return IntegrationStatus.notConfigured;
     if (availability != HcAvailability.available) {
       return const IntegrationStatus(
-          IntegrationState.notConfigured, HcNotAvailable());
+        IntegrationState.notConfigured,
+        HcNotAvailable(),
+      );
     }
     if (missing.isNotEmpty) {
       return IntegrationStatus(
-          IntegrationState.notConfigured, HcPermissionMissing(missing));
+        IntegrationState.notConfigured,
+        HcPermissionMissing(missing),
+      );
     }
     return IntegrationStatus.configured;
   }
@@ -44,12 +50,17 @@ class HealthConnectController extends ChangeNotifier {
         missing = await _source.missingPermissions();
         historyAvailable = await _source.isHistoryAvailable();
         historyAuthorized = await _source.isHistoryAuthorized();
+        backgroundAvailable = await _source.isBackgroundAvailable();
+        backgroundAuthorized = await _source.isBackgroundAuthorized();
       } else {
         missing = HcDataType.values.toSet();
       }
     } catch (e, st) {
-      AppLog.health.error('Health Connect status refresh failed',
-          err: e, stackTrace: st);
+      AppLog.health.error(
+        'Health Connect status refresh failed',
+        err: e,
+        stackTrace: st,
+      );
     }
     _loaded = true;
     notifyListeners();
@@ -60,14 +71,19 @@ class HealthConnectController extends ChangeNotifier {
   /// Requests steps + weight. If the dialog can't help (e.g. the user denied
   /// twice, so Android stops showing it), opens Health Connect settings.
   Future<void> grantPermissions() => _run(() async {
-        final granted = await _source.requestPermissions();
-        if (!granted) await _intents.openHealthConnectSettings();
-      });
+    final granted = await _source.requestPermissions();
+    if (!granted) await _intents.openHealthConnectSettings();
+  });
 
   Future<void> grantHistory() => _run(() async {
-        final granted = await _source.requestHistoryAuthorization();
-        if (!granted) await _intents.openHealthConnectSettings();
-      });
+    final granted = await _source.requestHistoryAuthorization();
+    if (!granted) await _intents.openHealthConnectSettings();
+  });
+
+  Future<void> grantBackground() => _run(() async {
+    final granted = await _source.requestBackgroundAuthorization();
+    if (!granted) await _intents.openHealthConnectSettings();
+  });
 
   Future<void> openSettings() => _run(_intents.openHealthConnectSettings);
 
@@ -78,8 +94,11 @@ class HealthConnectController extends ChangeNotifier {
     try {
       await action();
     } catch (e, st) {
-      AppLog.health.error('Health Connect action failed',
-          err: e, stackTrace: st);
+      AppLog.health.error(
+        'Health Connect action failed',
+        err: e,
+        stackTrace: st,
+      );
     } finally {
       busy = false;
       await refresh();

@@ -70,8 +70,9 @@ class FakeKt implements KtSource {
 
 class FakeSheet implements TrackerSheet {
   FakeSheet({TrackerIndex? index})
-      : index = index ??
-            TrackerIndex.build(tables: [weekTable()], values: trackerValues());
+    : index =
+          index ??
+          TrackerIndex.build(tables: [weekTable()], values: trackerValues());
 
   TrackerIndex index;
   SyncIssue? loadError;
@@ -87,8 +88,10 @@ class FakeSheet implements TrackerSheet {
 
   @override
   Future<Map<int, List<Object?>>> loadFormulas(
-          String spreadsheetId, String tab, TrackerIndex index) async =>
-      formulas;
+    String spreadsheetId,
+    String tab,
+    TrackerIndex index,
+  ) async => formulas;
 
   @override
   Future<int> write(String spreadsheetId, WritePlan plan) async {

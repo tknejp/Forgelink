@@ -38,11 +38,15 @@ class SheetController extends ChangeNotifier {
   IntegrationStatus get status {
     if (spreadsheetId == null) {
       return const IntegrationStatus(
-          IntegrationState.notConfigured, SheetNotConfigured());
+        IntegrationState.notConfigured,
+        SheetNotConfigured(),
+      );
     }
     if (!googleConnected) {
       return const IntegrationStatus(
-          IntegrationState.notConfigured, GoogleNotConnected());
+        IntegrationState.notConfigured,
+        GoogleNotConnected(),
+      );
     }
     return _stored ?? IntegrationStatus.configured;
   }
@@ -92,14 +96,18 @@ class SheetController extends ChangeNotifier {
       );
       // Keep a proven write ("verified") — a read check can't downgrade it.
       if (_stored?.state != IntegrationState.verified) {
-        await _statusStore.save(Integration.googleSheets,
-            const IntegrationStatus(IntegrationState.readVerified));
+        await _statusStore.save(
+          Integration.googleSheets,
+          const IntegrationStatus(IntegrationState.readVerified),
+        );
       }
     } on SyncIssueException catch (e) {
       lastIssue = e.issue;
       verification = null;
-      await _statusStore.save(Integration.googleSheets,
-          IntegrationStatus(IntegrationState.error, e.issue));
+      await _statusStore.save(
+        Integration.googleSheets,
+        IntegrationStatus(IntegrationState.error, e.issue),
+      );
     } catch (e, st) {
       AppLog.sheets.error('Sheet verify failed', err: e, stackTrace: st);
       lastIssue = const UnexpectedIssue();

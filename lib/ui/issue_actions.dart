@@ -18,9 +18,11 @@ Future<void> runIssueAction(
   final google = context.read<GoogleController>();
   switch (action.kind) {
     case IssueActionKind.openSettings:
-      await Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (_) => SettingsScreen(initialSection: action.section),
-      ));
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => SettingsScreen(initialSection: action.section),
+        ),
+      );
     case IssueActionKind.installHealthConnect:
       await hc.install();
     case IssueActionKind.grantHcPermissions:
@@ -28,10 +30,13 @@ Future<void> runIssueAction(
     case IssueActionKind.grantHcHistory:
       await hc.grantHistory();
     case IssueActionKind.grantHcBackground:
-      await Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (_) =>
-            const SettingsScreen(initialSection: SettingsSection.healthConnect),
-      ));
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => const SettingsScreen(
+            initialSection: SettingsSection.healthConnect,
+          ),
+        ),
+      );
     case IssueActionKind.connectGoogle:
     case IssueActionKind.reconnectGoogle:
       await google.connect();

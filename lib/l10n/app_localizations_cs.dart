@@ -21,7 +21,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get homeLastSyncNever => 'Zatím neproběhla žádná synchronizace.';
 
   @override
-  String get homeQuickSyncButton => 'Synchronizovat včerejšek';
+  String get homeQuickSyncButton => 'Synchronizovat';
 
   @override
   String get homeRangeSync => 'Synchronizovat období';
@@ -507,4 +507,32 @@ class AppLocalizationsCs extends AppLocalizations {
   String homeQuickSyncCaption(String yesterday, String today) {
     return '$yesterday kompletně · $today jen váha';
   }
+
+  @override
+  String get settingsHcBackground => 'Povolit čtení na pozadí';
+
+  @override
+  String get settingsHcBackgroundGranted =>
+      'Čtení na pozadí je povolené – synchronizace doběhne, i když aplikaci opustíš.';
+
+  @override
+  String get settingsHcBackgroundUnavailable =>
+      'Tato verze Health Connect čtení na pozadí nepodporuje.';
+
+  @override
+  String get syncServiceTitle => 'Forgelink synchronizuje…';
+
+  @override
+  String get syncServiceText => 'Zapisuji data do tabulky.';
+
+  @override
+  String get syncServiceChannel => 'Probíhající synchronizace';
+
+  @override
+  String syncQueued(int count) {
+    return '+$count ve frontě';
+  }
+
+  @override
+  String get homeQuickSyncLabel => 'Rychlá synchronizace včerejška';
 }

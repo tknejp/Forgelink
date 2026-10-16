@@ -16,9 +16,9 @@ class StatusPill extends StatelessWidget {
     final colors = StatusColors.of(context);
     final (Color color, String label) = switch (status.state) {
       IntegrationState.notConfigured => (
-          status.issue == null ? colors.neutral : colors.warn,
-          l10n.statusNotConfigured
-        ),
+        status.issue == null ? colors.neutral : colors.warn,
+        l10n.statusNotConfigured,
+      ),
       IntegrationState.configured => (colors.ok, l10n.statusConfigured),
       IntegrationState.readVerified => (colors.ok, l10n.statusReadVerified),
       IntegrationState.verified => (colors.ok, l10n.statusVerified),
@@ -42,10 +42,10 @@ class StatusPill extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: Theme.of(context)
-                .textTheme
-                .labelMedium
-                ?.copyWith(color: color, fontWeight: FontWeight.w600),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

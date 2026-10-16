@@ -40,8 +40,9 @@ class LocalDate implements Comparable<LocalDate> {
 
   // ─── Parsing ────────────────────────────────────────────────────────────
 
-  static final RegExp _czDate =
-      RegExp(r'^\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\s*$');
+  static final RegExp _czDate = RegExp(
+    r'^\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\s*$',
+  );
 
   /// Parses `12.10.2026`, `12. 10. 2026` or `1.7.2025`. Returns null for any
   /// other text or an impossible date (e.g. `31.2.2026`).
@@ -85,16 +86,18 @@ class LocalDate implements Comparable<LocalDate> {
   int get weekday => DateTime.utc(year, month, day).weekday;
 
   /// Whole days from this date to [other] (positive when [other] is later).
-  int daysUntil(LocalDate other) => DateTime.utc(other.year, other.month,
-          other.day)
-      .difference(DateTime.utc(year, month, day))
-      .inDays;
+  int daysUntil(LocalDate other) => DateTime.utc(
+    other.year,
+    other.month,
+    other.day,
+  ).difference(DateTime.utc(year, month, day)).inDays;
 
   bool isBefore(LocalDate other) => compareTo(other) < 0;
   bool isAfter(LocalDate other) => compareTo(other) > 0;
 
   /// Stable storage key, `yyyy-MM-dd`.
-  String get isoKey => '${year.toString().padLeft(4, '0')}-'
+  String get isoKey =>
+      '${year.toString().padLeft(4, '0')}-'
       '${month.toString().padLeft(2, '0')}-'
       '${day.toString().padLeft(2, '0')}';
 

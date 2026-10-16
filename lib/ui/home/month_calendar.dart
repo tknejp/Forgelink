@@ -43,7 +43,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
   LocalDate? _anchor; // where the hold started
   LocalDate? _focus; // where the finger is now
 
-  static const cellHeight = 42.0;
+  static const cellHeight = 52.0;
   final _gridKey = GlobalKey();
 
   /// Grid width at gesture time (no LayoutBuilder, so the calendar can be
@@ -174,16 +174,14 @@ class _MonthCalendarState extends State<MonthCalendar> {
             if (v < 0 && canGoForward) _shift(1);
             if (v > 0) _shift(-1);
           },
-          onLongPressStart: c.busy
-              ? null
-              : (d) {
-                  final day = _dayAt(d.localPosition, _gridWidth, today);
-                  HapticFeedback.selectionClick();
-                  setState(() {
-                    _anchor = day;
-                    _focus = day;
-                  });
-                },
+          onLongPressStart: (d) {
+            final day = _dayAt(d.localPosition, _gridWidth, today);
+            HapticFeedback.selectionClick();
+            setState(() {
+              _anchor = day;
+              _focus = day;
+            });
+          },
           onLongPressMoveUpdate: (d) {
             if (_anchor == null) return;
             final day = _dayAt(d.localPosition, _gridWidth, today);
@@ -265,7 +263,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
       isToday: date == today,
       isFuture: date.isAfter(today),
       running: c.running.contains(date),
-      disabled: c.busy,
+      queued: c.queued.contains(date),
       selected: selected,
       status: c.days[date]?.status,
       onTap: () => widget.onTapDay(date),
@@ -279,7 +277,7 @@ class _DayCell extends StatelessWidget {
     required this.isToday,
     required this.isFuture,
     required this.running,
-    required this.disabled,
+    required this.queued,
     required this.selected,
     required this.status,
     required this.onTap,
@@ -289,7 +287,7 @@ class _DayCell extends StatelessWidget {
   final bool isToday;
   final bool isFuture;
   final bool running;
-  final bool disabled;
+  final bool queued;
   final bool selected;
   final DayStatus? status;
   final VoidCallback onTap;
@@ -334,7 +332,7 @@ class _DayCell extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: isFuture || disabled ? null : onTap,
+          onTap: isFuture ? null : onTap,
           child: SizedBox(
             height: _MonthCalendarState.cellHeight - 4,
             child: Center(
@@ -343,14 +341,30 @@ class _DayCell extends StatelessWidget {
                       dimension: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(
-                      '${date.day}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: isToday || selected
-                            ? FontWeight.w700
-                            : null,
-                        color: textColor,
-                      ),
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${date.day}',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: isToday || selected
+                                ? FontWeight.w700
+                                : null,
+                            color: textColor,
+                          ),
+                        ),
+                        // Waiting in the sync queue.
+                        if (queued)
+                          Container(
+                            width: 5,
+                            height: 5,
+                            margin: const EdgeInsets.only(top: 2),
+                            decoration: BoxDecoration(
+                              color: scheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
                     ),
             ),
           ),

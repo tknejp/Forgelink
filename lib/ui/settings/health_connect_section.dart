@@ -20,10 +20,10 @@ class HealthConnectSection extends StatelessWidget {
     final issue = status.issue;
 
     VoidCallback? actionFor(IssueAction? action) => switch (action?.kind) {
-          IssueActionKind.installHealthConnect => c.install,
-          IssueActionKind.grantHcPermissions => c.grantPermissions,
-          _ => null,
-        };
+      IssueActionKind.installHealthConnect => c.install,
+      IssueActionKind.grantHcPermissions => c.grantPermissions,
+      _ => null,
+    };
 
     if (!c.loaded) return const LinearProgressIndicator();
 
@@ -42,8 +42,10 @@ class HealthConnectSection extends StatelessWidget {
         if (available) ...[
           const SizedBox(height: 12),
           if (!c.historyAvailable)
-            Text(l10n.settingsHcHistoryUnavailable,
-                style: theme.textTheme.bodySmall)
+            Text(
+              l10n.settingsHcHistoryUnavailable,
+              style: theme.textTheme.bodySmall,
+            )
           else if (c.historyAuthorized)
             Text(l10n.settingsHcHistoryGranted)
           else
@@ -51,6 +53,22 @@ class HealthConnectSection extends StatelessWidget {
               icon: const Icon(Icons.history, size: 18),
               onPressed: c.busy ? null : c.grantHistory,
               label: Text(l10n.settingsHcHistory),
+            ),
+        ],
+        if (available) ...[
+          const SizedBox(height: 8),
+          if (!c.backgroundAvailable)
+            Text(
+              l10n.settingsHcBackgroundUnavailable,
+              style: theme.textTheme.bodySmall,
+            )
+          else if (c.backgroundAuthorized)
+            Text(l10n.settingsHcBackgroundGranted)
+          else
+            OutlinedButton.icon(
+              icon: const Icon(Icons.nightlight_outlined, size: 18),
+              onPressed: c.busy ? null : c.grantBackground,
+              label: Text(l10n.settingsHcBackground),
             ),
         ],
         const SizedBox(height: 4),
@@ -62,8 +80,9 @@ class HealthConnectSection extends StatelessWidget {
         ),
         Text(
           l10n.settingsHcPriorityHint,
-          style: theme.textTheme.bodySmall
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );

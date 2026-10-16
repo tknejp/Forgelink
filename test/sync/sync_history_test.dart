@@ -33,8 +33,14 @@ void main() {
     List<SyncIssue> issues = const [],
     SyncIssue? dayIssue,
   }) {
-    final f = fields ??
-        {SheetColumn.weight: const FieldOutcome(FieldOutcomeKind.written, value: 106.3)};
+    final f =
+        fields ??
+        {
+          SheetColumn.weight: const FieldOutcome(
+            FieldOutcomeKind.written,
+            value: 106.3,
+          ),
+        };
     return RunResult(
       trigger: SyncTrigger.calendar,
       startedAt: DateTime(2026, 10, 15, 8),
@@ -79,55 +85,92 @@ void main() {
     expect((await history.runs()).single.days.single.date, day);
     expect((await history.days())[day]!.status, DayStatus.ok);
     expect((await history.lastSuccess())!.trigger, SyncTrigger.calendar);
-    expect((await statuses.load(Integration.googleSheets))!.state,
-        IntegrationState.verified);
+    expect(
+      (await statuses.load(Integration.googleSheets))!.state,
+      IntegrationState.verified,
+    );
   });
 
   test('a run with failures does not update last success', () async {
-    await history.record(run(fields: {
-      SheetColumn.weight: const FieldOutcome(FieldOutcomeKind.written, value: 1),
-      SheetColumn.kcal: const FieldOutcome(FieldOutcomeKind.failed,
-          issue: KtUnavailable()),
-    }, issues: const [KtUnavailable()]));
+    await history.record(
+      run(
+        fields: {
+          SheetColumn.weight: const FieldOutcome(
+            FieldOutcomeKind.written,
+            value: 1,
+          ),
+          SheetColumn.kcal: const FieldOutcome(
+            FieldOutcomeKind.failed,
+            issue: KtUnavailable(),
+          ),
+        },
+        issues: const [KtUnavailable()],
+      ),
+    );
     expect(await history.lastSuccess(), isNull);
   });
 
   test('open issues persist until a later run proves the area', () async {
-    await history.record(run(
-      fields: {
-        SheetColumn.kcal: const FieldOutcome(FieldOutcomeKind.failed,
-            issue: KtAuthRejected()),
-      },
-      issues: const [KtAuthRejected()],
-    ));
+    await history.record(
+      run(
+        fields: {
+          SheetColumn.kcal: const FieldOutcome(
+            FieldOutcomeKind.failed,
+            issue: KtAuthRejected(),
+          ),
+        },
+        issues: const [KtAuthRejected()],
+      ),
+    );
     expect((await history.openIssues()).single, isA<KtAuthRejected>());
-    expect((await statuses.load(Integration.kt))!.state, IntegrationState.error);
+    expect(
+      (await statuses.load(Integration.kt))!.state,
+      IntegrationState.error,
+    );
 
     // An unrelated weight-only success keeps the KT issue open.
     await history.record(run());
     expect((await history.openIssues()).single, isA<KtAuthRejected>());
 
     // A KT field succeeding clears it.
-    await history.record(run(fields: {
-      SheetColumn.kcal: const FieldOutcome(FieldOutcomeKind.written, value: 2000),
-    }));
+    await history.record(
+      run(
+        fields: {
+          SheetColumn.kcal: const FieldOutcome(
+            FieldOutcomeKind.written,
+            value: 2000,
+          ),
+        },
+      ),
+    );
     expect(await history.openIssues(), isEmpty);
-    expect((await statuses.load(Integration.kt))!.state,
-        IntegrationState.verified);
+    expect(
+      (await statuses.load(Integration.kt))!.state,
+      IntegrationState.verified,
+    );
   });
 
   test('date-level issues never become open issues', () async {
-    await history.record(run(fields: const {}, dayIssue: DateNotInSheet(day),
-        issues: const []));
+    await history.record(
+      run(fields: const {}, dayIssue: DateNotInSheet(day), issues: const []),
+    );
     expect(await history.openIssues(), isEmpty);
   });
 
   test('dismiss removes an open issue', () async {
     await history.record(run(issues: const [Offline()]));
     // Offline is in the general area; the same run proved it, so re-add.
-    await history.record(run(fields: const {
-      SheetColumn.kcal: FieldOutcome(FieldOutcomeKind.failed, issue: Offline()),
-    }, issues: const [Offline()]));
+    await history.record(
+      run(
+        fields: const {
+          SheetColumn.kcal: FieldOutcome(
+            FieldOutcomeKind.failed,
+            issue: Offline(),
+          ),
+        },
+        issues: const [Offline()],
+      ),
+    );
     expect(await history.openIssues(), isNotEmpty);
     await history.dismiss(const Offline());
     expect(await history.openIssues(), isEmpty);
@@ -161,23 +204,70 @@ void main() {
       );
     });
 
-    test('a second request while busy is ignored', () async {
+    test('requests during a run are queued, merged and all complete', () async {
       final first = controller.syncDate(LocalDate(2026, 10, 15));
-      expect(controller.busy, isTrue);
-      expect(await controller.syncDate(LocalDate(2026, 10, 14)), isNull);
-      await first;
+      final second = controller.syncDate(LocalDate(2026, 10, 14));
+      final third = controller.syncDate(LocalDate(2026, 10, 13));
+      expect(controller.queued, isNotEmpty);
+
+      final r1 = await first;
+      final r2 = await second;
+      final r3 = await third;
+      // Taps that arrive before the run starts are merged into one run.
+      expect(identical(r1, r2) && identical(r2, r3), isTrue);
+      expect(r1!.days.map((d) => d.date), [
+        LocalDate(2026, 10, 13),
+        LocalDate(2026, 10, 14),
+        LocalDate(2026, 10, 15),
+      ]);
       expect(controller.busy, isFalse);
+      expect(controller.queued, isEmpty);
+    });
+
+    test('a request during a running sync waits for the next run', () async {
+      final first = controller.syncDate(LocalDate(2026, 10, 15));
+      await Future<void>.delayed(Duration.zero); // first run has started
+      await Future<void>.delayed(Duration.zero);
+      final second = controller.syncDate(LocalDate(2026, 10, 14));
+      final r1 = await first;
+      final r2 = await second;
+      expect(r2, isNotNull);
+      expect(r2!.days.map((d) => d.date), contains(LocalDate(2026, 10, 14)));
+      expect(r1!.days.map((d) => d.date), contains(LocalDate(2026, 10, 15)));
+    });
+
+    test('keep-alive wraps the whole queue', () async {
+      final keep = _RecordingKeepAlive();
+      final c = SyncController(
+        SyncEngine(
+          prefs: prefs,
+          health: health,
+          kt: FakeKt(),
+          sheet: FakeSheet(),
+          now: () => DateTime(2026, 10, 15, 8),
+        ),
+        history,
+        now: () => DateTime(2026, 10, 15, 8),
+        keepAlive: keep,
+      );
+      final a = c.syncDate(LocalDate(2026, 10, 15));
+      final b = c.syncDate(LocalDate(2026, 10, 14));
+      await a;
+      await b;
+      expect(keep.events, ['start', 'stop']);
     });
 
     test('reload picks up the persisted run', () async {
       await controller.syncDate(LocalDate(2026, 10, 15));
       final other = SyncController(
-          SyncEngine(
-              prefs: prefs,
-              health: health,
-              kt: FakeKt(),
-              sheet: FakeSheet()),
-          SyncHistory(prefs, statuses));
+        SyncEngine(
+          prefs: prefs,
+          health: health,
+          kt: FakeKt(),
+          sheet: FakeSheet(),
+        ),
+        SyncHistory(prefs, statuses),
+      );
       await other.reload();
       expect(other.lastRun, isNotNull);
       expect(other.days[LocalDate(2026, 10, 15)]!.status, DayStatus.ok);
@@ -186,9 +276,19 @@ void main() {
     test('range longer than the cap is rejected', () {
       expect(
         () => controller.syncRange(
-            LocalDate(2026, 1, 1), LocalDate(2026, 10, 15)),
+          LocalDate(2026, 1, 1),
+          LocalDate(2026, 10, 15),
+        ),
         throwsArgumentError,
       );
     });
   });
+}
+
+class _RecordingKeepAlive implements SyncKeepAlive {
+  final events = <String>[];
+  @override
+  Future<void> start() async => events.add('start');
+  @override
+  Future<void> stop() async => events.add('stop');
 }

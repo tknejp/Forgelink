@@ -43,8 +43,8 @@ class TableInfo {
 
   /// Absolute column of every owned field found by header name.
   Map<SheetColumn, int> get ownedColumns => {
-        for (final c in SheetColumn.values) c: ?columnOf(c.header),
-      };
+    for (final c in SheetColumn.values) c: ?columnOf(c.header),
+  };
 
   bool get isComplete => ownedColumns.length == SheetColumn.values.length;
 }
@@ -112,8 +112,9 @@ class TrackerIndex {
 
   /// Highest owned column used by any indexed row (for the formula read).
   int get maxColumn => rows.values.fold(
-      7,
-      (m, r) => r.columns.values.fold(m, (m2, c) => c > m2 ? c : m2));
+    7,
+    (m, r) => r.columns.values.fold(m, (m2, c) => c > m2 ? c : m2),
+  );
 
   LocalDate? get firstDate =>
       rows.isEmpty ? null : (rows.keys.toList()..sort()).first;
@@ -157,9 +158,7 @@ class TrackerIndex {
           continue;
         }
         if (rows.containsKey(date) || duplicates.containsKey(date)) {
-          duplicates
-              .putIfAbsent(date, () => [rows[date]!.row])
-              .add(g + 1);
+          duplicates.putIfAbsent(date, () => [rows[date]!.row]).add(g + 1);
           continue;
         }
         rows[date] = IndexedRow(

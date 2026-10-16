@@ -53,41 +53,46 @@ class _RunTile extends StatelessWidget {
       child: ExpansionTile(
         shape: const Border(),
         collapsedShape: const Border(),
-        leading: Icon(
-          switch (run.trigger) {
-            SyncTrigger.quick => Icons.sync,
-            SyncTrigger.calendar => Icons.calendar_today_outlined,
-            SyncTrigger.range => Icons.date_range_outlined,
-            SyncTrigger.background => Icons.schedule,
-          },
-          color: theme.colorScheme.primary,
-        ),
+        leading: Icon(switch (run.trigger) {
+          SyncTrigger.quick => Icons.sync,
+          SyncTrigger.calendar => Icons.calendar_today_outlined,
+          SyncTrigger.range => Icons.date_range_outlined,
+          SyncTrigger.background => Icons.schedule,
+        }, color: theme.colorScheme.primary),
         title: Text(text.trigger(run.trigger)),
         subtitle: Text(
           '${text.when(run.finishedAt, now: DateTime.now())} · '
           '${text.dates([for (final d in run.days) d.date])}',
         ),
-        trailing: Text(text.runStatus(run.status),
-            style: theme.textTheme.labelMedium
-                ?.copyWith(color: color, fontWeight: FontWeight.w700)),
+        trailing: Text(
+          text.runStatus(run.status),
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final i in run.issues)
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
-              child: Text(text.presenter.message(i),
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: colors.warn)),
+              child: Text(
+                text.presenter.message(i),
+                style: theme.textTheme.bodySmall?.copyWith(color: colors.warn),
+              ),
             ),
           for (final d in run.days)
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Text(text.dayLine(d), style: theme.textTheme.bodySmall),
             ),
-          Text(l10n.historyCells(run.cellsWritten),
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          Text(
+            l10n.historyCells(run.cellsWritten),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );

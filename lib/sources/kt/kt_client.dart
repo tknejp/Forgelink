@@ -72,15 +72,14 @@ class KtDayNutrition {
   bool get hasData => (kcal ?? 0) > 0 || (protein ?? 0) > 0;
 
   @override
-  String toString() => 'KtDayNutrition(kcal=$kcal, P=$protein, C=$carbs, '
+  String toString() =>
+      'KtDayNutrition(kcal=$kcal, P=$protein, C=$carbs, '
       'F=$fat, fiber=$fiber, hasData=$hasData)';
 }
 
 class KtClient {
-  KtClient({
-    required FlutterSecureStorage storage,
-    http.Client? client,
-  }) : _session = _KtSessionClient(storage: storage, client: client);
+  KtClient({required FlutterSecureStorage storage, http.Client? client})
+    : _session = _KtSessionClient(storage: storage, client: client);
 
   final _KtSessionClient _session;
   final _parser = const _KtSummaryParser();
@@ -146,8 +145,10 @@ class KtClient {
     }
 
     final parsed = _parser.parse(data);
-    AppLog.ktApi.success('Day summary loaded for $dateString',
-        payload: parsed.toString());
+    AppLog.ktApi.success(
+      'Day summary loaded for $dateString',
+      payload: parsed.toString(),
+    );
     return parsed;
   }
 }

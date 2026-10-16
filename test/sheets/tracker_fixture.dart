@@ -42,15 +42,14 @@ TableInfo weekTable({
   int headerRow = 882,
   Map<int, String> columnNames = newLayout,
   bool hasFooter = true,
-}) =>
-    TableInfo(
-      name: name,
-      startRow: headerRow - 1,
-      endRow: headerRow - 1 + 9,
-      startColumn: 0,
-      hasFooter: hasFooter,
-      columnNames: columnNames,
-    );
+}) => TableInfo(
+  name: name,
+  startRow: headerRow - 1,
+  endRow: headerRow - 1 + 9,
+  startColumn: 0,
+  hasFooter: hasFooter,
+  columnNames: columnNames,
+);
 
 /// Unformatted values from row 1 (column A first). Contains the goals row
 /// ("CÍLE:" at 879), the header at 882, days 12.–18.10.2026 at 883–889 and

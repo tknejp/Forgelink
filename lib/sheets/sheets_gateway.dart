@@ -20,8 +20,8 @@ class SheetsGateway {
     http.Client Function()? httpClient,
     Future<void> Function(Duration)? delay,
     this.interactive = true,
-  })  : _httpClient = httpClient ?? http.Client.new,
-        _delay = delay ?? Future<void>.delayed;
+  }) : _httpClient = httpClient ?? http.Client.new,
+       _delay = delay ?? Future<void>.delayed;
 
   final TokenProvider _tokens;
   final http.Client Function() _httpClient;
@@ -33,58 +33,60 @@ class SheetsGateway {
   static const _maxAttempts = 4;
 
   Future<Spreadsheet> metadata(String spreadsheetId) => _run(
-        'metadata',
-        (api) => api.spreadsheets.get(
-          spreadsheetId,
-          $fields: 'properties(title,locale,timeZone),'
-              'sheets(properties(sheetId,title),'
-              'tables(tableId,name,range,rowsProperties(footerColorStyle),'
-              'columnProperties(columnIndex,columnName,columnType)))',
-        ),
-      );
+    'metadata',
+    (api) => api.spreadsheets.get(
+      spreadsheetId,
+      $fields:
+          'properties(title,locale,timeZone),'
+          'sheets(properties(sheetId,title),'
+          'tables(tableId,name,range,rowsProperties(footerColorStyle),'
+          'columnProperties(columnIndex,columnName,columnType)))',
+    ),
+  );
 
   Future<ValueRange> values(
     String spreadsheetId,
     String range, {
     required String valueRenderOption,
     String? dateTimeRenderOption,
-  }) =>
-      _run(
-        'values.get $range ($valueRenderOption)',
-        (api) => api.spreadsheets.values.get(
-          spreadsheetId,
-          range,
-          valueRenderOption: valueRenderOption,
-          dateTimeRenderOption: dateTimeRenderOption,
-          majorDimension: 'ROWS',
-        ),
-      );
+  }) => _run(
+    'values.get $range ($valueRenderOption)',
+    (api) => api.spreadsheets.values.get(
+      spreadsheetId,
+      range,
+      valueRenderOption: valueRenderOption,
+      dateTimeRenderOption: dateTimeRenderOption,
+      majorDimension: 'ROWS',
+    ),
+  );
 
   /// Values-only write (`RAW`, never `USER_ENTERED`).
   Future<BatchUpdateValuesResponse> writeValues(
     String spreadsheetId,
     List<ValueRange> data,
-  ) =>
-      _run(
-        'values.batchUpdate (${data.length} ranges)',
-        (api) => api.spreadsheets.values.batchUpdate(
-          BatchUpdateValuesRequest(valueInputOption: 'RAW', data: data),
-          spreadsheetId,
-          $fields: 'totalUpdatedCells',
-        ),
-      );
+  ) => _run(
+    'values.batchUpdate (${data.length} ranges)',
+    (api) => api.spreadsheets.values.batchUpdate(
+      BatchUpdateValuesRequest(valueInputOption: 'RAW', data: data),
+      spreadsheetId,
+      $fields: 'totalUpdatedCells',
+    ),
+  );
 
   Future<T> _run<T>(String label, Future<T> Function(SheetsApi api) op) async {
     var tokenRetried = false;
-    for (var attempt = 1;; attempt++) {
+    for (var attempt = 1; ; attempt++) {
       final token = await _tokens.accessToken(interactive: interactive);
       final base = _httpClient();
       final client = authenticatedClient(
         base,
         AccessCredentials(
           // The Play-services token carries no expiry; use a short synthetic one.
-          AccessToken('Bearer', token,
-              DateTime.now().toUtc().add(const Duration(minutes: 50))),
+          AccessToken(
+            'Bearer',
+            token,
+            DateTime.now().toUtc().add(const Duration(minutes: 50)),
+          ),
           null,
           const [AppConfig.sheetsScope],
         ),
@@ -99,8 +101,10 @@ class SheetsGateway {
         }
         if (!tokenRetried) {
           tokenRetried = true;
-          AppLog.sheets.info('$label: token rejected, clearing and retrying once',
-              payload: msg);
+          AppLog.sheets.info(
+            '$label: token rejected, clearing and retrying once',
+            payload: msg,
+          );
           await _tokens.invalidate(token);
           continue;
         }
@@ -115,16 +119,25 @@ class SheetsGateway {
           await _delay(wait);
           continue;
         }
-        final issue = classifySheetsError(e, email: await _tokens.accountEmail());
-        AppLog.sheets.error('$label → ${issue.code}',
-            payload: 'status=$status, json=${e.jsonResponse}', err: e);
+        final issue = classifySheetsError(
+          e,
+          email: await _tokens.accountEmail(),
+        );
+        AppLog.sheets.error(
+          '$label → ${issue.code}',
+          payload: 'status=$status, json=${e.jsonResponse}',
+          err: e,
+        );
         throw SyncIssueException(issue, e);
       } on SyncIssueException {
         rethrow;
       } catch (e, st) {
         final issue = classifySheetsError(e);
-        AppLog.sheets.error('$label → ${issue.code}',
-            err: e, stackTrace: issue is UnexpectedIssue ? st : null);
+        AppLog.sheets.error(
+          '$label → ${issue.code}',
+          err: e,
+          stackTrace: issue is UnexpectedIssue ? st : null,
+        );
         throw SyncIssueException(issue, e);
       } finally {
         client.close();

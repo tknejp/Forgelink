@@ -13,7 +13,9 @@ void main() {
 
   TrackerIndex index({Map<int, List<Object?>> extraRows = const {}}) =>
       TrackerIndex.build(
-          tables: [weekTable()], values: trackerValues(extraRows: extraRows));
+        tables: [weekTable()],
+        values: trackerValues(extraRows: extraRows),
+      );
 
   const full = {
     SheetColumn.weight: 106.3,
@@ -29,60 +31,79 @@ void main() {
 
   test('full day → one B..H range with numbers', () {
     final plan = buildWritePlan(
-        tab: 'tracker', index: index(), values: {mon: full});
+      tab: 'tracker',
+      index: index(),
+      values: {mon: full},
+    );
     expect(rangesOf(plan), ["'tracker'!B883:H883"]);
     expect(plan.ranges.single.values, [
-      [106.3, 2700, 216, 308, 61, 27, 8432]
+      [106.3, 2700, 216, 308, 61, 27, 8432],
     ]);
     expect(plan.cellsToWrite, 7);
   });
 
   test('missing values are never sent; adjacent writes are grouped', () {
-    final plan = buildWritePlan(tab: 'tracker', index: index(), values: {
-      tue: {
-        SheetColumn.weight: null,
-        SheetColumn.kcal: 1720,
-        SheetColumn.protein: 132,
-        SheetColumn.carbs: 170,
-        SheetColumn.fat: 55,
-        SheetColumn.fiber: 31,
-        SheetColumn.steps: 10234,
+    final plan = buildWritePlan(
+      tab: 'tracker',
+      index: index(),
+      values: {
+        tue: {
+          SheetColumn.weight: null,
+          SheetColumn.kcal: 1720,
+          SheetColumn.protein: 132,
+          SheetColumn.carbs: 170,
+          SheetColumn.fat: 55,
+          SheetColumn.fiber: 31,
+          SheetColumn.steps: 10234,
+        },
       },
-    });
+    );
     expect(rangesOf(plan), ["'tracker'!C884:H884"]);
-    expect(plan.days.single.fields[SheetColumn.weight]!.outcome,
-        PlannedOutcome.missing);
+    expect(
+      plan.days.single.fields[SheetColumn.weight]!.outcome,
+      PlannedOutcome.missing,
+    );
   });
 
   test('a gap splits the row into separate ranges', () {
-    final plan = buildWritePlan(tab: 'tracker', index: index(), values: {
-      mon: {
-        SheetColumn.weight: 106.3,
-        SheetColumn.kcal: 2700,
-        SheetColumn.steps: 8432,
+    final plan = buildWritePlan(
+      tab: 'tracker',
+      index: index(),
+      values: {
+        mon: {
+          SheetColumn.weight: 106.3,
+          SheetColumn.kcal: 2700,
+          SheetColumn.steps: 8432,
+        },
       },
-    });
+    );
     expect(rangesOf(plan), ["'tracker'!B883:C883", "'tracker'!H883"]);
   });
 
-  test('old-layout week: KCAL→G, macros→C..F, KROKY→K; manual H..J untouched',
-      () {
-    final oldMon = LocalDate(2025, 11, 10);
-    final idx = TrackerIndex.build(
-      tables: [weekTable(name: 'Tabulka32', headerRow: 448, columnNames: oldLayout)],
-      values: trackerValues(weeks: {448: oldMon}),
-    );
-    final plan =
-        buildWritePlan(tab: 'tracker', index: idx, values: {oldMon: full});
-    expect(rangesOf(plan),
-        ["'tracker'!B449:G449", "'tracker'!K449"]);
-    expect(plan.ranges.first.values, [
-      [106.3, 216, 308, 61, 27, 2700]
-    ]);
-    expect(plan.ranges.last.values, [
-      [8432]
-    ]);
-  });
+  test(
+    'old-layout week: KCAL→G, macros→C..F, KROKY→K; manual H..J untouched',
+    () {
+      final oldMon = LocalDate(2025, 11, 10);
+      final idx = TrackerIndex.build(
+        tables: [
+          weekTable(name: 'Tabulka32', headerRow: 448, columnNames: oldLayout),
+        ],
+        values: trackerValues(weeks: {448: oldMon}),
+      );
+      final plan = buildWritePlan(
+        tab: 'tracker',
+        index: idx,
+        values: {oldMon: full},
+      );
+      expect(rangesOf(plan), ["'tracker'!B449:G449", "'tracker'!K449"]);
+      expect(plan.ranges.first.values, [
+        [106.3, 216, 308, 61, 27, 2700],
+      ]);
+      expect(plan.ranges.last.values, [
+        [8432],
+      ]);
+    },
+  );
 
   test('layout-broken table date → SheetLayoutChanged, nothing written', () {
     final broken = Map.of(newLayout)..[7] = 'KROKŮ';
@@ -90,15 +111,21 @@ void main() {
       tables: [weekTable(columnNames: broken)],
       values: trackerValues(),
     );
-    final plan = buildWritePlan(tab: 'tracker', index: idx, values: {mon: full});
+    final plan = buildWritePlan(
+      tab: 'tracker',
+      index: idx,
+      values: {mon: full},
+    );
     expect(plan.days.single.issue, isA<SheetLayoutChanged>());
     expect(plan.hasWrites, isFalse);
   });
 
-  test('nothing ever lands in A or I..L, and no empty strings are written',
-      () {
+  test('nothing ever lands in A or I..L, and no empty strings are written', () {
     final plan = buildWritePlan(
-        tab: 'tracker', index: index(), values: {mon: full, tue: full});
+      tab: 'tracker',
+      index: index(),
+      values: {mon: full, tue: full},
+    );
     for (final r in plan.ranges) {
       final cells = r.range!.split('!').last;
       expect(cells, matches(RegExp(r'^[B-H]\d+(:[B-H]\d+)?$')));
@@ -113,22 +140,28 @@ void main() {
   test('unchanged values are skipped (weight within 0.05)', () {
     final plan = buildWritePlan(
       tab: 'tracker',
-      index: index(extraRows: {
-        883: [mon.toSheetSerial(), 106.32, 2700, 216, 308, 61, 27, 8432],
-      }),
+      index: index(
+        extraRows: {
+          883: [mon.toSheetSerial(), 106.32, 2700, 216, 308, 61, 27, 8432],
+        },
+      ),
       values: {mon: full},
     );
     expect(plan.hasWrites, isFalse);
-    expect(plan.days.single.fields.values.map((f) => f.outcome),
-        everyElement(PlannedOutcome.unchanged));
+    expect(
+      plan.days.single.fields.values.map((f) => f.outcome),
+      everyElement(PlannedOutcome.unchanged),
+    );
   });
 
   test('a changed value is rewritten; text in an owned cell is replaced', () {
     final plan = buildWritePlan(
       tab: 'tracker',
-      index: index(extraRows: {
-        883: [mon.toSheetSerial(), 106.3, 2500, '216', 308, 61, 27, 8432],
-      }),
+      index: index(
+        extraRows: {
+          883: [mon.toSheetSerial(), 106.3, 2500, '216', 308, 61, 27, 8432],
+        },
+      ),
       values: {mon: full},
     );
     expect(rangesOf(plan), ["'tracker'!C883:D883"]);
@@ -143,42 +176,61 @@ void main() {
         883: [null, null, '=C882*2'], // from column A: C883
       },
     );
-    expect(plan.days.single.fields[SheetColumn.kcal]!.outcome,
-        PlannedOutcome.skippedFormula);
+    expect(
+      plan.days.single.fields[SheetColumn.kcal]!.outcome,
+      PlannedOutcome.skippedFormula,
+    );
     expect(rangesOf(plan), ["'tracker'!B883", "'tracker'!D883:H883"]);
   });
 
   test('date not in sheet → DateNotInSheet, nothing written for it', () {
     final missing = LocalDate(2026, 11, 1);
     final plan = buildWritePlan(
-        tab: 'tracker', index: index(), values: {missing: full});
+      tab: 'tracker',
+      index: index(),
+      values: {missing: full},
+    );
     expect(plan.days.single.issue, isA<DateNotInSheet>());
     expect(plan.hasWrites, isFalse);
   });
 
   test('duplicate date → DateDuplicated, nothing written for it', () {
     final idx = TrackerIndex.build(
-      tables: [weekTable(), weekTable(name: 'Tabulka64', headerRow: 892)],
+      tables: [
+        weekTable(),
+        weekTable(name: 'Tabulka64', headerRow: 892),
+      ],
       values: trackerValues(weeks: {892: mon}),
     );
-    final plan = buildWritePlan(tab: 'tracker', index: idx, values: {mon: full});
+    final plan = buildWritePlan(
+      tab: 'tracker',
+      index: idx,
+      values: {mon: full},
+    );
     expect(plan.days.single.issue, isA<DateDuplicated>());
     expect(plan.hasWrites, isFalse);
   });
 
   test('a real zero is written', () {
-    final plan = buildWritePlan(tab: 'tracker', index: index(), values: {
-      mon: {SheetColumn.fiber: 0},
-    });
+    final plan = buildWritePlan(
+      tab: 'tracker',
+      index: index(),
+      values: {
+        mon: {SheetColumn.fiber: 0},
+      },
+    );
     expect(rangesOf(plan), ["'tracker'!G883"]);
     expect(plan.ranges.single.values, [
-      [0]
+      [0],
     ]);
   });
 
   test('days come out sorted by date', () {
     final plan = buildWritePlan(
-        tab: 'tracker', index: index(), values: {tue: full, mon: full});
+      tab: 'tracker',
+      index: index(),
+      values: {tue: full, mon: full},
+    );
     expect(plan.days.map((d) => d.date), [mon, tue]);
   });
 }

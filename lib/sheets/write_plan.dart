@@ -54,10 +54,11 @@ class WritePlan {
   bool get hasWrites => ranges.isNotEmpty;
 
   int get cellsToWrite => days.fold(
-      0,
-      (n, d) =>
-          n +
-          d.fields.values.where((f) => f.outcome == PlannedOutcome.write).length);
+    0,
+    (n, d) =>
+        n +
+        d.fields.values.where((f) => f.outcome == PlannedOutcome.write).length,
+  );
 }
 
 /// Builds the values-only write plan (docs/implementation_plan.md §4 step 8).
@@ -81,19 +82,30 @@ WritePlan buildWritePlan({
   for (final date in dates) {
     final dupRows = index.duplicateRows[date];
     if (dupRows != null) {
-      days.add(PlannedDay(
-          date: date, fields: const {}, issue: DateDuplicated(date, dupRows)));
+      days.add(
+        PlannedDay(
+          date: date,
+          fields: const {},
+          issue: DateDuplicated(date, dupRows),
+        ),
+      );
       continue;
     }
     if (index.layoutBroken.contains(date)) {
-      days.add(PlannedDay(
-          date: date, fields: const {}, issue: SheetLayoutChanged(tab)));
+      days.add(
+        PlannedDay(
+          date: date,
+          fields: const {},
+          issue: SheetLayoutChanged(tab),
+        ),
+      );
       continue;
     }
     final indexed = index.rows[date];
     if (indexed == null) {
-      days.add(PlannedDay(
-          date: date, fields: const {}, issue: DateNotInSheet(date)));
+      days.add(
+        PlannedDay(date: date, fields: const {}, issue: DateNotInSheet(date)),
+      );
       continue;
     }
 
@@ -129,13 +141,15 @@ WritePlan buildWritePlan({
       }
       final from = columnLetter(cols[i]);
       final to = columnLetter(cols[j]);
-      ranges.add(ValueRange(
-        range: i == j ? '$sheet!$from$row' : '$sheet!$from$row:$to$row',
-        majorDimension: 'ROWS',
-        values: [
-          [for (var k = i; k <= j; k++) writes[cols[k]]!]
-        ],
-      ));
+      ranges.add(
+        ValueRange(
+          range: i == j ? '$sheet!$from$row' : '$sheet!$from$row:$to$row',
+          majorDimension: 'ROWS',
+          values: [
+            [for (var k = i; k <= j; k++) writes[cols[k]]!],
+          ],
+        ),
+      );
       i = j + 1;
     }
   }

@@ -40,7 +40,8 @@ class _SheetSectionState extends State<SheetSection> {
     }
 
     final v = c.verification;
-    final readOk = c.status.state == IntegrationState.readVerified ||
+    final readOk =
+        c.status.state == IntegrationState.readVerified ||
         c.status.state == IntegrationState.verified;
 
     return Column(
@@ -74,32 +75,43 @@ class _SheetSectionState extends State<SheetSection> {
           ),
         if (v != null) ...[
           const SizedBox(height: 10),
-          Text(v.days == 0
-              ? l10n.sheetVerifyNoDates
-              : l10n.sheetVerifyResult(
-                  v.weekTables,
-                  v.days,
-                  presenter.formatDate(v.first!),
-                  presenter.formatDate(v.last!),
-                )),
+          Text(
+            v.days == 0
+                ? l10n.sheetVerifyNoDates
+                : l10n.sheetVerifyResult(
+                    v.weekTables,
+                    v.days,
+                    presenter.formatDate(v.first!),
+                    presenter.formatDate(v.last!),
+                  ),
+          ),
         ],
         if (v != null && v.duplicates.isNotEmpty) ...[
           const SizedBox(height: 4),
-          Builder(builder: (_) {
-            final dates = v.duplicates.keys.toList()..sort();
-            final rows = (v.duplicates.values.expand((r) => r).toSet().toList()
-                  ..sort())
-                .join(', ');
-            return Text(
-              l10n.sheetDuplicates(dates.length, presenter.formatDate(dates.first),
-                  presenter.formatDate(dates.last), rows),
-              style: errorStyle,
-            );
-          }),
+          Builder(
+            builder: (_) {
+              final dates = v.duplicates.keys.toList()..sort();
+              final rows =
+                  (v.duplicates.values.expand((r) => r).toSet().toList()
+                        ..sort())
+                      .join(', ');
+              return Text(
+                l10n.sheetDuplicates(
+                  dates.length,
+                  presenter.formatDate(dates.first),
+                  presenter.formatDate(dates.last),
+                  rows,
+                ),
+                style: errorStyle,
+              );
+            },
+          ),
         ],
         if (readOk && c.status.state != IntegrationState.verified)
-          Text(l10n.sheetEditAccessNote,
-              style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            l10n.sheetEditAccessNote,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         const SizedBox(height: 12),
         FilledButton(
           onPressed: c.busy
@@ -108,7 +120,8 @@ class _SheetSectionState extends State<SheetSection> {
           child: c.busy
               ? const SizedBox.square(
                   dimension: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2))
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : Text(l10n.sheetSaveVerify),
         ),
       ],

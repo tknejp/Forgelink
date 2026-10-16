@@ -12,12 +12,10 @@ class _KtSessionClient {
   String? _cookieHeader;
   bool _loggedIn = false;
 
-  _KtSessionClient({
-    required FlutterSecureStorage storage,
-    http.Client? client,
-  })  : _client = client ?? http.Client(),
-        _ownsClient = client == null,
-        _storage = storage;
+  _KtSessionClient({required FlutterSecureStorage storage, http.Client? client})
+    : _client = client ?? http.Client(),
+      _ownsClient = client == null,
+      _storage = storage;
 
   /// Disposes the current keep-alive pool and creates a fresh client.
   /// No-op when the client was injected (tests) — they manage lifecycle.
@@ -136,8 +134,11 @@ class _KtSessionClient {
         try {
           return await send().timeout(_requestTimeout);
         } catch (e2, st2) {
-          AppLog.ktApi.error('$label: network error (after retry)',
-              err: e2, stackTrace: st2);
+          AppLog.ktApi.error(
+            '$label: network error (after retry)',
+            err: e2,
+            stackTrace: st2,
+          );
           throw KtNetworkException('Network error during $label: $e2');
         }
       }
@@ -155,16 +156,14 @@ class _KtSessionClient {
   Future<void> _performLogin(String email, String passwordHash) async {
     AppLog.ktApi.debug('Performing KT login for ${maskEmail(email)}');
 
-    final loginUri =
-        Uri.parse('${AppConfig.ktBaseUrl}/login/create?=&format=json');
+    final loginUri = Uri.parse(
+      '${AppConfig.ktBaseUrl}/login/create?=&format=json',
+    );
     const headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-    final loginPayload = jsonEncode({
-      'email': email,
-      'password': passwordHash,
-    });
+    final loginPayload = jsonEncode({'email': email, 'password': passwordHash});
 
     final response = await _withNetworkRetry(
       'login',
@@ -236,9 +235,7 @@ class _KtSessionClient {
   }
 
   Map<String, String> buildGetHeaders() {
-    final headers = <String, String>{
-      'Accept': 'application/json',
-    };
+    final headers = <String, String>{'Accept': 'application/json'};
 
     if (_cookieHeader != null && _cookieHeader!.isNotEmpty) {
       headers['Cookie'] = _cookieHeader!;

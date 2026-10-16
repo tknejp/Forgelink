@@ -15,28 +15,27 @@ import 'sync_models.dart';
 enum IssueArea { kt, healthConnect, sheets, general, date }
 
 IssueArea areaOf(SyncIssue i) => switch (i) {
-      KtCredentialsMissing() || KtAuthRejected() || KtUnavailable() =>
-        IssueArea.kt,
-      HcNotAvailable() ||
-      HcPermissionMissing() ||
-      HcHistoryPermissionMissing() ||
-      HcBackgroundPermissionMissing() ||
-      HcReadFailed() =>
-        IssueArea.healthConnect,
-      GoogleNotConnected() ||
-      GoogleReauthRequired() ||
-      SheetNotConfigured() ||
-      SheetNotFound() ||
-      SheetNoEditAccess() ||
-      SheetsApiDisabled() ||
-      SheetTabMissing() ||
-      SheetLayoutChanged() ||
-      SheetsUnavailable() =>
-        IssueArea.sheets,
-      Offline() || UnexpectedIssue() => IssueArea.general,
-      DateNotInSheet() || DateDuplicated() || CellHasFormula() || NoData() =>
-        IssueArea.date,
-    };
+  KtCredentialsMissing() || KtAuthRejected() || KtUnavailable() => IssueArea.kt,
+  HcNotAvailable() ||
+  HcPermissionMissing() ||
+  HcHistoryPermissionMissing() ||
+  HcBackgroundPermissionMissing() ||
+  HcReadFailed() => IssueArea.healthConnect,
+  GoogleNotConnected() ||
+  GoogleReauthRequired() ||
+  SheetNotConfigured() ||
+  SheetNotFound() ||
+  SheetNoEditAccess() ||
+  SheetsApiDisabled() ||
+  SheetTabMissing() ||
+  SheetLayoutChanged() ||
+  SheetsUnavailable() => IssueArea.sheets,
+  Offline() || UnexpectedIssue() => IssueArea.general,
+  DateNotInSheet() ||
+  DateDuplicated() ||
+  CellHasFormula() ||
+  NoData() => IssueArea.date,
+};
 
 @immutable
 class LastSuccess {
@@ -82,8 +81,9 @@ class SyncHistory {
       final map = (jsonDecode(raw) as Map).cast<String, Object?>();
       return {
         for (final e in map.entries)
-          ?LocalDate.tryParseIso(e.key):
-              DayResult.fromJson((e.value as Map).cast()),
+          ?LocalDate.tryParseIso(e.key): DayResult.fromJson(
+            (e.value as Map).cast(),
+          ),
       };
     } catch (_) {
       return const {};
@@ -109,7 +109,8 @@ class SyncHistory {
     final parts = raw.split('|');
     final at = DateTime.tryParse(parts.first);
     if (at == null) return null;
-    final trigger = SyncTrigger.values
+    final trigger =
+        SyncTrigger.values
             .where((t) => parts.length > 1 && t.name == parts[1])
             .firstOrNull ??
         SyncTrigger.quick;
@@ -121,7 +122,9 @@ class SyncHistory {
   Future<void> record(RunResult run) async {
     final runs = [run, ...await this.runs()].take(maxRuns).toList();
     await _prefs.setRawString(
-        _kRuns, jsonEncode([for (final r in runs) r.toJson()]));
+      _kRuns,
+      jsonEncode([for (final r in runs) r.toJson()]),
+    );
 
     final days = Map.of(await this.days());
     for (final d in run.days) {
@@ -129,12 +132,18 @@ class SyncHistory {
     }
     final keep = (days.keys.toList()..sort()).reversed.take(maxDays).toSet();
     days.removeWhere((k, _) => !keep.contains(k));
-    await _prefs.setRawString(_kDays,
-        jsonEncode({for (final e in days.entries) e.key.isoKey: e.value.toJson()}));
+    await _prefs.setRawString(
+      _kDays,
+      jsonEncode({
+        for (final e in days.entries) e.key.isoKey: e.value.toJson(),
+      }),
+    );
 
     if (run.countsAsSuccess) {
-      await _prefs.setRawString(_kLastSuccess,
-          '${run.finishedAt.toIso8601String()}|${run.trigger.name}');
+      await _prefs.setRawString(
+        _kLastSuccess,
+        '${run.finishedAt.toIso8601String()}|${run.trigger.name}',
+      );
     }
 
     await _updateOpenIssues(run);
@@ -183,16 +192,21 @@ class SyncHistory {
   }
 
   Future<void> _saveOpen(List<SyncIssue> open) => _prefs.setRawString(
-      _kOpen, jsonEncode([for (final i in open) SyncIssueCodec.encode(i)]));
+    _kOpen,
+    jsonEncode([for (final i in open) SyncIssueCodec.encode(i)]),
+  );
 
   Future<void> _updateIntegrationStatus(RunResult run) async {
     final proven = provenAreas(run);
-    final written = run.days.any((d) =>
-        d.fields.values.any((f) => f.kind == FieldOutcomeKind.written));
+    final written = run.days.any(
+      (d) => d.fields.values.any((f) => f.kind == FieldOutcomeKind.written),
+    );
 
     if (written) {
       await _statusStore.save(
-          Integration.googleSheets, IntegrationStatus.verified);
+        Integration.googleSheets,
+        IntegrationStatus.verified,
+      );
     }
     if (proven.contains(IssueArea.kt)) {
       await _statusStore.save(Integration.kt, IntegrationStatus.verified);
@@ -201,11 +215,15 @@ class SyncHistory {
     for (final i in run.issues) {
       switch (areaOf(i)) {
         case IssueArea.sheets when i is! SheetsUnavailable:
-          await _statusStore.save(Integration.googleSheets,
-              IntegrationStatus(IntegrationState.error, i));
+          await _statusStore.save(
+            Integration.googleSheets,
+            IntegrationStatus(IntegrationState.error, i),
+          );
         case IssueArea.kt when i is KtAuthRejected:
           await _statusStore.save(
-              Integration.kt, IntegrationStatus(IntegrationState.error, i));
+            Integration.kt,
+            IntegrationStatus(IntegrationState.error, i),
+          );
         default:
           break;
       }

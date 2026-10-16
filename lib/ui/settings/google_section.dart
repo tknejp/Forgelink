@@ -34,8 +34,10 @@ class GoogleSection extends StatelessWidget {
           IssueNotice(issue: issue),
         if (AppConfig.googleWebClientId.isEmpty) ...[
           const SizedBox(height: 4),
-          Text(l10n.googleWebClientMissing,
-              style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            l10n.googleWebClientMissing,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
         if (c.lastIssue != null)
           Padding(
@@ -50,10 +52,13 @@ class GoogleSection extends StatelessWidget {
               child: c.busy
                   ? const SizedBox.square(
                       dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(c.email == null
-                      ? l10n.actionConnectGoogle
-                      : l10n.actionReconnectGoogle),
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      c.email == null
+                          ? l10n.actionConnectGoogle
+                          : l10n.actionReconnectGoogle,
+                    ),
             ),
             if (c.email != null) ...[
               const SizedBox(width: 8),

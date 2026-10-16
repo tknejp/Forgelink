@@ -68,32 +68,49 @@ void main() {
 
   test('parameters appear in the message', () {
     expect(presenter.message(DateNotInSheet(date)), contains('12. 10. 2026'));
-    expect(presenter.message(const SheetTabMissing('tracker')),
-        contains('tracker'));
+    expect(
+      presenter.message(const SheetTabMissing('tracker')),
+      contains('tracker'),
+    );
     expect(
       presenter.message(
-          const HcPermissionMissing({HcDataType.steps, HcDataType.weight})),
+        const HcPermissionMissing({HcDataType.steps, HcDataType.weight}),
+      ),
       contains('váha, kroky'),
     );
     expect(presenter.message(const CellHasFormula('B883')), contains('B883'));
   });
 
   test('actions route to the right place', () {
-    expect(const KtCredentialsMissing().action,
-        const IssueAction.openSettings(SettingsSection.kt));
-    expect(const SheetNotConfigured().action,
-        const IssueAction.openSettings(SettingsSection.sheet));
-    expect(const HcPermissionMissing({HcDataType.weight}).action.kind,
-        IssueActionKind.grantHcPermissions);
-    expect(const GoogleReauthRequired().action.kind,
-        IssueActionKind.reconnectGoogle);
+    expect(
+      const KtCredentialsMissing().action,
+      const IssueAction.openSettings(SettingsSection.kt),
+    );
+    expect(
+      const SheetNotConfigured().action,
+      const IssueAction.openSettings(SettingsSection.sheet),
+    );
+    expect(
+      const HcPermissionMissing({HcDataType.weight}).action.kind,
+      IssueActionKind.grantHcPermissions,
+    );
+    expect(
+      const GoogleReauthRequired().action.kind,
+      IssueActionKind.reconnectGoogle,
+    );
     expect(const Offline().action.kind, IssueActionKind.retry);
   });
 
   test('transient issues', () {
-    final transient =
-        allIssues.where((i) => i.isTransient).map((i) => i.code).toSet();
-    expect(transient,
-        {'ktUnavailable', 'sheetsUnavailable', 'hcReadFailed', 'offline'});
+    final transient = allIssues
+        .where((i) => i.isTransient)
+        .map((i) => i.code)
+        .toSet();
+    expect(transient, {
+      'ktUnavailable',
+      'sheetsUnavailable',
+      'hcReadFailed',
+      'offline',
+    });
   });
 }
