@@ -802,5 +802,19 @@
       }
     }
   },
-  "rowSheetFile": "Soubor"
+  "rowSheetFile": "Soubor",
+  "waitTitle": "Čeká na připojení",
+  "waitSub": "Dokončí se samo · {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}",
+  "@waitSub": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "waitNow": "Zkusit teď",
+  "chipWaiting": "Čeká",
+  "syncRowWaitingNet": "Čeká na připojení",
+  "syncSheetWaitingNote": "Až bude připojení, synchronizace se dokončí sama a dá vědět notifikací.",
+  "dayWaitingNote": "Poslední pokus se nepovedl kvůli připojení. Den se zkusí znovu sám."
 }

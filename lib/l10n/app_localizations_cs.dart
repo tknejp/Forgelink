@@ -1190,4 +1190,36 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get rowSheetFile => 'Soubor';
+
+  @override
+  String get waitTitle => 'Čeká na připojení';
+
+  @override
+  String waitSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dní',
+      few: '$count dny',
+      one: '1 den',
+    );
+    return 'Dokončí se samo · $_temp0';
+  }
+
+  @override
+  String get waitNow => 'Zkusit teď';
+
+  @override
+  String get chipWaiting => 'Čeká';
+
+  @override
+  String get syncRowWaitingNet => 'Čeká na připojení';
+
+  @override
+  String get syncSheetWaitingNote =>
+      'Až bude připojení, synchronizace se dokončí sama a dá vědět notifikací.';
+
+  @override
+  String get dayWaitingNote =>
+      'Poslední pokus se nepovedl kvůli připojení. Den se zkusí znovu sám.';
 }

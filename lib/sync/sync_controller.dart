@@ -46,15 +46,24 @@ class SyncController extends ChangeNotifier {
     DateTime Function()? now,
     SyncKeepAlive keepAlive = const _NoKeepAlive(),
     SheetStatusSource? sheetStatus,
+    Future<void> Function(Set<LocalDate> pending)? onRetryDatesChanged,
   }) : _now = now ?? DateTime.now,
        _keepAlive = keepAlive,
-       _sheetStatus = sheetStatus;
+       _sheetStatus = sheetStatus,
+       _onRetryDatesChanged = onRetryDatesChanged;
 
   final SyncEngine _engine;
   final SyncHistory _history;
   final DateTime Function() _now;
   final SyncKeepAlive _keepAlive;
   final SheetStatusSource? _sheetStatus;
+
+  /// Books / cancels the background retry (BackgroundSync.reconcileRetry).
+  final Future<void> Function(Set<LocalDate> pending)? _onRetryDatesChanged;
+
+  /// Dates that failed only for temporary reasons and wait for an
+  /// automatic retry (shown as "Čeká na připojení", never as errors).
+  Set<LocalDate> retryDates = const {};
   bool _sheetLoading = false;
 
   /// What the coach's sheet currently contains (null = never read). The
@@ -108,6 +117,7 @@ class SyncController extends ChangeNotifier {
     days = await _history.days();
     openIssues = await _history.openIssues();
     lastSuccess = await _history.lastSuccess();
+    retryDates = await _history.retryDates();
     notifyListeners();
   }
 
@@ -129,6 +139,16 @@ class SyncController extends ChangeNotifier {
       for (var i = 0; i < n; i++) from.addDays(i),
     ]);
   }
+
+  /// Syncs the dates waiting for a retry right away.
+  Future<RunResult?> retryNow() => retryDates.isEmpty
+      ? Future.value(null)
+      : _enqueue(SyncTrigger.calendar, retryDates.toList()..sort());
+
+  /// Keeps the background retry in step with [retryDates] (app start and
+  /// after every run): a success here cancels a booked retry.
+  Future<void> syncRetrySchedule() async =>
+      _onRetryDatesChanged?.call(retryDates);
 
   Future<void> dismissIssue(SyncIssue issue) async {
     await _history.dismiss(issue);
@@ -199,6 +219,7 @@ class SyncController extends ChangeNotifier {
       running = const {};
       progress = null;
       await reload();
+      unawaited(syncRetrySchedule());
       unawaited(refreshSheet());
     }
   }

@@ -34,14 +34,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  /// Last run that got a toast: taps merged into one run share it.
-  RunResult? _toastedRun;
-
-  /// Last problem shown and when — the same problem isn't repeated within
-  /// [_repeatAfter] (e.g. several taps on a bad connection).
-  (String, DateTime)? _toastedIssue;
-  static const _repeatAfter = Duration(seconds: 30);
-
   @override
   void initState() {
     super.initState();
@@ -84,110 +76,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     context,
   ).push(MaterialPageRoute<void>(builder: (_) => const HistoryScreen()));
 
-  /// Only problems get a toast (red, with the fix as its action); success
-  /// shows in the calendar, the chips and a short "Hotovo" on the button.
-  /// Failed days also turn red and their detail says why.
-  void _toast(
-    ScaffoldMessengerState messenger,
-    RunResult result,
-    VoidCallback retry,
-  ) {
-    if (identical(result, _toastedRun)) return;
-    _toastedRun = result;
-    if (result.status != RunStatus.partial &&
-        result.status != RunStatus.failed) {
-      // Working again: the next problem is news.
-      _toastedIssue = null;
-      return;
-    }
-    final text = SyncText(context.l10n);
-    final p = Palette.of(context);
-    final issue = [
-      ...result.issues,
-      for (final d in result.days) ...[
-        ?d.issue,
-        for (final f in d.fields.values) ?f.issue,
-      ],
-    ].firstOrNull;
-    final action = issue?.action;
-    final key = issue?.code ?? result.status.name;
-    final now = DateTime.now();
-    if (_toastedIssue case (
-      final last,
-      final at,
-    ) when last == key && now.difference(at) < _repeatAfter) {
-      return;
-    }
-    _toastedIssue = (key, now);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 6),
-          backgroundColor: p.errBg,
-          content: Row(
-            children: [
-              Icon(Icons.error_rounded, size: 20, color: p.err),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  issue == null
-                      ? text.runSummary(result)
-                      : text.presenter.message(issue),
-                  style: TextStyle(color: p.text),
-                ),
-              ),
-            ],
-          ),
-          action: action == null
-              ? null
-              : SnackBarAction(
-                  label: text.presenter.actionLabel(action),
-                  textColor: p.err,
-                  onPressed: () {
-                    if (!mounted) return;
-                    runIssueAction(context, action, onRetry: retry);
-                  },
-                ),
-        ),
-      );
-  }
-
-  /// Calendar tap: syncs right away; problems come as a toast.
+  /// Calendar tap: syncs right away. No popups: the day's colour, the
+  /// status card (problems to fix, "Čeká na připojení") and the button say
+  /// how it went.
   Future<void> _sync(
     Future<RunResult?> Function(SyncController c) start,
   ) async {
-    final messenger = ScaffoldMessenger.of(context);
     final result = await start(context.read<SyncController>());
     if (!mounted || result == null) return;
     _refresh();
-    _toast(messenger, result, () => _sync(start));
   }
 
   /// Quick Sync and range sync: same as [_sync], with the progress sheet.
-  /// The toast only comes when the sheet was swiped away before the end.
   Future<void> _syncWithSheet(
     String label,
     List<LocalDate> dates,
     Future<RunResult?> Function(SyncController c) start,
   ) async {
-    final messenger = ScaffoldMessenger.of(context);
     final c = context.read<SyncController>();
     final future = start(c);
-    var sheetOpen = true;
     showSyncSheet(
       context,
       label: label,
       dates: dates,
       result: future,
       restart: () => start(c),
-    ).whenComplete(() => sheetOpen = false);
+    );
     final result = await future;
     if (!mounted || result == null) return;
     _refresh();
-    if (!sheetOpen) {
-      _toast(messenger, result, () => _syncWithSheet(label, dates, start));
-    }
   }
 
   void _quickSync() {
@@ -325,6 +242,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   onFix: _openSettings,
                   onRetry: _quickSync,
                   issues: sync.openIssues,
+                  waiting: sync.retryDates.length,
+                  onRetryNow: () => _sync((c) => c.retryNow()),
                 ),
                 const SizedBox(height: 12),
                 if (fixed) Expanded(child: calendar) else calendar,
@@ -352,11 +271,17 @@ class _StatusCard extends StatelessWidget {
     required this.onFix,
     required this.onRetry,
     required this.issues,
+    required this.waiting,
+    required this.onRetryNow,
   });
 
   final void Function(SettingsSection section) onFix;
   final VoidCallback onRetry;
   final List<SyncIssue> issues;
+
+  /// Dates waiting for an automatic retry (connection problems).
+  final int waiting;
+  final VoidCallback onRetryNow;
 
   static bool _ok(IntegrationStatus s) =>
       s.state == IntegrationState.configured ||
@@ -401,6 +326,16 @@ class _StatusCard extends StatelessWidget {
         onDismiss: () => context.read<SyncController>().dismissIssue(issue),
       );
     }
+    if (waiting > 0) {
+      return _StatusRow(
+        tone: Tone.warn,
+        icon: Icons.wifi_off_rounded,
+        title: l10n.waitTitle,
+        sub: l10n.waitSub(waiting),
+        actionLabel: l10n.waitNow,
+        onAction: onRetryNow,
+      );
+    }
     if (attention.isNotEmpty) {
       final anyError = attention.any(
         (i) => i.$2.state == IntegrationState.error,
@@ -426,6 +361,7 @@ class _StatusRow extends StatelessWidget {
   const _StatusRow({
     required this.tone,
     required this.title,
+    this.icon,
     this.sub,
     this.actionLabel,
     this.onAction,
@@ -435,6 +371,7 @@ class _StatusRow extends StatelessWidget {
 
   final Tone tone;
   final String title;
+  final IconData? icon;
   final String? sub;
   final String? actionLabel;
   final VoidCallback? onAction;
@@ -459,11 +396,12 @@ class _StatusRow extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                switch (tone) {
-                  Tone.ok => Icons.check_circle_rounded,
-                  Tone.err => Icons.error_rounded,
-                  _ => Icons.warning_rounded,
-                },
+                icon ??
+                    switch (tone) {
+                      Tone.ok => Icons.check_circle_rounded,
+                      Tone.err => Icons.error_rounded,
+                      _ => Icons.warning_rounded,
+                    },
                 color: fg,
                 size: 24,
               ),

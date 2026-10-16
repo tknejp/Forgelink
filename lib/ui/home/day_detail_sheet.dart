@@ -130,7 +130,11 @@ class _DayDetail extends StatelessWidget {
     );
 
     // Missing nutrition is already explained by the day's NoData note.
-    final note = isToday ? l10n.dayTodayNote : null;
+    final note = c.retryDates.contains(date)
+        ? l10n.dayWaitingNote
+        : isToday
+        ? l10n.dayTodayNote
+        : null;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -180,7 +184,8 @@ class _DayDetail extends StatelessWidget {
         if (day != null && day.issue == null)
           for (final message in {
             for (final f in day.fields.values)
-              if (f.issue case final i?) text.presenter.message(i),
+              if (f.issue case final i? when !i.isTransient)
+                text.presenter.message(i),
           }) ...[
             const SizedBox(height: 10),
             Callout(text: message, tone: Tone.err),

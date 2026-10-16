@@ -57,6 +57,10 @@ class SyncHistory {
   static const _kDays = 'history.days';
   static const _kOpen = 'history.open_issues';
   static const _kLastSuccess = 'history.last_success';
+  static const _kRetry = 'history.retry_dates';
+
+  /// Dates older than this are no longer retried automatically.
+  static const retryWindow = Duration(days: 30);
   static const maxRuns = 50;
   static const maxDays = 400;
 
@@ -104,6 +108,14 @@ class SyncHistory {
     }
   }
 
+  /// Dates whose last run failed only for temporary reasons (connection);
+  /// the retry worker syncs them once the phone is online again.
+  Future<Set<LocalDate>> retryDates() async {
+    final raw = await _prefs.rawString(_kRetry);
+    if (raw == null || raw.isEmpty) return const {};
+    return {for (final s in raw.split(',')) ?LocalDate.tryParseIso(s)};
+  }
+
   Future<LastSuccess?> lastSuccess() async {
     final raw = await _prefs.rawString(_kLastSuccess);
     if (raw == null) return null;
@@ -128,9 +140,23 @@ class SyncHistory {
     );
 
     final days = Map.of(await this.days());
+    final retry = {...await retryDates()};
     for (final d in run.days) {
-      days[d.date] = d;
+      if (d.failedTemporarily) {
+        // Keep the day's last known state; it will be retried.
+        retry.add(d.date);
+        days.putIfAbsent(d.date, () => d);
+      } else {
+        retry.remove(d.date);
+        days[d.date] = d;
+      }
     }
+    final oldest = LocalDate.fromDateTime(run.finishedAt.subtract(retryWindow));
+    retry.removeWhere((d) => d.isBefore(oldest));
+    await _prefs.setRawString(
+      _kRetry,
+      (retry.toList()..sort()).map((d) => d.isoKey).join(','),
+    );
     final keep = (days.keys.toList()..sort()).reversed.take(maxDays).toSet();
     days.removeWhere((k, _) => !keep.contains(k));
     await _prefs.setRawString(
@@ -179,11 +205,12 @@ class SyncHistory {
 
   Future<void> _updateOpenIssues(RunResult run) async {
     final proven = provenAreas(run);
+    // Temporary problems are retried silently, never "open issues".
     final open = (await openIssues())
-        .where((i) => !proven.contains(areaOf(i)))
+        .where((i) => !proven.contains(areaOf(i)) && !i.isTransient)
         .toList();
     for (final i in run.issues) {
-      if (areaOf(i) == IssueArea.date) continue;
+      if (areaOf(i) == IssueArea.date || i.isTransient) continue;
       if (open.any((o) => o.code == i.code)) {
         open.removeWhere((o) => o.code == i.code);
       }

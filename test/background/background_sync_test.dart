@@ -149,6 +149,26 @@ void main() {
             day(15, {
               SheetColumn.weight: const FieldOutcome(
                 FieldOutcomeKind.failed,
+                issue: SheetNotFound(),
+              ),
+            }),
+          ],
+          const [SheetNotFound()],
+        ),
+        l10n,
+        notifySuccess: false,
+      )!;
+      expect(failed.kind, NoticeKind.failed);
+      expect(failed.body, contains('synchronizuj ručně'));
+    });
+
+    test('connection problems stay silent (retried automatically)', () {
+      final offline = SyncNotifier.noticeFor(
+        run(
+          [
+            day(15, {
+              SheetColumn.weight: const FieldOutcome(
+                FieldOutcomeKind.failed,
                 issue: Offline(),
               ),
             }),
@@ -156,10 +176,9 @@ void main() {
           const [Offline()],
         ),
         l10n,
-        notifySuccess: false,
-      )!;
-      expect(failed.kind, NoticeKind.failed);
-      expect(failed.body, contains('internetu'));
+        notifySuccess: true,
+      );
+      expect(offline, isNull);
     });
   });
 

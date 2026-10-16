@@ -1,6 +1,7 @@
 import '../core/app_config.dart';
 import '../core/local_date.dart';
 import '../sync/sheet_status.dart';
+import '../sync/sync_history.dart';
 import '../sync/sync_models.dart';
 import 'widgets/ds.dart';
 
@@ -34,7 +35,9 @@ CellState cellState(DayResult? day, SheetColumn c, {required bool isToday}) {
     FieldOutcomeKind.missing =>
       waitsForMidnight ? CellState.afterMidnight : CellState.missing,
     FieldOutcomeKind.skippedFormula => CellState.formula,
-    FieldOutcomeKind.failed => CellState.failed,
+    // A connection problem isn't this cell's fault: it will be retried.
+    FieldOutcomeKind.failed =>
+      (f.issue?.isTransient ?? false) ? CellState.toWrite : CellState.failed,
   };
 }
 
@@ -55,32 +58,35 @@ bool nutritionMissing(DayResult day) {
 }
 
 /// Calendar colour of [date]: the sheet's own fill state when it has been
-/// read ([sheet]); a failed last sync stays red until the sheet is full.
-/// Without a snapshot, the last sync result ([day]) decides.
+/// read ([sheet]), otherwise the last sync result ([day]).
+///
+/// Red only for problems with this particular date (duplicated / missing in
+/// the sheet, formula in a cell). Account-wide problems (sign-in, login,
+/// permissions) are shown once in the status card, and connection problems
+/// are retried silently — neither paints days red.
 DayStatus? calendarStatus(
   LocalDate date,
   LocalDate today, {
   DayResult? day,
   SheetSnapshot? sheet,
 }) {
-  final failedRun =
-      day != null &&
-      (day.status == DayStatus.failed || day.status == DayStatus.partial);
+  final dateProblem =
+      day != null && day.failures.any((i) => areaOf(i) == IssueArea.date);
   if (sheet != null) {
     final fill = sheet.fillOf(date, today);
     if (fill == SheetFill.full) return DayStatus.ok;
-    if (failedRun || fill == SheetFill.problem) return DayStatus.failed;
+    if (dateProblem || fill == SheetFill.problem) return DayStatus.failed;
     return switch (fill) {
       SheetFill.partial => DayStatus.partial,
       SheetFill.empty => DayStatus.noData,
       // Not in the sheet (week not created yet): fall back to history.
-      _ => day?.status,
+      _ => day?.status == DayStatus.failed ? null : day?.status,
     };
   }
   if (day == null) return null;
-  // Some cells failed → an error day (red); amber is only for nutrition
-  // that wasn't in Kalorické tabulky yet.
-  if (failedRun) return DayStatus.failed;
+  if (dateProblem) return DayStatus.failed;
+  if (day.status == DayStatus.failed) return null;
+  // Amber: some cells missing (e.g. nutrition not in KT yet).
   if (day.status == DayStatus.ok && date != today && nutritionMissing(day)) {
     return DayStatus.partial;
   }

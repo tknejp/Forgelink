@@ -97,14 +97,18 @@ class _SyncSheetState extends State<_SyncSheet> {
       for (final d in result?.days ?? const <DayResult>[])
         if (widget.dates.contains(d.date)) d.date: d,
     };
+    // Connection problems: no errors, it finishes by itself later.
+    final waiting = result?.onlyTemporaryProblems ?? false;
     final warnings = <String>[
-      if (result != null && status != RunStatus.failed)
+      if (result != null && status != RunStatus.failed && !waiting)
         for (final i in result.issues) text.presenter.message(i),
       for (final d in ours.values)
         for (final n in d.notes) text.presenter.message(n),
     ];
     final (String title, IconData icon, Tone tone) = !_finished
         ? (l10n.syncSheetRunning, Icons.sync_rounded, Tone.accent)
+        : waiting
+        ? (l10n.waitTitle, Icons.wifi_off_rounded, Tone.warn)
         : switch (status) {
             RunStatus.success when warnings.isEmpty => (
               l10n.syncSheetDone,
@@ -151,6 +155,15 @@ class _SyncSheetState extends State<_SyncSheet> {
             Icons.error_rounded,
             p.err,
             p.err,
+          );
+        }
+        if (day.failedTemporarily) {
+          return _Row(
+            dayTitle,
+            l10n.syncRowWaitingNet,
+            Icons.schedule_rounded,
+            p.warn,
+            p.warn,
           );
         }
         if (day.issue != null) {
@@ -250,7 +263,7 @@ class _SyncSheetState extends State<_SyncSheet> {
     final shown = rows.length > _maxRows ? rows.take(_maxRows).toList() : rows;
 
     // ─── actions ──────────────────────────────────────────────────────────
-    final blocking = status == RunStatus.failed
+    final blocking = status == RunStatus.failed && !waiting
         ? [
             ...?result?.issues,
             for (final d in ours.values) ?d.issue,
@@ -326,6 +339,14 @@ class _SyncSheetState extends State<_SyncSheet> {
         if (blocking != null) ...[
           const SizedBox(height: 10),
           Callout(text: text.presenter.message(blocking), tone: Tone.err),
+        ],
+        if (waiting) ...[
+          const SizedBox(height: 10),
+          Callout(
+            text: l10n.syncSheetWaitingNote,
+            tone: Tone.warn,
+            icon: Icons.schedule_rounded,
+          ),
         ],
         if (_finished) ...[
           const SizedBox(height: 16),

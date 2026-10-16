@@ -11,6 +11,7 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../sync/sheet_status.dart';
 import '../../sync/sync_controller.dart';
+import '../../sync/sync_history.dart';
 import '../../sync/sync_models.dart';
 import '../day_view.dart';
 import '../settings/sheet_controller.dart';
@@ -139,11 +140,13 @@ class _SyncCardState extends State<SyncCard> {
             icon: Icons.restaurant_rounded,
             title: l10n.qsYesterday(text.dayShort(yesterday)),
             sub: l10n.qsYesterdaySub,
-            chip: _yesterdayChip(
-              l10n,
-              c.days[yesterday],
-              c.sheet?.days[yesterday],
-            ),
+            chip: c.retryDates.contains(yesterday)
+                ? (l10n.chipWaiting, Tone.warn)
+                : _yesterdayChip(
+                    l10n,
+                    c.days[yesterday],
+                    c.sheet?.days[yesterday],
+                  ),
           ),
           _QuickRow(
             icon: Icons.monitor_weight_rounded,
@@ -158,7 +161,9 @@ class _SyncCardState extends State<SyncCard> {
               ),
               null => l10n.qsTodaySubNone,
             },
-            chip: _todayChip(l10n, c.days[today], c.sheet?.days[today]),
+            chip: c.retryDates.contains(today)
+                ? (l10n.chipWaiting, Tone.warn)
+                : _todayChip(l10n, c.days[today], c.sheet?.days[today]),
           ),
           const SizedBox(height: 12),
           Row(
@@ -193,7 +198,7 @@ class _SyncCardState extends State<SyncCard> {
       final missingKt = ktColumns.where((k) => !sheet.filled.contains(k));
       final rest = [SheetColumn.weight].where((k) => !sheet.filled.contains(k));
       if (missingKt.isEmpty && rest.isEmpty) return (l10n.chipInSheet, Tone.ok);
-      if (day?.status == DayStatus.failed) return (l10n.chipError, Tone.err);
+      if (day != null && _dateProblem(day)) return (l10n.chipError, Tone.err);
       if (missingKt.length == ktColumns.length && sheet.filled.isNotEmpty) {
         return (l10n.chipNutritionMissing, Tone.warn);
       }
@@ -201,7 +206,7 @@ class _SyncCardState extends State<SyncCard> {
       return (l10n.chipToWrite, Tone.accent);
     }
     if (day == null) return (l10n.chipToWrite, Tone.accent);
-    if (day.status == DayStatus.failed) return (l10n.chipError, Tone.err);
+    if (_dateProblem(day)) return (l10n.chipError, Tone.err);
     if (nutritionMissing(day)) return (l10n.chipNutritionMissing, Tone.warn);
     return switch (day.status) {
       DayStatus.ok => (l10n.chipInSheet, Tone.ok),
@@ -220,7 +225,7 @@ class _SyncCardState extends State<SyncCard> {
     }
     final weight = day?.fields[SheetColumn.weight];
     if (day == null) return (l10n.chipToWrite, Tone.accent);
-    if (day.issue != null) return (l10n.chipError, Tone.err);
+    if (_dateProblem(day)) return (l10n.chipError, Tone.err);
     return switch (weight?.kind) {
       // In the run but no longer in the sheet → needs writing again.
       FieldOutcomeKind.written || FieldOutcomeKind.unchanged =>
@@ -237,6 +242,11 @@ class _SyncCardState extends State<SyncCard> {
 
 /// Square green button next to Synchronizovat: opens the coach's sheet in
 /// Google Sheets (or the browser).
+/// Red only for a problem with that very date; account-wide problems are in
+/// the status card, connection problems are retried.
+bool _dateProblem(DayResult day) =>
+    day.failures.any((i) => areaOf(i) == IssueArea.date);
+
 class _OpenSheetButton extends StatelessWidget {
   const _OpenSheetButton({required this.spreadsheetId});
 

@@ -39,6 +39,9 @@ class SyncNotifier {
     AppLocalizations l10n, {
     required bool notifySuccess,
   }) {
+    // Connection problems are retried automatically; only the final
+    // result is worth a notification.
+    if (r.onlyTemporaryProblems) return null;
     final text = SyncText(l10n);
     final dates = text.dates([for (final d in r.days) d.date]);
     String firstProblem() {

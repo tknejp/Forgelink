@@ -68,12 +68,14 @@ Future<void> main() async {
       channelName: l10n.syncServiceChannel,
     ),
     // Calendar colours from the sheet itself; never shows Google UI.
+    onRetryDatesChanged: BackgroundSync.reconcileRetry,
     sheetStatus: SheetStatusSource(
       prefs,
       TrackerSheet(SheetsGateway(googleAuth, interactive: false)),
     ),
   );
   await syncController.reload();
+  await syncController.syncRetrySchedule();
   // Register (or cancel) the automatic sync on every start (plan Phase 6).
   await BackgroundSync.apply(prefs);
 

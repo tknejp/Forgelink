@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:forgelink/core/app_config.dart';
 import 'package:forgelink/core/local_date.dart';
+import 'package:forgelink/core/sync_issue.dart';
 import 'package:forgelink/sheets/tracker_index.dart';
 import 'package:forgelink/sync/sheet_status.dart';
 import 'package:forgelink/sync/sync_models.dart';
@@ -67,8 +68,12 @@ void main() {
   });
 
   group('calendarStatus', () {
-    DayResult failed(LocalDate d) =>
-        DayResult(date: d, status: DayStatus.failed, fields: const {});
+    DayResult failed(LocalDate d) => DayResult(
+      date: d,
+      status: DayStatus.failed,
+      fields: const {},
+      issue: DateDuplicated(d, const [3, 4]),
+    );
 
     test('the sheet wins when it is full, even after a failed run', () {
       final s = _snap({d15: _all()});
@@ -101,6 +106,22 @@ void main() {
     test('without a snapshot the last run decides', () {
       expect(calendarStatus(d15, _today), isNull);
       expect(calendarStatus(d15, _today, day: failed(d15)), DayStatus.failed);
+    });
+
+    test('account-wide or connection failures never paint a day red', () {
+      for (final issue in const [GoogleReauthRequired(), Offline()]) {
+        final d = DayResult(
+          date: d15,
+          status: DayStatus.failed,
+          fields: const {},
+          issue: issue,
+        );
+        expect(calendarStatus(d15, _today, day: d), isNull);
+        expect(
+          calendarStatus(d15, _today, day: d, sheet: _snap({d15: {}})),
+          DayStatus.noData,
+        );
+      }
     });
   });
 

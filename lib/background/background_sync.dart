@@ -98,6 +98,38 @@ abstract final class BackgroundSync {
     AppLog.sync.info('Next background sync booked', payload: '$slot');
   }
 
+  // ─── Retry after temporary failures ──────────────────────────────────────
+
+  static const retryTaskName = 'forgelink.retry_sync';
+  static const _retryName = 'forgelink_retry';
+
+  /// Keeps the retry task in step with the dates waiting for it: books one
+  /// (runs when the phone is online, with growing delays while it keeps
+  /// failing) or cancels it once nothing waits — e.g. after a successful
+  /// manual sync. Safe to call after every run.
+  static Future<void> reconcileRetry(Set<LocalDate> pending) async {
+    try {
+      await Workmanager().initialize(backgroundSyncCallback);
+      if (pending.isEmpty) {
+        await Workmanager().cancelByUniqueName(_retryName);
+        return;
+      }
+      await Workmanager().registerOneOffTask(
+        _retryName,
+        retryTaskName,
+        initialDelay: const Duration(seconds: 30),
+        constraints: Constraints(networkType: NetworkType.connected),
+        // A booked or running retry already picks up new dates.
+        existingWorkPolicy: ExistingWorkPolicy.keep,
+        backoffPolicy: BackoffPolicy.exponential,
+        backoffPolicyDelay: const Duration(minutes: 1),
+      );
+      AppLog.sync.info('Retry booked', payload: '${pending.length} dates');
+    } catch (e) {
+      AppLog.sync.warn('Retry scheduling failed', payload: '$e');
+    }
+  }
+
   /// Debug aid: runs the same headless worker once, [delay] from now, so it
   /// can be observed with the app closed.
   static Future<void> runOnceForTest({
@@ -124,7 +156,11 @@ abstract final class BackgroundSync {
 /// Headless entry point: runs in its own Flutter engine with no Activity.
 @pragma('vm:entry-point')
 void backgroundSyncCallback() {
-  Workmanager().executeTask((task, input) => runBackgroundSync());
+  Workmanager().executeTask(
+    (task, input) => task == BackgroundSync.retryTaskName
+        ? runRetrySync()
+        : runBackgroundSync(),
+  );
 }
 
 /// One background run. Always returns `true` (no WorkManager retries): the
@@ -163,12 +199,60 @@ Future<bool> runBackgroundSync() async {
       BackgroundSync.datesFor(LocalDate.today()),
     );
     await history.record(result);
+    await BackgroundSync.reconcileRetry(await history.retryDates());
     await SyncNotifier(prefs).notify(result);
     return true;
   } catch (e, st) {
     AppLog.sync.error('Background run crashed', err: e, stackTrace: st);
     await SyncNotifier(prefs).notifyCrash();
     return true;
+  } finally {
+    await log.flush();
+  }
+}
+
+/// The retry worker: syncs the dates whose last run failed only for
+/// temporary reasons. Returns false ("retry later", WorkManager backs off)
+/// while they still fail that way; notifies once they are through.
+Future<bool> runRetrySync() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+  await initializeDateFormatting('cs');
+
+  final prefs = PrefsStore();
+  final log = PersistentLogBuffer(prefs);
+  AppLog.sink = log;
+  await log.load();
+
+  try {
+    final history = SyncHistory(prefs, IntegrationStatusStore(prefs));
+    final dates = (await history.retryDates()).toList()..sort();
+    if (dates.isEmpty) {
+      AppLog.sync.info('Retry: nothing waits');
+      return true;
+    }
+
+    final googleAuth = GoogleAuth(prefs);
+    await googleAuth.initialize();
+    final engine = SyncEngine(
+      prefs: prefs,
+      health: HealthSource(prefs: prefs, requireBackgroundPermission: true),
+      kt: KtSource(KtClient(storage: SecureStore.instance)),
+      sheet: TrackerSheet(SheetsGateway(googleAuth, interactive: false)),
+    );
+    final result = await engine.run(SyncTrigger.background, dates);
+    await history.record(result);
+
+    if ((await history.retryDates()).isNotEmpty &&
+        result.onlyTemporaryProblems) {
+      AppLog.sync.info('Retry: still offline, backing off');
+      return false;
+    }
+    await SyncNotifier(prefs).notify(result);
+    return true;
+  } catch (e, st) {
+    AppLog.sync.error('Retry run crashed', err: e, stackTrace: st);
+    return false;
   } finally {
     await log.flush();
   }

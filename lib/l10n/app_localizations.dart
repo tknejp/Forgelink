@@ -2073,6 +2073,48 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Soubor'**
   String get rowSheetFile;
+
+  /// No description provided for @waitTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čeká na připojení'**
+  String get waitTitle;
+
+  /// No description provided for @waitSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Dokončí se samo · {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}'**
+  String waitSub(int count);
+
+  /// No description provided for @waitNow.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zkusit teď'**
+  String get waitNow;
+
+  /// No description provided for @chipWaiting.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čeká'**
+  String get chipWaiting;
+
+  /// No description provided for @syncRowWaitingNet.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čeká na připojení'**
+  String get syncRowWaitingNet;
+
+  /// No description provided for @syncSheetWaitingNote.
+  ///
+  /// In cs, this message translates to:
+  /// **'Až bude připojení, synchronizace se dokončí sama a dá vědět notifikací.'**
+  String get syncSheetWaitingNote;
+
+  /// No description provided for @dayWaitingNote.
+  ///
+  /// In cs, this message translates to:
+  /// **'Poslední pokus se nepovedl kvůli připojení. Den se zkusí znovu sám.'**
+  String get dayWaitingNote;
 }
 
 class _AppLocalizationsDelegate

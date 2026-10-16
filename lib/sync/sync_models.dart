@@ -86,6 +86,18 @@ class DayResult {
     return DayStatus.ok;
   }
 
+  /// Issues that stopped this date or some of its cells.
+  List<SyncIssue> get failures => [
+    ?issue,
+    for (final f in fields.values)
+      if (f.kind == FieldOutcomeKind.failed) ?f.issue,
+  ];
+
+  /// Something failed, and only for temporary reasons (no connection, a
+  /// service briefly down): retried automatically, never shown as an error.
+  bool get failedTemporarily =>
+      failures.isNotEmpty && failures.every((i) => i.isTransient);
+
   Iterable<SheetColumn> fieldsWhere(bool Function(FieldOutcome) test) =>
       fields.entries.where((e) => test(e.value)).map((e) => e.key);
 
@@ -163,6 +175,16 @@ class RunResult {
             d.issue != null ||
             d.fields.values.any((f) => f.kind == FieldOutcomeKind.failed),
       );
+
+  /// The run didn't finish, but only for temporary reasons — it will be
+  /// retried automatically, so nothing is reported as an error.
+  bool get onlyTemporaryProblems {
+    if (status != RunStatus.partial && status != RunStatus.failed) {
+      return false;
+    }
+    final all = [...issues, for (final d in days) ...d.failures];
+    return all.isNotEmpty && all.every((i) => i.isTransient);
+  }
 
   int get cellsWritten => days.fold(
     0,

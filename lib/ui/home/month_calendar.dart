@@ -314,7 +314,8 @@ class _MonthCalendarState extends State<MonthCalendar> {
       isToday: date == today,
       isFuture: date.isAfter(today),
       running: c.running.contains(date),
-      queued: c.queued.contains(date),
+      // Waiting in the queue, or for an automatic retry.
+      queued: c.queued.contains(date) || c.retryDates.contains(date),
       selected: selected,
       status: calendarStatus(date, today, day: c.days[date], sheet: c.sheet),
       height: _rowHeight,

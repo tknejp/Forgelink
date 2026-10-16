@@ -158,22 +158,53 @@ void main() {
   });
 
   test('dismiss removes an open issue', () async {
-    await history.record(run(issues: const [Offline()]));
-    // Offline is in the general area; the same run proved it, so re-add.
     await history.record(
       run(
         fields: const {
           SheetColumn.kcal: FieldOutcome(
             FieldOutcomeKind.failed,
-            issue: Offline(),
+            issue: SheetNotFound(),
           ),
         },
-        issues: const [Offline()],
+        issues: const [SheetNotFound()],
       ),
     );
     expect(await history.openIssues(), isNotEmpty);
-    await history.dismiss(const Offline());
+    await history.dismiss(const SheetNotFound());
     expect(await history.openIssues(), isEmpty);
+  });
+
+  group('connection problems', () {
+    RunResult offline() => run(
+      fields: const {
+        SheetColumn.weight: FieldOutcome(
+          FieldOutcomeKind.failed,
+          issue: Offline(),
+        ),
+      },
+      issues: const [Offline()],
+    );
+
+    test('are never open issues; the date waits for a retry', () async {
+      await history.record(offline());
+      expect(await history.openIssues(), isEmpty);
+      expect(await history.retryDates(), {day});
+    });
+
+    test('keep the day\'s last good state', () async {
+      await history.record(run());
+      await history.record(offline());
+      final kept = (await history.days())[day]!;
+      expect(kept.status, DayStatus.ok);
+      expect(await history.retryDates(), {day});
+    });
+
+    test('a later success clears the retry', () async {
+      await history.record(offline());
+      await history.record(run());
+      expect(await history.retryDates(), isEmpty);
+      expect((await history.days())[day]!.status, DayStatus.ok);
+    });
   });
 
   test('run log is capped', () async {
