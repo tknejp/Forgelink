@@ -5,7 +5,7 @@ abstract final class AppConfig {
 
   /// Shown in the Settings footer; keep in sync with `version:` in
   /// pubspec.yaml.
-  static const version = '0.1.0';
+  static const version = '1.0.0';
 
   /// Google Cloud project `forgelink-511721` (#598204569304).
   ///
