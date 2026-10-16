@@ -21,7 +21,7 @@
 
     <!-- Backup is disabled on purpose: restored secure-storage ciphertext can't be
          decrypted with the new keystore, and a restored hcFirstGrantDate would be
-         stale (docs/implementation_plan.md §12). -->
+         stale (docs/archive/implementation_plan.md §12). -->
     <application
         android:label="Forgelink"
         android:name="${applicationName}"
