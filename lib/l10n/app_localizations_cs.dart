@@ -537,7 +537,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get autoSyncDescription =>
-      'Zhruba dvakrát denně doplní poslední 3 dny a dnešní váhu. Android může běh posunout, ruční synchronizace funguje vždy.';
+      'Každý den kolem 0:30 (celý předchozí den) a 12:30 (dnešní váha) doplní poslední 3 dny. Android může běh o pár minut posunout, ruční synchronizace funguje vždy.';
 
   @override
   String autoSyncLastRun(String when, String status) {
@@ -569,7 +569,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get bgFailureTitle => 'Automatická synchronizace se nezdařila';
 
   @override
-  String get bgChannelName => 'Problémy se synchronizací';
+  String get bgChannelName => 'Výsledky synchronizace';
 
   @override
   String get diagnosticsBgTest => 'Test synchronizace na pozadí';
@@ -577,4 +577,43 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String get diagnosticsBgTestScheduled =>
       'Spustí se za 10 s – teď můžeš aplikaci opustit.';
+
+  @override
+  String get bgSuccessTitle => 'Synchronizace dokončena';
+
+  @override
+  String bgSuccessBody(String dates, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hodnot',
+      few: '$count hodnoty',
+      one: '1 hodnota',
+    );
+    return '$dates: zapsáno $_temp0.';
+  }
+
+  @override
+  String bgUpToDateBody(String dates) {
+    return '$dates: vše už bylo aktuální.';
+  }
+
+  @override
+  String get bgPartialTitle => 'Synchronizace dokončena s problémy';
+
+  @override
+  String get bgManualHint => 'Otevři Forgelink a synchronizuj ručně.';
+
+  @override
+  String autoSyncNextRun(String when) {
+    return 'Další běh: $when';
+  }
+
+  @override
+  String get autoSyncNotifySuccess => 'Oznámit i úspěšnou synchronizaci';
+
+  @override
+  String whenTomorrow(String time) {
+    return 'zítra $time';
+  }
 }

@@ -64,6 +64,22 @@ class PrefsStore {
 
   Future<void> setAutoSync(bool enabled) => _prefs.setBool(_kAutoSync, enabled);
 
+  Future<bool> notifySuccess() async =>
+      await _prefs.getBool('sync.notify_success') ?? true;
+
+  Future<void> setNotifySuccess(bool value) =>
+      _prefs.setBool('sync.notify_success', value);
+
+  /// When the next automatic run is booked (null when none).
+  Future<DateTime?> nextBackgroundRun() async {
+    final raw = await _prefs.getString('sync.next_run');
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  Future<void> setNextBackgroundRun(DateTime? at) => at == null
+      ? _prefs.remove('sync.next_run')
+      : _prefs.setString('sync.next_run', at.toIso8601String());
+
   // ─── Health Connect history window ──────────────────────────────────────
 
   Future<LocalDate?> hcFirstGrantDate() async {

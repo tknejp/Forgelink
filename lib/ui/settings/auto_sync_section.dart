@@ -41,7 +41,16 @@ class AutoSyncSection extends StatelessWidget {
         ),
         Text(l10n.autoSyncDescription, style: muted),
         if (c.enabled) ...[
-          const SizedBox(height: 10),
+          if (c.nextRun case final next?) ...[
+            const SizedBox(height: 10),
+            Text(l10n.autoSyncNextRun(text.when(next, now: DateTime.now()))),
+          ],
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.autoSyncNotifySuccess),
+            value: c.notifySuccess,
+            onChanged: c.setNotifySuccess,
+          ),
           Text(
             lastBg == null
                 ? l10n.autoSyncNeverRan

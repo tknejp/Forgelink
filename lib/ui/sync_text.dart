@@ -39,6 +39,7 @@ class SyncText {
     final t = _time.format(at);
     if (day == today) return l10n.whenToday(t);
     if (day == today.addDays(-1)) return l10n.whenYesterday(t);
+    if (day == today.addDays(1)) return l10n.whenTomorrow(t);
     return '${date(day)} $t';
   }
 

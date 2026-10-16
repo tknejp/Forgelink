@@ -979,7 +979,7 @@ abstract class AppLocalizations {
   /// No description provided for @autoSyncDescription.
   ///
   /// In cs, this message translates to:
-  /// **'Zhruba dvakrát denně doplní poslední 3 dny a dnešní váhu. Android může běh posunout, ruční synchronizace funguje vždy.'**
+  /// **'Každý den kolem 0:30 (celý předchozí den) a 12:30 (dnešní váha) doplní poslední 3 dny. Android může běh o pár minut posunout, ruční synchronizace funguje vždy.'**
   String get autoSyncDescription;
 
   /// No description provided for @autoSyncLastRun.
@@ -1033,7 +1033,7 @@ abstract class AppLocalizations {
   /// No description provided for @bgChannelName.
   ///
   /// In cs, this message translates to:
-  /// **'Problémy se synchronizací'**
+  /// **'Výsledky synchronizace'**
   String get bgChannelName;
 
   /// No description provided for @diagnosticsBgTest.
@@ -1047,6 +1047,54 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'Spustí se za 10 s – teď můžeš aplikaci opustit.'**
   String get diagnosticsBgTestScheduled;
+
+  /// No description provided for @bgSuccessTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizace dokončena'**
+  String get bgSuccessTitle;
+
+  /// No description provided for @bgSuccessBody.
+  ///
+  /// In cs, this message translates to:
+  /// **'{dates}: zapsáno {count, plural, =1{1 hodnota} few{{count} hodnoty} other{{count} hodnot}}.'**
+  String bgSuccessBody(String dates, int count);
+
+  /// No description provided for @bgUpToDateBody.
+  ///
+  /// In cs, this message translates to:
+  /// **'{dates}: vše už bylo aktuální.'**
+  String bgUpToDateBody(String dates);
+
+  /// No description provided for @bgPartialTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizace dokončena s problémy'**
+  String get bgPartialTitle;
+
+  /// No description provided for @bgManualHint.
+  ///
+  /// In cs, this message translates to:
+  /// **'Otevři Forgelink a synchronizuj ručně.'**
+  String get bgManualHint;
+
+  /// No description provided for @autoSyncNextRun.
+  ///
+  /// In cs, this message translates to:
+  /// **'Další běh: {when}'**
+  String autoSyncNextRun(String when);
+
+  /// No description provided for @autoSyncNotifySuccess.
+  ///
+  /// In cs, this message translates to:
+  /// **'Oznámit i úspěšnou synchronizaci'**
+  String get autoSyncNotifySuccess;
+
+  /// No description provided for @whenTomorrow.
+  ///
+  /// In cs, this message translates to:
+  /// **'zítra {time}'**
+  String whenTomorrow(String time);
 }
 
 class _AppLocalizationsDelegate

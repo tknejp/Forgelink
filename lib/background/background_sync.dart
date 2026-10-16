@@ -19,37 +19,57 @@ import '../sync/integration_status.dart';
 import '../sync/sync_engine.dart';
 import '../sync/sync_history.dart';
 import '../sync/sync_models.dart';
-import 'failure_notifier.dart';
+import 'sync_notifier.dart';
 
-/// Automatic daily sync (docs/implementation_plan.md §13 Phase 6).
+/// Automatic sync at fixed times of day (docs/implementation_plan.md Phase 6).
 ///
-/// One unique periodic WorkManager task, ~every 12 h with a 4 h flex, only
-/// with network. Each run re-syncs the last three days in full plus today's
-/// weight; unchanged cells are skipped, so extra runs cost nothing and late
-/// data (e.g. steps Samsung Health pushes later) heals itself.
+/// Runs at about 00:30 (the day that just ended, complete) and 12:30 (after
+/// the morning weigh-in). WorkManager periodic work drifts, so each run is a
+/// one-off task with its own name; a run first books the next slot, then
+/// syncs — the chain survives a crash, and every app start re-arms it.
+/// Each run re-syncs the last [lookbackDays] days in full plus today's
+/// weight; unchanged cells are skipped, so overlapping runs cost nothing.
 abstract final class BackgroundSync {
-  static const uniqueName = 'forgelink_daily_sync';
   static const taskName = 'forgelink.daily_sync';
+  static const tag = 'forgelink_scheduled';
   static const lookbackDays = 3;
 
-  /// Call on every app start and when the setting changes: registers the
-  /// task when auto sync is on (also recovering it after a force-stop or
-  /// hibernation), cancels it otherwise.
+  /// Times of day (hour, minute), local time.
+  static const slots = [(0, 30), (12, 30)];
+
+  /// Unique name of the old 12 h periodic task (before fixed times).
+  static const _legacyPeriodicName = 'forgelink_daily_sync';
+
+  /// The first slot strictly later than [now] + 1 minute.
+  static DateTime nextSlot(DateTime now) {
+    final earliest = now.add(const Duration(minutes: 1));
+    for (var dayOffset = 0; dayOffset < 2; dayOffset++) {
+      for (final (h, m) in slots) {
+        final t = DateTime(now.year, now.month, now.day + dayOffset, h, m);
+        if (t.isAfter(earliest)) return t;
+      }
+    }
+    final (h, m) = slots.first;
+    return DateTime(now.year, now.month, now.day + 2, h, m);
+  }
+
+  static String _nameFor(DateTime slot) =>
+      'forgelink_sync_${LocalDate.fromDateTime(slot).isoKey}_'
+      '${slot.hour.toString().padLeft(2, '0')}'
+      '${slot.minute.toString().padLeft(2, '0')}';
+
+  /// Call on every app start and when the setting changes: books the next
+  /// slot when auto sync is on (KEEP — never pushes an already booked run),
+  /// cancels everything otherwise.
   static Future<void> apply(PrefsStore prefs) async {
     try {
       await Workmanager().initialize(backgroundSyncCallback);
+      await Workmanager().cancelByUniqueName(_legacyPeriodicName);
       if (await prefs.autoSync()) {
-        await Workmanager().registerPeriodicTask(
-          uniqueName,
-          taskName,
-          frequency: const Duration(hours: 12),
-          flexInterval: const Duration(hours: 4),
-          constraints: Constraints(networkType: NetworkType.connected),
-          existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
-        );
-        AppLog.sync.info('Background sync scheduled (12 h)');
+        await scheduleNext(prefs);
       } else {
-        await Workmanager().cancelByUniqueName(uniqueName);
+        await Workmanager().cancelByTag(tag);
+        await prefs.setNextBackgroundRun(null);
         AppLog.sync.info('Background sync cancelled');
       }
     } catch (e, st) {
@@ -61,9 +81,25 @@ abstract final class BackgroundSync {
     }
   }
 
+  /// Books the next 00:30 / 12:30 run. Safe to call repeatedly.
+  static Future<void> scheduleNext(PrefsStore prefs, {DateTime? now}) async {
+    final at = now ?? DateTime.now();
+    final slot = nextSlot(at);
+    await Workmanager().registerOneOffTask(
+      _nameFor(slot),
+      taskName,
+      tag: tag,
+      initialDelay: slot.difference(at),
+      // Offline at the slot → runs as soon as the network is back.
+      constraints: Constraints(networkType: NetworkType.connected),
+      existingWorkPolicy: ExistingWorkPolicy.keep,
+    );
+    await prefs.setNextBackgroundRun(slot);
+    AppLog.sync.info('Next background sync booked', payload: '$slot');
+  }
+
   /// Debug aid: runs the same headless worker once, [delay] from now, so it
-  /// can be observed with the app closed (periodic work can't be forced
-  /// before its window).
+  /// can be observed with the app closed.
   static Future<void> runOnceForTest({
     Duration delay = const Duration(seconds: 10),
   }) async {
@@ -91,9 +127,9 @@ void backgroundSyncCallback() {
   Workmanager().executeTask((task, input) => runBackgroundSync());
 }
 
-/// One background run. Return values follow workmanager_android:
-/// `true` → success (also for problems only the user can fix — they are
-/// recorded and notified), `false` → retry with backoff (transient problems).
+/// One background run. Always returns `true` (no WorkManager retries): the
+/// outcome is recorded and notified, and the next slot or a manual sync
+/// takes over — retries would only produce a burst of notifications.
 Future<bool> runBackgroundSync() async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
@@ -109,6 +145,8 @@ Future<bool> runBackgroundSync() async {
       AppLog.sync.info('Background run skipped: auto sync is off');
       return true;
     }
+    // Book the next slot first, so a crash below can't break the chain.
+    await BackgroundSync.scheduleNext(prefs);
 
     final googleAuth = GoogleAuth(prefs);
     await googleAuth.initialize();
@@ -120,23 +158,17 @@ Future<bool> runBackgroundSync() async {
     );
     final history = SyncHistory(prefs, IntegrationStatusStore(prefs));
 
-    final today = LocalDate.today();
     final result = await engine.run(
       SyncTrigger.background,
-      BackgroundSync.datesFor(today),
+      BackgroundSync.datesFor(LocalDate.today()),
     );
     await history.record(result);
-    await FailureNotifier(prefs).notifyIfNeeded(result);
-
-    // Retry soon only when nothing got through and the cause is transient.
-    final retry =
-        result.status == RunStatus.failed &&
-        result.issues.isNotEmpty &&
-        result.issues.every((i) => i.isTransient);
-    return !retry;
+    await SyncNotifier(prefs).notify(result);
+    return true;
   } catch (e, st) {
     AppLog.sync.error('Background run crashed', err: e, stackTrace: st);
-    return true; // don't loop on a bug; the next period runs anyway
+    await SyncNotifier(prefs).notifyCrash();
+    return true;
   } finally {
     await log.flush();
   }

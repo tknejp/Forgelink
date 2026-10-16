@@ -16,9 +16,13 @@ class AutoSyncController extends ChangeNotifier {
 
   bool enabled = false;
   bool ignoringBattery = false;
+  bool notifySuccess = true;
+  DateTime? nextRun;
 
   Future<void> load() async {
     enabled = await _prefs.autoSync();
+    notifySuccess = await _prefs.notifySuccess();
+    nextRun = enabled ? await _prefs.nextBackgroundRun() : null;
     ignoringBattery = await _intents.isIgnoringBatteryOptimizations();
     notifyListeners();
   }
@@ -28,6 +32,13 @@ class AutoSyncController extends ChangeNotifier {
     notifyListeners();
     await _prefs.setAutoSync(value);
     await (scheduler ?? BackgroundSync.apply)(_prefs);
+    await load();
+  }
+
+  Future<void> setNotifySuccess(bool value) async {
+    notifySuccess = value;
+    notifyListeners();
+    await _prefs.setNotifySuccess(value);
   }
 
   Future<void> requestBatteryExemption() async {

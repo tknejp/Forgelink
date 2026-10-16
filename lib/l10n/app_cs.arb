@@ -409,7 +409,7 @@
   },
   "homeQuickSyncLabel": "Rychlá synchronizace včerejška",
   "autoSyncSwitch": "Synchronizovat automaticky",
-  "autoSyncDescription": "Zhruba dvakrát denně doplní poslední 3 dny a dnešní váhu. Android může běh posunout, ruční synchronizace funguje vždy.",
+  "autoSyncDescription": "Každý den kolem 0:30 (celý předchozí den) a 12:30 (dnešní váha) doplní poslední 3 dny. Android může běh o pár minut posunout, ruční synchronizace funguje vždy.",
   "autoSyncLastRun": "Poslední běh na pozadí: {when} · {status}",
   "@autoSyncLastRun": {
     "placeholders": {
@@ -428,7 +428,46 @@
   "autoSyncUnusedHint": "V nastavení aplikace vypni „Pozastavit aktivitu, pokud se aplikace nepoužívá“, jinak Android po delší době automatickou synchronizaci zastaví.",
   "autoSyncNeedsHcBackground": "Health Connect na pozadí: povol „Čtení na pozadí“ v sekci Health Connect.",
   "bgFailureTitle": "Automatická synchronizace se nezdařila",
-  "bgChannelName": "Problémy se synchronizací",
+  "bgChannelName": "Výsledky synchronizace",
   "diagnosticsBgTest": "Test synchronizace na pozadí",
-  "diagnosticsBgTestScheduled": "Spustí se za 10 s – teď můžeš aplikaci opustit."
+  "diagnosticsBgTestScheduled": "Spustí se za 10 s – teď můžeš aplikaci opustit.",
+  "bgSuccessTitle": "Synchronizace dokončena",
+  "bgSuccessBody": "{dates}: zapsáno {count, plural, =1{1 hodnota} few{{count} hodnoty} other{{count} hodnot}}.",
+  "@bgSuccessBody": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bgUpToDateBody": "{dates}: vše už bylo aktuální.",
+  "@bgUpToDateBody": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      }
+    }
+  },
+  "bgPartialTitle": "Synchronizace dokončena s problémy",
+  "bgManualHint": "Otevři Forgelink a synchronizuj ručně.",
+  "autoSyncNextRun": "Další běh: {when}",
+  "@autoSyncNextRun": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "autoSyncNotifySuccess": "Oznámit i úspěšnou synchronizaci",
+  "whenTomorrow": "zítra {time}",
+  "@whenTomorrow": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }
