@@ -34,6 +34,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  /// Last run that got a toast: taps merged into one run share it.
+  RunResult? _toastedRun;
+
+  /// Last problem shown and when — the same problem isn't repeated within
+  /// [_repeatAfter] (e.g. several taps on a bad connection).
+  (String, DateTime)? _toastedIssue;
+  static const _repeatAfter = Duration(seconds: 30);
+
   @override
   void initState() {
     super.initState();
@@ -84,8 +92,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     RunResult result,
     VoidCallback retry,
   ) {
+    if (identical(result, _toastedRun)) return;
+    _toastedRun = result;
     if (result.status != RunStatus.partial &&
         result.status != RunStatus.failed) {
+      // Working again: the next problem is news.
+      _toastedIssue = null;
       return;
     }
     final text = SyncText(context.l10n);
@@ -98,6 +110,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ],
     ].firstOrNull;
     final action = issue?.action;
+    final key = issue?.code ?? result.status.name;
+    final now = DateTime.now();
+    if (_toastedIssue case (
+      final last,
+      final at,
+    ) when last == key && now.difference(at) < _repeatAfter) {
+      return;
+    }
+    _toastedIssue = (key, now);
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
