@@ -112,12 +112,6 @@ abstract class AppLocalizations {
   /// **'Vše připojeno'**
   String get homeAllConnected;
 
-  /// No description provided for @homeLastSyncTitle.
-  ///
-  /// In cs, this message translates to:
-  /// **'Poslední synchronizace'**
-  String get homeLastSyncTitle;
-
   /// No description provided for @homeLastSyncNever.
   ///
   /// In cs, this message translates to:
@@ -127,31 +121,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeQuickSyncButton.
   ///
   /// In cs, this message translates to:
-  /// **'Synchronizovat'**
+  /// **'Synchronizovat včerejšek'**
   String get homeQuickSyncButton;
-
-  /// No description provided for @homeQuickSyncSubtitle.
-  ///
-  /// In cs, this message translates to:
-  /// **'Včera: výživa a kroky · Dnes: váha'**
-  String get homeQuickSyncSubtitle;
-
-  /// No description provided for @homeCalendarTitle.
-  ///
-  /// In cs, this message translates to:
-  /// **'Kalendář'**
-  String get homeCalendarTitle;
-
-  /// No description provided for @homeAdvancedTitle.
-  ///
-  /// In cs, this message translates to:
-  /// **'Další možnosti'**
-  String get homeAdvancedTitle;
 
   /// No description provided for @homeRangeSync.
   ///
   /// In cs, this message translates to:
-  /// **'Synchronizovat období…'**
+  /// **'Synchronizovat období'**
   String get homeRangeSync;
 
   /// No description provided for @homeHistory.
@@ -841,7 +817,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendarHint.
   ///
   /// In cs, this message translates to:
-  /// **'Klepnutím na den ho synchronizuješ. Podržením zobrazíš detail, podržením a tažením vybereš období.'**
+  /// **'Klepni = synchronizovat · podrž = detail · podrž a táhni = období'**
   String get calendarHint;
 
   /// No description provided for @rangeTooLong.
@@ -945,6 +921,12 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'{dates} · {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}'**
   String rangeConfirmBody(String dates, int count);
+
+  /// No description provided for @homeQuickSyncCaption.
+  ///
+  /// In cs, this message translates to:
+  /// **'{yesterday} kompletně · {today} jen váha'**
+  String homeQuickSyncCaption(String yesterday, String today);
 }
 
 class _AppLocalizationsDelegate

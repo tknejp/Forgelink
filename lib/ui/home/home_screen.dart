@@ -71,7 +71,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   /// Runs a sync and gives the plan §8 feedback: a snackbar for success /
   /// nothing-to-write; partial and failed results stay in the sync card.
-  Future<void> _sync(Future<RunResult?> Function(SyncController c) start) async {
+  Future<void> _sync(
+    Future<RunResult?> Function(SyncController c) start,
+  ) async {
     final messenger = ScaffoldMessenger.of(context);
     final text = SyncText(context.l10n);
     final result = await start(context.read<SyncController>());
@@ -89,8 +91,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final text = SyncText(l10n);
     final count = from.daysUntil(to) + 1;
     if (count > AppConfig.maxRangeDays) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.rangeTooLong(AppConfig.maxRangeDays))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.rangeTooLong(AppConfig.maxRangeDays))),
+      );
       return;
     }
     final ok = await showDialog<bool>(
@@ -128,8 +131,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final from = LocalDate.fromDateTime(picked.start);
     final to = LocalDate.fromDateTime(picked.end);
     if (from.daysUntil(to) + 1 > AppConfig.maxRangeDays) {
-      messenger.showSnackBar(SnackBar(
-          content: Text(l10n.rangeTooLong(AppConfig.maxRangeDays))));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.rangeTooLong(AppConfig.maxRangeDays))),
+      );
       return;
     }
     await _sync((c) => c.syncRange(from, to));
@@ -161,56 +165,71 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ),
       body: RefreshIndicator(
         onRefresh: () async => _refresh(),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-          children: [
-            _ConnectionsCard(onFix: _openSettings),
-            if (sync.openIssues.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _OpenIssuesCard(
-                issues: sync.openIssues,
-                onRetry: () => _sync((c) => c.quickSync()),
+        // Fills the screen so the sync card sits at the bottom (near the
+        // thumb); scrolls only when extra cards (open issues) don't fit.
+        child: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _ConnectionsCard(onFix: _openSettings),
+                    if (sync.openIssues.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      _OpenIssuesCard(
+                        issues: sync.openIssues,
+                        onRetry: () => _sync((c) => c.quickSync()),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(6, 4, 6, 10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                      child: MonthCalendar(
+                        onTapDay: (d) => _sync((c) => c.syncDate(d)),
+                        onLongPressDay: (d) => showDayDetail(
+                          context,
+                          d,
+                          onSync: () => _sync((c) => c.syncDate(d)),
+                        ),
+                        onSelectRange: _confirmRange,
+                        actions: [
+                          IconButton(
+                            tooltip: l10n.homeRangeSync,
+                            visualDensity: VisualDensity.compact,
+                            onPressed: sync.busy ? null : _pickRange,
+                            icon: const Icon(Icons.date_range_outlined),
+                          ),
+                          IconButton(
+                            tooltip: l10n.homeHistory,
+                            visualDensity: VisualDensity.compact,
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const HistoryScreen(),
+                              ),
+                            ),
+                            icon: const Icon(Icons.history),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    const SizedBox(height: 10),
+                    SyncCard(onQuickSync: () => _sync((c) => c.quickSync())),
+                  ],
+                ),
               ),
-            ],
-            const SizedBox(height: 12),
-            SectionCard(
-              icon: Icons.calendar_month_outlined,
-              title: l10n.homeCalendarTitle,
-              children: [
-                MonthCalendar(
-                  onTapDay: (d) => _sync((c) => c.syncDate(d)),
-                  onLongPressDay: (d) => showDayDetail(context, d,
-                      onSync: () => _sync((c) => c.syncDate(d))),
-                  onSelectRange: _confirmRange,
-                ),
-              ],
-            ),
-            // Below the calendar so the big button sits near the thumb.
-            const SizedBox(height: 12),
-            SyncCard(onQuickSync: () => _sync((c) => c.quickSync())),
-            const SizedBox(height: 12),
-            SectionCard(
-              icon: Icons.tune,
-              title: l10n.homeAdvancedTitle,
-              children: [
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  enabled: !sync.busy,
-                  leading: const Icon(Icons.date_range_outlined),
-                  title: Text(l10n.homeRangeSync),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: _pickRange,
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.history),
-                  title: Text(l10n.homeHistory),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                          builder: (_) => const HistoryScreen())),
-                ),
-              ],
             ),
           ],
         ),
@@ -246,8 +265,11 @@ class _OpenIssuesCard extends StatelessWidget {
                     issue: issue,
                     onAction: issue.action == null
                         ? null
-                        : () => runIssueAction(context, issue.action!,
-                            onRetry: onRetry),
+                        : () => runIssueAction(
+                            context,
+                            issue.action!,
+                            onRetry: onRetry,
+                          ),
                   ),
                 ),
                 IconButton(
@@ -288,12 +310,12 @@ class _ConnectionsCard extends StatelessWidget {
       (
         l10n.settingsSectionHealthConnect,
         context.watch<HealthConnectController>().status,
-        SettingsSection.healthConnect
+        SettingsSection.healthConnect,
       ),
       (
         l10n.settingsSectionKt,
         context.watch<KtController>().status,
-        SettingsSection.kt
+        SettingsSection.kt,
       ),
       _ok(google)
           ? (l10n.homeIntegrationSheets, sheet, SettingsSection.sheet)
@@ -316,14 +338,19 @@ class _ConnectionsCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.homeAllConnected,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                          color: colors.ok, fontWeight: FontWeight.w600)),
+                  Text(
+                    l10n.homeAllConnected,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colors.ok,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Text(
                     items.map((i) => i.$1).join(' · '),
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),

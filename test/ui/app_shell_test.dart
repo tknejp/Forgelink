@@ -89,10 +89,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Forgelink'), findsOneWidget);
-    expect(find.text('Kalendář'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Synchronizovat'), 300);
-    expect(find.text('Synchronizovat'), findsOneWidget);
-    expect(find.text('Včera: výživa a kroky · Dnes: váha'), findsOneWidget);
+    expect(find.byTooltip('Synchronizovat období'), findsOneWidget);
+    expect(find.byTooltip('Historie synchronizací'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Synchronizovat včerejšek'), 300);
+    expect(find.text('Synchronizovat včerejšek'), findsOneWidget);
+    expect(find.textContaining('kompletně'), findsOneWidget);
   });
 
   testWidgets('settings deep link scrolls to the target section',

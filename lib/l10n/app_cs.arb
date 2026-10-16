@@ -6,13 +6,9 @@
   },
   "homeIntegrationsTitle": "Propojení",
   "homeAllConnected": "Vše připojeno",
-  "homeLastSyncTitle": "Poslední synchronizace",
   "homeLastSyncNever": "Zatím neproběhla žádná synchronizace.",
-  "homeQuickSyncButton": "Synchronizovat",
-  "homeQuickSyncSubtitle": "Včera: výživa a kroky · Dnes: váha",
-  "homeCalendarTitle": "Kalendář",
-  "homeAdvancedTitle": "Další možnosti",
-  "homeRangeSync": "Synchronizovat období…",
+  "homeQuickSyncButton": "Synchronizovat včerejšek",
+  "homeRangeSync": "Synchronizovat období",
   "homeHistory": "Historie synchronizací",
   "settingsSectionHealthConnect": "Health Connect",
   "settingsSectionKt": "Kalorické tabulky",
@@ -345,7 +341,7 @@
   "dayNeverSynced": "Tento den zatím nebyl synchronizován.",
   "daySyncNow": "Synchronizovat tento den",
   "dayTodayWeightOnly": "Dnes se synchronizuje jen váha.",
-  "calendarHint": "Klepnutím na den ho synchronizuješ. Podržením zobrazíš detail, podržením a tažením vybereš období.",
+  "calendarHint": "Klepni = synchronizovat · podrž = detail · podrž a táhni = období",
   "rangeTooLong": "Období může mít nejvýše {max} dní.",
   "@rangeTooLong": {
     "placeholders": {
@@ -384,6 +380,17 @@
       },
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "homeQuickSyncCaption": "{yesterday} kompletně · {today} jen váha",
+  "@homeQuickSyncCaption": {
+    "placeholders": {
+      "yesterday": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
       }
     }
   }

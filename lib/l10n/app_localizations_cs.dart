@@ -18,25 +18,13 @@ class AppLocalizationsCs extends AppLocalizations {
   String get homeAllConnected => 'Vše připojeno';
 
   @override
-  String get homeLastSyncTitle => 'Poslední synchronizace';
-
-  @override
   String get homeLastSyncNever => 'Zatím neproběhla žádná synchronizace.';
 
   @override
-  String get homeQuickSyncButton => 'Synchronizovat';
+  String get homeQuickSyncButton => 'Synchronizovat včerejšek';
 
   @override
-  String get homeQuickSyncSubtitle => 'Včera: výživa a kroky · Dnes: váha';
-
-  @override
-  String get homeCalendarTitle => 'Kalendář';
-
-  @override
-  String get homeAdvancedTitle => 'Další možnosti';
-
-  @override
-  String get homeRangeSync => 'Synchronizovat období…';
+  String get homeRangeSync => 'Synchronizovat období';
 
   @override
   String get homeHistory => 'Historie synchronizací';
@@ -449,7 +437,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get calendarHint =>
-      'Klepnutím na den ho synchronizuješ. Podržením zobrazíš detail, podržením a tažením vybereš období.';
+      'Klepni = synchronizovat · podrž = detail · podrž a táhni = období';
 
   @override
   String rangeTooLong(int max) {
@@ -513,5 +501,10 @@ class AppLocalizationsCs extends AppLocalizations {
       one: '1 den',
     );
     return '$dates · $_temp0';
+  }
+
+  @override
+  String homeQuickSyncCaption(String yesterday, String today) {
+    return '$yesterday kompletně · $today jen váha';
   }
 }

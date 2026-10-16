@@ -18,6 +18,9 @@ class SyncText {
 
   String date(LocalDate d) => presenter.formatDate(d);
 
+  /// "15. 10." (no year), for compact captions.
+  String dayMonth(LocalDate d) => _dayMonth.format(d.startOfDay);
+
   /// "12. 10. 2026" or "12. 10. – 18. 10. 2026".
   String dates(List<LocalDate> list) {
     if (list.isEmpty) return '';
