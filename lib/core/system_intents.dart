@@ -78,6 +78,15 @@ class SystemIntents {
     }
   }
 
+  /// Opens [url] in the app that handles it (Google Sheets or the browser).
+  Future<void> openUrl(String url) async {
+    try {
+      await _channel.invokeMethod<void>('openUrl', {'url': url});
+    } catch (e) {
+      AppLog.app.warn('openUrl failed', payload: '$e');
+    }
+  }
+
   Future<void> stopSyncService() async {
     try {
       await _channel.invokeMethod<void>('stopSyncService');

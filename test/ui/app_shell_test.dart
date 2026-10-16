@@ -100,12 +100,60 @@ void main() {
     expect(find.text('Forgelink'), findsOneWidget);
     expect(find.byTooltip('Synchronizovat období'), findsOneWidget);
     expect(find.byTooltip('Historie synchronizací'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Rychlá synchronizace včerejška'),
-      300,
+    expect(find.byTooltip('Nastavení'), findsOneWidget);
+    // Quick Sync card: yesterday + today, neither synced yet.
+    expect(find.text('Rychlá synchronizace'), findsOneWidget);
+    expect(find.textContaining('Včera · '), findsOneWidget);
+    expect(find.textContaining('Dnes · '), findsOneWidget);
+    expect(find.text('Ke zápisu'), findsNWidgets(2));
+    expect(find.text('Synchronizovat'), findsOneWidget);
+  });
+
+  testWidgets('first launch shows the setup steps', (tester) async {
+    await tester.pumpWidget(
+      _withProviders(const ForgelinkApp(showOnboarding: true)),
     );
-    expect(find.text('Rychlá synchronizace včerejška'), findsOneWidget);
-    expect(find.textContaining('kompletně'), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Začít nastavení'), findsOneWidget);
+    await tester.tap(find.text('Začít nastavení'));
+    await tester.pumpAndSettle();
+    expect(find.text('Health Connect'), findsWidgets);
+    expect(find.text('Přeskočit'), findsOneWidget);
+
+    await tester.tap(find.text('Přeskočit'));
+    await tester.pumpAndSettle();
+    expect(find.text('Přihlásit a ověřit'), findsOneWidget);
+
+    await tester.tap(find.text('Přeskočit'));
+    await tester.pumpAndSettle();
+    expect(find.text('Přihlásit přes Google'), findsOneWidget);
+
+    await tester.tap(find.text('Přeskočit'));
+    await tester.pumpAndSettle();
+    expect(find.text('Vše připraveno'), findsOneWidget);
+    expect(find.text('Přejít na přehled'), findsOneWidget);
+  });
+
+  testWidgets('history and diagnostics open from settings', (tester) async {
+    await tester.pumpWidget(
+      _withProviders(
+        const MaterialApp(
+          locale: Locale('cs'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: SettingsScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Diagnostika'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Diagnostika'));
+    await tester.pumpAndSettle();
+    expect(find.text('Upozornění a chyby'), findsOneWidget);
+    expect(find.text('Žádné záznamy.'), findsOneWidget);
   });
 
   testWidgets('settings deep link scrolls to the target section', (

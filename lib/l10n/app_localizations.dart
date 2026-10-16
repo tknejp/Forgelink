@@ -1137,6 +1137,930 @@ abstract class AppLocalizations {
   /// In cs, this message translates to:
   /// **'{owner} · upraveno {when}'**
   String driveOwnerModified(String owner, String when);
+
+  /// No description provided for @homeQuickSyncTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Rychlá synchronizace'**
+  String get homeQuickSyncTitle;
+
+  /// No description provided for @homeLastSync.
+  ///
+  /// In cs, this message translates to:
+  /// **'Naposledy {when}'**
+  String homeLastSync(String when);
+
+  /// No description provided for @homeLastSyncWith.
+  ///
+  /// In cs, this message translates to:
+  /// **'{when} · {trigger}'**
+  String homeLastSyncWith(String when, String trigger);
+
+  /// No description provided for @qsYesterday.
+  ///
+  /// In cs, this message translates to:
+  /// **'Včera · {date}'**
+  String qsYesterday(String date);
+
+  /// No description provided for @qsYesterdaySub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Výživa a kroky'**
+  String get qsYesterdaySub;
+
+  /// No description provided for @qsToday.
+  ///
+  /// In cs, this message translates to:
+  /// **'Dnes · {date}'**
+  String qsToday(String date);
+
+  /// No description provided for @qsTodaySub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Váha {value}'**
+  String qsTodaySub(String value);
+
+  /// No description provided for @qsTodaySubNone.
+  ///
+  /// In cs, this message translates to:
+  /// **'Jen váha'**
+  String get qsTodaySubNone;
+
+  /// No description provided for @chipInSheet.
+  ///
+  /// In cs, this message translates to:
+  /// **'V tabulce'**
+  String get chipInSheet;
+
+  /// No description provided for @chipToWrite.
+  ///
+  /// In cs, this message translates to:
+  /// **'Ke zápisu'**
+  String get chipToWrite;
+
+  /// No description provided for @chipNutritionMissing.
+  ///
+  /// In cs, this message translates to:
+  /// **'Výživa chybí'**
+  String get chipNutritionMissing;
+
+  /// No description provided for @chipError.
+  ///
+  /// In cs, this message translates to:
+  /// **'Chyba'**
+  String get chipError;
+
+  /// No description provided for @chipNoData.
+  ///
+  /// In cs, this message translates to:
+  /// **'Bez dat'**
+  String get chipNoData;
+
+  /// No description provided for @calendarRangeButton.
+  ///
+  /// In cs, this message translates to:
+  /// **'Období'**
+  String get calendarRangeButton;
+
+  /// No description provided for @legendFull.
+  ///
+  /// In cs, this message translates to:
+  /// **'Kompletní'**
+  String get legendFull;
+
+  /// No description provided for @legendPartial.
+  ///
+  /// In cs, this message translates to:
+  /// **'Částečně'**
+  String get legendPartial;
+
+  /// No description provided for @legendMissing.
+  ///
+  /// In cs, this message translates to:
+  /// **'Chybí'**
+  String get legendMissing;
+
+  /// No description provided for @legendFailed.
+  ///
+  /// In cs, this message translates to:
+  /// **'Chyba'**
+  String get legendFailed;
+
+  /// No description provided for @homeNeedsSetup.
+  ///
+  /// In cs, this message translates to:
+  /// **'Nenastaveno'**
+  String get homeNeedsSetup;
+
+  /// No description provided for @syncSheetRunning.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizuji…'**
+  String get syncSheetRunning;
+
+  /// No description provided for @syncSheetDone.
+  ///
+  /// In cs, this message translates to:
+  /// **'Hotovo'**
+  String get syncSheetDone;
+
+  /// No description provided for @syncSheetWarn.
+  ///
+  /// In cs, this message translates to:
+  /// **'Hotovo s upozorněním'**
+  String get syncSheetWarn;
+
+  /// No description provided for @syncSheetFailed.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizace selhala'**
+  String get syncSheetFailed;
+
+  /// No description provided for @syncSheetNoData.
+  ///
+  /// In cs, this message translates to:
+  /// **'Žádná nová data'**
+  String get syncSheetNoData;
+
+  /// No description provided for @syncSheetSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'{label} · {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}'**
+  String syncSheetSub(String label, int count);
+
+  /// No description provided for @syncRowWaiting.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čeká'**
+  String get syncRowWaiting;
+
+  /// No description provided for @syncRowReading.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čtu Health Connect a Kalorické tabulky…'**
+  String get syncRowReading;
+
+  /// No description provided for @syncRowRead.
+  ///
+  /// In cs, this message translates to:
+  /// **'Načteno'**
+  String get syncRowRead;
+
+  /// No description provided for @syncRowWriting.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zapisuji do tabulky…'**
+  String get syncRowWriting;
+
+  /// No description provided for @syncRowResult.
+  ///
+  /// In cs, this message translates to:
+  /// **'{written, plural, =1{1 nová} few{{written} nové} other{{written} nových}} · {unchanged} beze změny'**
+  String syncRowResult(int written, int unchanged);
+
+  /// No description provided for @syncRowNutritionMissing.
+  ///
+  /// In cs, this message translates to:
+  /// **'výživa chybí'**
+  String get syncRowNutritionMissing;
+
+  /// No description provided for @syncRowRestAfterMidnight.
+  ///
+  /// In cs, this message translates to:
+  /// **'zbytek po půlnoci'**
+  String get syncRowRestAfterMidnight;
+
+  /// No description provided for @syncRowNoData.
+  ///
+  /// In cs, this message translates to:
+  /// **'Ve zdrojích nejsou data'**
+  String get syncRowNoData;
+
+  /// No description provided for @syncMoreDays.
+  ///
+  /// In cs, this message translates to:
+  /// **'+ {count} dalších'**
+  String syncMoreDays(int count);
+
+  /// No description provided for @actionClose.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zavřít'**
+  String get actionClose;
+
+  /// No description provided for @actionOpenSheet.
+  ///
+  /// In cs, this message translates to:
+  /// **'Otevřít tabulku'**
+  String get actionOpenSheet;
+
+  /// No description provided for @fieldLabelWeight.
+  ///
+  /// In cs, this message translates to:
+  /// **'Váha'**
+  String get fieldLabelWeight;
+
+  /// No description provided for @fieldLabelSteps.
+  ///
+  /// In cs, this message translates to:
+  /// **'Kroky'**
+  String get fieldLabelSteps;
+
+  /// No description provided for @fieldLabelKcal.
+  ///
+  /// In cs, this message translates to:
+  /// **'Energie'**
+  String get fieldLabelKcal;
+
+  /// No description provided for @fieldLabelProtein.
+  ///
+  /// In cs, this message translates to:
+  /// **'Bílkoviny'**
+  String get fieldLabelProtein;
+
+  /// No description provided for @fieldLabelCarbs.
+  ///
+  /// In cs, this message translates to:
+  /// **'Sacharidy'**
+  String get fieldLabelCarbs;
+
+  /// No description provided for @fieldLabelFat.
+  ///
+  /// In cs, this message translates to:
+  /// **'Tuky'**
+  String get fieldLabelFat;
+
+  /// No description provided for @fieldLabelFiber.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vláknina'**
+  String get fieldLabelFiber;
+
+  /// No description provided for @cellInSheet.
+  ///
+  /// In cs, this message translates to:
+  /// **'V tabulce'**
+  String get cellInSheet;
+
+  /// No description provided for @cellToWrite.
+  ///
+  /// In cs, this message translates to:
+  /// **'Ke zápisu'**
+  String get cellToWrite;
+
+  /// No description provided for @cellMissing.
+  ///
+  /// In cs, this message translates to:
+  /// **'Chybí ve zdroji'**
+  String get cellMissing;
+
+  /// No description provided for @cellAfterMidnight.
+  ///
+  /// In cs, this message translates to:
+  /// **'Po půlnoci'**
+  String get cellAfterMidnight;
+
+  /// No description provided for @cellFormula.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vzorec'**
+  String get cellFormula;
+
+  /// No description provided for @cellFailed.
+  ///
+  /// In cs, this message translates to:
+  /// **'Chyba'**
+  String get cellFailed;
+
+  /// No description provided for @dayChipFull.
+  ///
+  /// In cs, this message translates to:
+  /// **'Kompletní'**
+  String get dayChipFull;
+
+  /// No description provided for @dayChipPartial.
+  ///
+  /// In cs, this message translates to:
+  /// **'Částečně'**
+  String get dayChipPartial;
+
+  /// No description provided for @dayChipNone.
+  ///
+  /// In cs, this message translates to:
+  /// **'Nesynchronizováno'**
+  String get dayChipNone;
+
+  /// No description provided for @dayChipFailed.
+  ///
+  /// In cs, this message translates to:
+  /// **'Chyba'**
+  String get dayChipFailed;
+
+  /// No description provided for @dayChipNoData.
+  ///
+  /// In cs, this message translates to:
+  /// **'Bez dat'**
+  String get dayChipNoData;
+
+  /// No description provided for @daySheetTab.
+  ///
+  /// In cs, this message translates to:
+  /// **'List {tab}'**
+  String daySheetTab(String tab);
+
+  /// No description provided for @dayTodaySuffix.
+  ///
+  /// In cs, this message translates to:
+  /// **'{title} · dnes'**
+  String dayTodaySuffix(String title);
+
+  /// No description provided for @dayTodayNote.
+  ///
+  /// In cs, this message translates to:
+  /// **'Den ještě neskončil. Výživa a kroky se zapíšou po půlnoci, teď lze zapsat jen váhu.'**
+  String get dayTodayNote;
+
+  /// No description provided for @lockNoteManual.
+  ///
+  /// In cs, this message translates to:
+  /// **'Hlad, hydratace, trénink a poznámky zůstanou beze změny.'**
+  String get lockNoteManual;
+
+  /// No description provided for @daySyncFirst.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizovat den'**
+  String get daySyncFirst;
+
+  /// No description provided for @dayUpdate.
+  ///
+  /// In cs, this message translates to:
+  /// **'Aktualizovat den'**
+  String get dayUpdate;
+
+  /// No description provided for @rangePreset3.
+  ///
+  /// In cs, this message translates to:
+  /// **'Poslední 3 dny'**
+  String get rangePreset3;
+
+  /// No description provided for @rangePreset7.
+  ///
+  /// In cs, this message translates to:
+  /// **'Posledních 7 dní'**
+  String get rangePreset7;
+
+  /// No description provided for @rangePresetMonth.
+  ///
+  /// In cs, this message translates to:
+  /// **'Tento měsíc'**
+  String get rangePresetMonth;
+
+  /// No description provided for @rangeLockNote.
+  ///
+  /// In cs, this message translates to:
+  /// **'Existující hodnoty se jen aktualizují. Hlad, hydratace, trénink a poznámky zůstanou beze změny.'**
+  String get rangeLockNote;
+
+  /// No description provided for @rangePickFirst.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vyber první a poslední den'**
+  String get rangePickFirst;
+
+  /// No description provided for @rangePickEnd.
+  ///
+  /// In cs, this message translates to:
+  /// **'{date} · klepni na konec období'**
+  String rangePickEnd(String date);
+
+  /// No description provided for @rangeSummary.
+  ///
+  /// In cs, this message translates to:
+  /// **'{from} – {to} · {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}'**
+  String rangeSummary(String from, String to, int count);
+
+  /// No description provided for @rangeButton.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizovat {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}'**
+  String rangeButton(int count);
+
+  /// No description provided for @monthPrev.
+  ///
+  /// In cs, this message translates to:
+  /// **'Předchozí měsíc'**
+  String get monthPrev;
+
+  /// No description provided for @monthNext.
+  ///
+  /// In cs, this message translates to:
+  /// **'Další měsíc'**
+  String get monthNext;
+
+  /// No description provided for @settingsGroupSources.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zdroje dat'**
+  String get settingsGroupSources;
+
+  /// No description provided for @settingsGroupTarget.
+  ///
+  /// In cs, this message translates to:
+  /// **'Cíl'**
+  String get settingsGroupTarget;
+
+  /// No description provided for @settingsGroupOther.
+  ///
+  /// In cs, this message translates to:
+  /// **'Ostatní'**
+  String get settingsGroupOther;
+
+  /// No description provided for @rowReads.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čte'**
+  String get rowReads;
+
+  /// No description provided for @hcReadsValue.
+  ///
+  /// In cs, this message translates to:
+  /// **'Váhu a kroky'**
+  String get hcReadsValue;
+
+  /// No description provided for @rowHistory.
+  ///
+  /// In cs, this message translates to:
+  /// **'Starší data'**
+  String get rowHistory;
+
+  /// No description provided for @rowBackground.
+  ///
+  /// In cs, this message translates to:
+  /// **'Na pozadí'**
+  String get rowBackground;
+
+  /// No description provided for @valueAllowed.
+  ///
+  /// In cs, this message translates to:
+  /// **'Povoleno'**
+  String get valueAllowed;
+
+  /// No description provided for @valueNotAllowed.
+  ///
+  /// In cs, this message translates to:
+  /// **'Nepovoleno'**
+  String get valueNotAllowed;
+
+  /// No description provided for @valueUnsupported.
+  ///
+  /// In cs, this message translates to:
+  /// **'Nepodporováno'**
+  String get valueUnsupported;
+
+  /// No description provided for @hcGrantHistoryShort.
+  ///
+  /// In cs, this message translates to:
+  /// **'Povolit starší data'**
+  String get hcGrantHistoryShort;
+
+  /// No description provided for @hcGrantBackgroundShort.
+  ///
+  /// In cs, this message translates to:
+  /// **'Povolit na pozadí'**
+  String get hcGrantBackgroundShort;
+
+  /// No description provided for @rowAccount.
+  ///
+  /// In cs, this message translates to:
+  /// **'Účet'**
+  String get rowAccount;
+
+  /// No description provided for @ktReadsValue.
+  ///
+  /// In cs, this message translates to:
+  /// **'Energii, makra, vlákninu'**
+  String get ktReadsValue;
+
+  /// No description provided for @ktLoginShort.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přihlásit'**
+  String get ktLoginShort;
+
+  /// No description provided for @rowAccess.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přístup'**
+  String get rowAccess;
+
+  /// No description provided for @googleAccessValue.
+  ///
+  /// In cs, this message translates to:
+  /// **'Tabulky, vybrané soubory'**
+  String get googleAccessValue;
+
+  /// No description provided for @googleConnect.
+  ///
+  /// In cs, this message translates to:
+  /// **'Připojit'**
+  String get googleConnect;
+
+  /// No description provided for @rowSheetId.
+  ///
+  /// In cs, this message translates to:
+  /// **'ID'**
+  String get rowSheetId;
+
+  /// No description provided for @rowTab.
+  ///
+  /// In cs, this message translates to:
+  /// **'List'**
+  String get rowTab;
+
+  /// No description provided for @rowCoverage.
+  ///
+  /// In cs, this message translates to:
+  /// **'Rozsah'**
+  String get rowCoverage;
+
+  /// No description provided for @sheetCoverage.
+  ///
+  /// In cs, this message translates to:
+  /// **'Týdnů: {weeks} · {first} – {last}'**
+  String sheetCoverage(int weeks, String first, String last);
+
+  /// No description provided for @sheetPickDrive.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vybrat z Disku'**
+  String get sheetPickDrive;
+
+  /// No description provided for @sheetEditManual.
+  ///
+  /// In cs, this message translates to:
+  /// **'Upravit ručně'**
+  String get sheetEditManual;
+
+  /// No description provided for @sheetEditTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Upravit tabulku'**
+  String get sheetEditTitle;
+
+  /// No description provided for @autoSyncSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Denně 0:30 a 12:30 · doplní poslední 3 dny'**
+  String get autoSyncSub;
+
+  /// No description provided for @notifySuccessSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Notifikace po každém běhu, nejen při chybě'**
+  String get notifySuccessSub;
+
+  /// No description provided for @rowNextRun.
+  ///
+  /// In cs, this message translates to:
+  /// **'Další běh'**
+  String get rowNextRun;
+
+  /// No description provided for @rowLastRun.
+  ///
+  /// In cs, this message translates to:
+  /// **'Poslední běh'**
+  String get rowLastRun;
+
+  /// No description provided for @rowBattery.
+  ///
+  /// In cs, this message translates to:
+  /// **'Baterie'**
+  String get rowBattery;
+
+  /// No description provided for @batteryOk.
+  ///
+  /// In cs, this message translates to:
+  /// **'Optimalizace vypnutá'**
+  String get batteryOk;
+
+  /// No description provided for @batteryOn.
+  ///
+  /// In cs, this message translates to:
+  /// **'Optimalizace zapnutá'**
+  String get batteryOn;
+
+  /// No description provided for @valueOff.
+  ///
+  /// In cs, this message translates to:
+  /// **'vypnuto'**
+  String get valueOff;
+
+  /// No description provided for @valueNever.
+  ///
+  /// In cs, this message translates to:
+  /// **'zatím ne'**
+  String get valueNever;
+
+  /// No description provided for @autoSyncDelayHint.
+  ///
+  /// In cs, this message translates to:
+  /// **'Android může běh o pár minut posunout. Aby ho po delší době nezastavil, vypni v nastavení aplikace „Pozastavit aktivitu, pokud se aplikace nepoužívá“.'**
+  String get autoSyncDelayHint;
+
+  /// No description provided for @appSettingsButton.
+  ///
+  /// In cs, this message translates to:
+  /// **'Nastavení aplikace'**
+  String get appSettingsButton;
+
+  /// No description provided for @batteryButton.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vypnout optimalizaci'**
+  String get batteryButton;
+
+  /// No description provided for @diagnosticsCount.
+  ///
+  /// In cs, this message translates to:
+  /// **'{count, plural, =1{1 záznam} few{{count} záznamy} other{{count} záznamů}}'**
+  String diagnosticsCount(int count);
+
+  /// No description provided for @settingsFooter.
+  ///
+  /// In cs, this message translates to:
+  /// **'Forgelink {version} · data zůstávají v telefonu'**
+  String settingsFooter(String version);
+
+  /// No description provided for @historyFilterAll.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vše'**
+  String get historyFilterAll;
+
+  /// No description provided for @historyFilterManual.
+  ///
+  /// In cs, this message translates to:
+  /// **'Ručně'**
+  String get historyFilterManual;
+
+  /// No description provided for @historyFilterBackground.
+  ///
+  /// In cs, this message translates to:
+  /// **'Na pozadí'**
+  String get historyFilterBackground;
+
+  /// No description provided for @historyFilterIssues.
+  ///
+  /// In cs, this message translates to:
+  /// **'Problémy'**
+  String get historyFilterIssues;
+
+  /// No description provided for @historyFilterEmpty.
+  ///
+  /// In cs, this message translates to:
+  /// **'Žádné záznamy v tomto filtru.'**
+  String get historyFilterEmpty;
+
+  /// No description provided for @historyToday.
+  ///
+  /// In cs, this message translates to:
+  /// **'Dnes'**
+  String get historyToday;
+
+  /// No description provided for @historyYesterday.
+  ///
+  /// In cs, this message translates to:
+  /// **'Včera'**
+  String get historyYesterday;
+
+  /// No description provided for @diagFilterAll.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vše'**
+  String get diagFilterAll;
+
+  /// No description provided for @diagFilterIssues.
+  ///
+  /// In cs, this message translates to:
+  /// **'Upozornění a chyby'**
+  String get diagFilterIssues;
+
+  /// No description provided for @diagBgTestShort.
+  ///
+  /// In cs, this message translates to:
+  /// **'Test na pozadí'**
+  String get diagBgTestShort;
+
+  /// No description provided for @onbWelcomeText.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přenese váhu, kroky a výživu do tabulky tvého trenéra. Jedním klepnutím nebo samo každý den.'**
+  String get onbWelcomeText;
+
+  /// No description provided for @onbSourceHcSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Váha a kroky'**
+  String get onbSourceHcSub;
+
+  /// No description provided for @onbSourceKtSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Energie, makra, vláknina'**
+  String get onbSourceKtSub;
+
+  /// No description provided for @onbSourceSheets.
+  ///
+  /// In cs, this message translates to:
+  /// **'Google Sheets'**
+  String get onbSourceSheets;
+
+  /// No description provided for @onbSourceSheetsSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Tabulka trenéra'**
+  String get onbSourceSheetsSub;
+
+  /// No description provided for @onbLocalNote.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vše běží v telefonu. Žádný server ani další účet.'**
+  String get onbLocalNote;
+
+  /// No description provided for @onbStart.
+  ///
+  /// In cs, this message translates to:
+  /// **'Začít nastavení'**
+  String get onbStart;
+
+  /// No description provided for @onbContinue.
+  ///
+  /// In cs, this message translates to:
+  /// **'Pokračovat'**
+  String get onbContinue;
+
+  /// No description provided for @onbSkip.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přeskočit'**
+  String get onbSkip;
+
+  /// No description provided for @onbInstallHc.
+  ///
+  /// In cs, this message translates to:
+  /// **'Nainstalovat Health Connect'**
+  String get onbInstallHc;
+
+  /// No description provided for @onbHcText.
+  ///
+  /// In cs, this message translates to:
+  /// **'Forgelink bude jen číst. Nic nezapisuje ani nemaže.'**
+  String get onbHcText;
+
+  /// No description provided for @onbPermWeightSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Pro zápis dnešní váhy'**
+  String get onbPermWeightSub;
+
+  /// No description provided for @onbPermStepsSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Denní součet'**
+  String get onbPermStepsSub;
+
+  /// No description provided for @onbPermHistory.
+  ///
+  /// In cs, this message translates to:
+  /// **'Starší data'**
+  String get onbPermHistory;
+
+  /// No description provided for @onbPermHistorySub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Pro opravu dnů starších 30 dní'**
+  String get onbPermHistorySub;
+
+  /// No description provided for @onbPermBackground.
+  ///
+  /// In cs, this message translates to:
+  /// **'Čtení na pozadí'**
+  String get onbPermBackground;
+
+  /// No description provided for @onbPermBackgroundSub.
+  ///
+  /// In cs, this message translates to:
+  /// **'Pro automatickou synchronizaci'**
+  String get onbPermBackgroundSub;
+
+  /// No description provided for @onbKtText.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přihlas se stejným účtem jako v aplikaci. Údaje zůstanou uložené jen v telefonu.'**
+  String get onbKtText;
+
+  /// No description provided for @onbKtOk.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přihlášeno a ověřeno'**
+  String get onbKtOk;
+
+  /// No description provided for @onbEmailHint.
+  ///
+  /// In cs, this message translates to:
+  /// **'jmeno@email.cz'**
+  String get onbEmailHint;
+
+  /// No description provided for @onbSheetTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Tabulka trenéra'**
+  String get onbSheetTitle;
+
+  /// No description provided for @onbSheetText.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přihlas se ke Googlu a vyber tabulku. Forgelink najde řádek podle data a vyplní jen svoje sloupce.'**
+  String get onbSheetText;
+
+  /// No description provided for @onbGoogleNotConnected.
+  ///
+  /// In cs, this message translates to:
+  /// **'Nepřihlášeno'**
+  String get onbGoogleNotConnected;
+
+  /// No description provided for @onbGoogleAccess.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přístup k vybraným tabulkám'**
+  String get onbGoogleAccess;
+
+  /// No description provided for @onbSheetNone.
+  ///
+  /// In cs, this message translates to:
+  /// **'Nevybráno'**
+  String get onbSheetNone;
+
+  /// No description provided for @onbSheetOk.
+  ///
+  /// In cs, this message translates to:
+  /// **'List {tab} · ověřeno'**
+  String onbSheetOk(String tab);
+
+  /// No description provided for @onbGoogleButton.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přihlásit přes Google'**
+  String get onbGoogleButton;
+
+  /// No description provided for @onbPickSheet.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vybrat tabulku'**
+  String get onbPickSheet;
+
+  /// No description provided for @onbDoneTitle.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vše připraveno'**
+  String get onbDoneTitle;
+
+  /// No description provided for @onbDoneText.
+  ///
+  /// In cs, this message translates to:
+  /// **'Každý den kolem 0:30 se zapíše celý předchozí den, ve 12:30 dnešní váha.'**
+  String get onbDoneText;
+
+  /// No description provided for @onbFinish.
+  ///
+  /// In cs, this message translates to:
+  /// **'Přejít na přehled'**
+  String get onbFinish;
+
+  /// No description provided for @actionBack.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zpět'**
+  String get actionBack;
+
+  /// No description provided for @syncButtonProgress.
+  ///
+  /// In cs, this message translates to:
+  /// **'Synchronizuji {done}/{total}'**
+  String syncButtonProgress(int done, int total);
+
+  /// No description provided for @syncButtonWriting.
+  ///
+  /// In cs, this message translates to:
+  /// **'Zapisuji…'**
+  String get syncButtonWriting;
+
+  /// No description provided for @syncButtonDone.
+  ///
+  /// In cs, this message translates to:
+  /// **'Hotovo'**
+  String get syncButtonDone;
 }
 
 class _AppLocalizationsDelegate

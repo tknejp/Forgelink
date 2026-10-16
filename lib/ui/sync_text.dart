@@ -130,4 +130,36 @@ class SyncText {
   String value(SheetColumn c, num v) => c == SheetColumn.weight
       ? NumberFormat('0.0', 'cs').format(v)
       : NumberFormat.decimalPattern('cs').format(v);
+
+  /// [value] with its unit: "84,6 kg", "3 014 kcal", "210 g", "9 120".
+  String valueWithUnit(SheetColumn c, num v) => switch (c) {
+    SheetColumn.weight => '${value(c, v)} kg',
+    SheetColumn.kcal => '${value(c, v)} kcal',
+    SheetColumn.steps => value(c, v),
+    _ => '${value(c, v)} g',
+  };
+
+  /// Capitalised field name for labels ("Energie", "Bílkoviny").
+  String fieldLabel(SheetColumn c) => switch (c) {
+    SheetColumn.weight => l10n.fieldLabelWeight,
+    SheetColumn.kcal => l10n.fieldLabelKcal,
+    SheetColumn.protein => l10n.fieldLabelProtein,
+    SheetColumn.carbs => l10n.fieldLabelCarbs,
+    SheetColumn.fat => l10n.fieldLabelFat,
+    SheetColumn.fiber => l10n.fieldLabelFiber,
+    SheetColumn.steps => l10n.fieldLabelSteps,
+  };
+
+  static final _weekdayLong = DateFormat('EEEE', 'cs');
+  static final _weekdayShort = DateFormat.E('cs');
+
+  /// "Čtvrtek 15. 10."
+  String dayTitle(LocalDate d) {
+    final w = _weekdayLong.format(d.startOfDay);
+    return '${w[0].toUpperCase()}${w.substring(1)} ${dayMonth(d)}';
+  }
+
+  /// "čt 15. 10."
+  String dayShort(LocalDate d) =>
+      '${_weekdayShort.format(d.startOfDay)} ${dayMonth(d)}';
 }

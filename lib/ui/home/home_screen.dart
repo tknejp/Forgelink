@@ -17,14 +17,15 @@ import '../settings/settings_screen.dart';
 import '../settings/sheet_controller.dart';
 import '../sync_text.dart';
 import '../theme.dart';
-import '../widgets/issue_notice.dart';
-import '../widgets/section_card.dart';
+import '../widgets/ds.dart';
 import 'day_detail_sheet.dart';
 import 'month_calendar.dart';
+import 'range_screen.dart';
 import 'sync_card.dart';
+import 'sync_sheet.dart';
 
-/// Home (docs/archive/implementation_plan.md §8): connections, open issues, Quick
-/// Sync, calendar, range sync, history.
+/// Home (docs/archive/implementation_plan.md §8): connection status,
+/// calendar, range sync, history, Quick Sync — on one screen, no scrolling.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -69,20 +70,110 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _refresh();
   }
 
-  /// Runs a sync and gives the plan §8 feedback: a snackbar for success /
-  /// nothing-to-write; partial and failed results stay in the sync card.
+  void _openHistory() => Navigator.of(
+    context,
+  ).push(MaterialPageRoute<void>(builder: (_) => const HistoryScreen()));
+
+  /// Only problems get a toast (red, with the fix as its action); success
+  /// shows in the calendar, the chips and a short "Hotovo" on the button.
+  /// Failed days also turn red and their detail says why.
+  void _toast(
+    ScaffoldMessengerState messenger,
+    RunResult result,
+    VoidCallback retry,
+  ) {
+    if (result.status != RunStatus.partial &&
+        result.status != RunStatus.failed) {
+      return;
+    }
+    final text = SyncText(context.l10n);
+    final p = Palette.of(context);
+    final issue = [
+      ...result.issues,
+      for (final d in result.days) ...[
+        ?d.issue,
+        for (final f in d.fields.values) ?f.issue,
+      ],
+    ].firstOrNull;
+    final action = issue?.action;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 6),
+          backgroundColor: p.errBg,
+          content: Row(
+            children: [
+              Icon(Icons.error_rounded, size: 20, color: p.err),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  issue == null
+                      ? text.runSummary(result)
+                      : text.presenter.message(issue),
+                  style: TextStyle(color: p.text),
+                ),
+              ),
+            ],
+          ),
+          action: action == null
+              ? null
+              : SnackBarAction(
+                  label: text.presenter.actionLabel(action),
+                  textColor: p.err,
+                  onPressed: () {
+                    if (!mounted) return;
+                    runIssueAction(context, action, onRetry: retry);
+                  },
+                ),
+        ),
+      );
+  }
+
+  /// Calendar tap: syncs right away; problems come as a toast.
   Future<void> _sync(
     Future<RunResult?> Function(SyncController c) start,
   ) async {
     final messenger = ScaffoldMessenger.of(context);
-    final text = SyncText(context.l10n);
     final result = await start(context.read<SyncController>());
     if (!mounted || result == null) return;
     _refresh();
-    if (result.status == RunStatus.success ||
-        result.status == RunStatus.noData) {
-      messenger.showSnackBar(SnackBar(content: Text(text.runSummary(result))));
+    _toast(messenger, result, () => _sync(start));
+  }
+
+  /// Quick Sync and range sync: same as [_sync], with the progress sheet.
+  /// The toast only comes when the sheet was swiped away before the end.
+  Future<void> _syncWithSheet(
+    String label,
+    List<LocalDate> dates,
+    Future<RunResult?> Function(SyncController c) start,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final c = context.read<SyncController>();
+    final future = start(c);
+    var sheetOpen = true;
+    showSyncSheet(
+      context,
+      label: label,
+      dates: dates,
+      result: future,
+      restart: () => start(c),
+    ).whenComplete(() => sheetOpen = false);
+    final result = await future;
+    if (!mounted || result == null) return;
+    _refresh();
+    if (!sheetOpen) {
+      _toast(messenger, result, () => _syncWithSheet(label, dates, start));
     }
+  }
+
+  void _quickSync() {
+    final c = context.read<SyncController>();
+    _syncWithSheet(
+      context.l10n.triggerQuick,
+      quickSyncDates(c.today),
+      (c) => c.quickSync(),
+    );
   }
 
   /// Range dragged on the calendar: confirm before syncing several days.
@@ -107,36 +198,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: Text(l10n.ktCancel),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(l10n.homeQuickSyncButton),
           ),
         ],
       ),
     );
-    if (ok == true && mounted) await _sync((c) => c.syncRange(from, to));
+    if (ok == true && mounted) _syncRange(from, to);
   }
 
+  void _syncRange(LocalDate from, LocalDate to) => _syncWithSheet(
+    context.l10n.triggerRange,
+    [for (var i = 0; i <= from.daysUntil(to); i++) from.addDays(i)],
+    (c) => c.syncRange(from, to),
+  );
+
   Future<void> _pickRange() async {
-    final l10n = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
-    final today = context.read<SyncController>().today;
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(today.year - 2),
-      lastDate: today.startOfDay,
-      helpText: l10n.rangePickerHelp,
-      locale: const Locale('cs'),
-    );
+    final picked = await RangeScreen.open(context);
     if (picked == null || !mounted) return;
-    final from = LocalDate.fromDateTime(picked.start);
-    final to = LocalDate.fromDateTime(picked.end);
-    if (from.daysUntil(to) + 1 > AppConfig.maxRangeDays) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.rangeTooLong(AppConfig.maxRangeDays))),
-      );
-      return;
-    }
-    await _sync((c) => c.syncRange(from, to));
+    _syncRange(picked.$1, picked.$2);
   }
 
   @override
@@ -144,154 +225,115 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final l10n = context.l10n;
     final sync = context.watch<SyncController>();
 
+    // Header, one status card, the calendar card taking the remaining
+    // height (its rows stretch to fit 5 or 6 weeks), Quick Sync. Only a very
+    // short window (landscape, split screen) falls back to scrolling.
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            Image.asset('assets/branding/logo_256.png', width: 30, height: 30),
-            const SizedBox(width: 10),
-            const Text(AppConfig.appName),
-          ],
-        ),
-        actions: [
-          IconButton(
-            tooltip: l10n.settingsTitle,
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => _openSettings(),
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async => _refresh(),
-        // Fills the screen so the sync card sits at the bottom (near the
-        // thumb); scrolls only when extra cards (open issues) don't fit.
-        child: CustomScrollView(
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _ConnectionsCard(onFix: _openSettings),
-                    if (sync.openIssues.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      _OpenIssuesCard(
-                        issues: sync.openIssues,
-                        onRetry: () => _sync((c) => c.quickSync()),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final fixed = box.maxHeight >= 640;
+            final calendar = Panel(
+              radius: 24,
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+              child: MonthCalendar(
+                fill: fixed,
+                onTapDay: (d) => _sync((c) => c.syncDate(d)),
+                onLongPressDay: (d) => showDayDetail(
+                  context,
+                  d,
+                  onSync: () => _sync((c) => c.syncDate(d)),
+                ),
+                onSelectRange: _confirmRange,
+                actions: [
+                  Tooltip(
+                    message: l10n.homeRangeSync,
+                    child: SoftChipButton(
+                      label: l10n.calendarRangeButton,
+                      icon: Icons.date_range_rounded,
+                      onPressed: _pickRange,
+                    ),
+                  ),
+                ],
+              ),
+            );
+            final column = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 60,
+                  child: Row(
+                    children: [
+                      Transform.translate(
+                        offset: const Offset(-4, 0),
+                        child: Image.asset(
+                          'assets/branding/logo_fg_384.png',
+                          width: 42,
+                          height: 42,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Expanded(
+                        child: Text(
+                          AppConfig.appName,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      RoundIconButton(
+                        icon: Icons.history_rounded,
+                        tooltip: l10n.homeHistory,
+                        onPressed: _openHistory,
+                      ),
+                      Transform.translate(
+                        offset: const Offset(8, 0),
+                        child: RoundIconButton(
+                          icon: Icons.settings_rounded,
+                          tooltip: l10n.settingsTitle,
+                          onPressed: () => _openSettings(),
+                        ),
                       ),
                     ],
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(6, 4, 6, 10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                        ),
-                      ),
-                      child: MonthCalendar(
-                        onTapDay: (d) => _sync((c) => c.syncDate(d)),
-                        onLongPressDay: (d) => showDayDetail(
-                          context,
-                          d,
-                          onSync: () => _sync((c) => c.syncDate(d)),
-                        ),
-                        onSelectRange: _confirmRange,
-                        actions: [
-                          IconButton(
-                            tooltip: l10n.homeRangeSync,
-                            visualDensity: VisualDensity.compact,
-                            onPressed: _pickRange,
-                            icon: const Icon(Icons.date_range_outlined),
-                          ),
-                          IconButton(
-                            tooltip: l10n.homeHistory,
-                            visualDensity: VisualDensity.compact,
-                            onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const HistoryScreen(),
-                              ),
-                            ),
-                            icon: const Icon(Icons.history),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    const SizedBox(height: 10),
-                    SyncCard(onQuickSync: () => _sync((c) => c.quickSync())),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ],
+                _StatusCard(
+                  onFix: _openSettings,
+                  onRetry: _quickSync,
+                  issues: sync.openIssues,
+                ),
+                const SizedBox(height: 12),
+                if (fixed) Expanded(child: calendar) else calendar,
+                const SizedBox(height: 12),
+                SyncCard(onQuickSync: _quickSync),
+              ],
+            );
+            const padding = EdgeInsets.fromLTRB(16, 0, 16, 16);
+            return fixed
+                ? Padding(padding: padding, child: column)
+                : SingleChildScrollView(padding: padding, child: column);
+          },
         ),
       ),
     );
   }
 }
 
-/// Persisted problems from earlier runs (incl. background) with their
-/// actions; dismissable (plan §6 open issues).
-class _OpenIssuesCard extends StatelessWidget {
-  const _OpenIssuesCard({required this.issues, required this.onRetry});
-
-  final List<SyncIssue> issues;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final c = context.read<SyncController>();
-    return SectionCard(
-      icon: Icons.warning_amber_rounded,
-      title: l10n.openIssuesTitle,
-      children: [
-        for (final issue in issues)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: IssueNotice(
-                    issue: issue,
-                    onAction: issue.action == null
-                        ? null
-                        : () => runIssueAction(
-                            context,
-                            issue.action!,
-                            onRetry: onRetry,
-                          ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: l10n.dismiss,
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.close, size: 18),
-                  onPressed: () => c.dismissIssue(issue),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// One line when everything is fine ("Vše připojeno"), otherwise one row per
-/// integration that needs attention, each with a direct link to its section.
-class _ConnectionsCard extends StatelessWidget {
-  const _ConnectionsCard({required this.onFix});
+/// One card in a fixed slot: "Vše připojeno" when everything is fine;
+/// otherwise the most important problem — a persisted issue from an earlier
+/// run (e.g. Google sign-in expired in the background; with its fix,
+/// dismissable), or the integrations that still need setting up.
+class _StatusCard extends StatelessWidget {
+  const _StatusCard({
+    required this.onFix,
+    required this.onRetry,
+    required this.issues,
+  });
 
   final void Function(SettingsSection section) onFix;
+  final VoidCallback onRetry;
+  final List<SyncIssue> issues;
 
   static bool _ok(IntegrationStatus s) =>
       s.state == IntegrationState.configured ||
@@ -301,8 +343,7 @@ class _ConnectionsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colors = StatusColors.of(context);
+    final text = SyncText(l10n);
 
     final google = context.watch<GoogleController>().status;
     final sheet = context.watch<SheetController>().status;
@@ -323,71 +364,151 @@ class _ConnectionsCard extends StatelessWidget {
     ];
     final attention = items.where((i) => !_ok(i.$2)).toList();
 
-    if (attention.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: colors.ok.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.check_circle, color: colors.ok, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.homeAllConnected,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: colors.ok,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    items.map((i) => i.$1).join(' · '),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+    if (issues.isNotEmpty) {
+      final issue = issues.first;
+      final action = issue.action;
+      return _StatusRow(
+        tone: Tone.err,
+        title: text.presenter.message(issue),
+        sub: issues.length > 1 ? l10n.syncMoreDays(issues.length - 1) : null,
+        actionLabel: action == null ? null : text.presenter.actionLabel(action),
+        onAction: action == null
+            ? null
+            : () => runIssueAction(context, action, onRetry: onRetry),
+        onDismiss: () => context.read<SyncController>().dismissIssue(issue),
       );
     }
+    if (attention.isNotEmpty) {
+      final anyError = attention.any(
+        (i) => i.$2.state == IntegrationState.error,
+      );
+      return _StatusRow(
+        tone: anyError ? Tone.err : Tone.warn,
+        title: l10n.openIssuesTitle,
+        sub: attention.map((i) => i.$1).join(' · '),
+        actionLabel: l10n.homeFix,
+        onAction: () => onFix(attention.first.$3),
+      );
+    }
+    return _StatusRow(
+      tone: Tone.ok,
+      title: l10n.homeAllConnected,
+      sub: items.map((i) => i.$1).join(' · '),
+      onTap: () => onFix(SettingsSection.healthConnect),
+    );
+  }
+}
 
-    return SectionCard(
-      icon: Icons.link,
-      title: l10n.homeIntegrationsTitle,
-      children: [
-        for (final (name, status, section) in attention)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              children: [
-                Icon(
-                  status.state == IntegrationState.error
-                      ? Icons.error
-                      : Icons.radio_button_unchecked,
-                  size: 18,
-                  color: status.state == IntegrationState.error
-                      ? colors.error
-                      : colors.warn,
+class _StatusRow extends StatelessWidget {
+  const _StatusRow({
+    required this.tone,
+    required this.title,
+    this.sub,
+    this.actionLabel,
+    this.onAction,
+    this.onDismiss,
+    this.onTap,
+  });
+
+  final Tone tone;
+  final String title;
+  final String? sub;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final VoidCallback? onDismiss;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final p = Palette.of(context);
+    final (fg, bg) = tone.colors(p);
+    final isErr = tone == Tone.err;
+
+    return Material(
+      color: bg,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap ?? onAction,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(14, 12, onDismiss == null ? 14 : 4, 12),
+          child: Row(
+            children: [
+              Icon(
+                switch (tone) {
+                  Tone.ok => Icons.check_circle_rounded,
+                  Tone.err => Icons.error_rounded,
+                  _ => Icons.warning_rounded,
+                },
+                color: fg,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: fg,
+                      ),
+                    ),
+                    if (sub != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        sub!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12, color: p.muted),
+                      ),
+                    ],
+                  ],
                 ),
-                const SizedBox(width: 10),
-                Expanded(child: Text(name)),
-                TextButton(
-                  onPressed: () => onFix(section),
-                  child: Text(l10n.homeFix),
+              ),
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(width: 8),
+                Material(
+                  color: isErr ? p.err : p.accent,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: onAction,
+                    child: Container(
+                      height: 36,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Text(
+                          actionLabel!,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: isErr ? p.errInk : p.accentInk,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              ] else if (onTap != null)
+                Icon(Icons.chevron_right_rounded, size: 20, color: p.muted),
+              if (onDismiss != null)
+                IconButton(
+                  tooltip: l10n.dismiss,
+                  visualDensity: VisualDensity.compact,
+                  icon: Icon(Icons.close_rounded, size: 18, color: p.muted),
+                  onPressed: onDismiss,
+                ),
+            ],
           ),
-      ],
+        ),
+      ),
     );
   }
 }

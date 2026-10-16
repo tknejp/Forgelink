@@ -58,6 +58,14 @@ class PrefsStore {
     await _prefs.remove(_kGoogleUserId);
   }
 
+  // ─── First launch ───────────────────────────────────────────────────────
+
+  Future<bool> onboardingDone() async =>
+      await _prefs.getBool('app.onboarding_done') ?? false;
+
+  Future<void> setOnboardingDone() =>
+      _prefs.setBool('app.onboarding_done', true);
+
   // ─── Sync settings ──────────────────────────────────────────────────────
 
   Future<bool> autoSync() async => await _prefs.getBool(_kAutoSync) ?? false;

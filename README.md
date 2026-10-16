@@ -9,12 +9,14 @@ Status: **all planned phases shipped (2026-10-16).** Open setup items: [docs/sta
 ## What it does
 
 - **Quick Sync** — one button: yesterday in full plus today's weight.
-- **Calendar** — tap a day to sync it; hold for its per-field detail; hold and drag to sync a range (with a confirmation); swipe between months. Icons on the month bar open a date-range picker and the sync history.
+- **Calendar** — tap a day to sync it; hold for its per-field detail (value and state of every cell); hold and drag to sync a range (with a confirmation); swipe between months. "Období" opens a range screen with presets (last 3 / 7 days, this month).
+- **Progress sheet** — Quick Sync and range syncs show a per-day progress sheet (can be swiped away; the sync continues) with the result and "Otevřít tabulku".
+- **First launch** — a 5-step setup (Health Connect, Kalorické tabulky, Google + sheet, automatic sync), shown only while nothing is configured.
 - **Queue + background-safe** — taps during a running sync are queued and merged; a foreground service keeps a sync running when you leave the app.
 - **Automatic sync** — about **00:30** (the finished day) and **12:30** (after the morning weigh-in), each re-syncing the last 3 days plus today's weight, with a notification afterwards (success notifications can be turned off).
 - **Clear errors** — Czech messages with a direct action (open the right Settings section, grant a permission, reconnect Google, retry); unresolved problems stay on Home until fixed.
-- **Settings** — Health Connect permissions (incl. history and background reading), Kalorické tabulky login, Google account, destination sheet (paste a link or "Vybrat z Google Disku"), automatic sync, diagnostics log.
-- Light/dark Material 3 theme from the logo; Czech UI via ARB.
+- **Settings** — Health Connect permissions (incl. history and background reading), Kalorické tabulky login, Google account, destination sheet (paste a link or "Vybrat z Google Disku"), automatic sync, diagnostics log (own screen, filterable).
+- Light/dark theme from the design handoff (Manrope font, `lib/ui/theme.dart` tokens); Czech UI via ARB.
 
 ### How it finds the right cells
 

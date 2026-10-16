@@ -4,21 +4,128 @@ import 'package:provider/provider.dart';
 import '../../l10n/l10n.dart';
 import '../../sync/integration_status.dart';
 import '../issue_presenter.dart';
+import '../theme.dart';
+import '../widgets/ds.dart';
+import '../widgets/issue_notice.dart';
+import '../widgets/section_card.dart';
 import 'drive_picker_sheet.dart';
 import 'sheet_controller.dart';
-import '../widgets/issue_notice.dart';
 
-class SheetSection extends StatefulWidget {
+class SheetSection extends StatelessWidget {
   const SheetSection({super.key});
 
   @override
-  State<SheetSection> createState() => _SheetSectionState();
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final p = Palette.of(context);
+    final c = context.watch<SheetController>();
+    final presenter = IssuePresenter(l10n);
+
+    final v = c.verification;
+    final readOk =
+        c.status.state == IntegrationState.readVerified ||
+        c.status.state == IntegrationState.verified;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        KvRow(l10n.rowSheetId, c.spreadsheetId ?? '—', mono: true),
+        KvRow(l10n.rowTab, c.tab),
+        if (v != null)
+          KvRow(
+            l10n.rowCoverage,
+            v.days == 0
+                ? l10n.sheetVerifyNoDates
+                : l10n.sheetCoverage(
+                    v.weekTables,
+                    presenter.formatDate(v.first!),
+                    presenter.formatDate(v.last!),
+                  ),
+          ),
+        if (c.status.issue case final issue?
+            when c.status.state != IntegrationState.error) ...[
+          const SizedBox(height: 10),
+          IssueNotice(issue: issue),
+        ],
+        if (c.lastIssue != null) ...[
+          const SizedBox(height: 10),
+          IssueNotice(issue: c.lastIssue!, isError: true),
+        ],
+        if (v != null && v.duplicates.isNotEmpty)
+          Builder(
+            builder: (_) {
+              final dates = v.duplicates.keys.toList()..sort();
+              final rows =
+                  (v.duplicates.values.expand((r) => r).toSet().toList()
+                        ..sort())
+                      .join(', ');
+              return CardNote(
+                l10n.sheetDuplicates(
+                  dates.length,
+                  presenter.formatDate(dates.first),
+                  presenter.formatDate(dates.last),
+                  rows,
+                ),
+                color: p.err,
+              );
+            },
+          ),
+        if (readOk && c.status.state != IntegrationState.verified)
+          CardNote(l10n.sheetEditAccessNote),
+        CardActions([
+          if (c.googleConnected)
+            CardAction(
+              label: l10n.sheetPickDrive,
+              icon: Icons.folder_open_rounded,
+              primary: c.spreadsheetId == null,
+              onPressed: c.busy
+                  ? null
+                  : () async {
+                      final id = await showDrivePicker(context);
+                      if (id == null) return;
+                      await c.saveAndVerify(id, c.tab);
+                    },
+            ),
+          CardAction(
+            label: l10n.sheetEditManual,
+            icon: Icons.edit_rounded,
+            onPressed: c.busy ? null : () => showSheetEditor(context),
+          ),
+          if (c.spreadsheetId != null && c.googleConnected)
+            CardAction(
+              label: l10n.sheetVerify,
+              icon: Icons.fact_check_rounded,
+              busy: c.busy,
+              onPressed: c.verify,
+            ),
+        ]),
+      ],
+    );
+  }
 }
 
-class _SheetSectionState extends State<SheetSection> {
+/// "Upravit tabulku": link or ID + tab, saved and verified on confirm.
+Future<void> showSheetEditor(BuildContext context) =>
+    showDesignSheet<void>(context, builder: (_) => const _SheetEditor());
+
+class _SheetEditor extends StatefulWidget {
+  const _SheetEditor();
+
+  @override
+  State<_SheetEditor> createState() => _SheetEditorState();
+}
+
+class _SheetEditorState extends State<_SheetEditor> {
   final _input = TextEditingController();
   final _tab = TextEditingController();
-  bool _seeded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final c = context.read<SheetController>();
+    _input.text = c.spreadsheetId ?? '';
+    _tab.text = c.tab;
+  }
 
   @override
   void dispose() {
@@ -27,37 +134,32 @@ class _SheetSectionState extends State<SheetSection> {
     super.dispose();
   }
 
+  Future<void> _save() async {
+    final c = context.read<SheetController>();
+    await c.saveAndVerify(_input.text, _tab.text);
+    if (!mounted) return;
+    if (!c.invalidInput && c.lastIssue == null) Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final c = context.watch<SheetController>();
-    final presenter = IssuePresenter(l10n);
-    final errorStyle = TextStyle(color: Theme.of(context).colorScheme.error);
-
-    if (!_seeded && (c.spreadsheetId != null || c.tab.isNotEmpty)) {
-      _input.text = c.spreadsheetId ?? '';
-      _tab.text = c.tab;
-      _seeded = true;
-    }
-
-    final v = c.verification;
-    final readOk =
-        c.status.state == IntegrationState.readVerified ||
-        c.status.state == IntegrationState.verified;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (c.status.issue case final issue?
-            when c.status.state != IntegrationState.error)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: IssueNotice(issue: issue),
-          ),
+        Text(
+          l10n.sheetEditTitle,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 14),
         TextField(
           controller: _input,
           enabled: !c.busy,
           keyboardType: TextInputType.url,
+          style: const TextStyle(fontFamily: AppTheme.monoFamily, fontSize: 13),
           decoration: InputDecoration(
             labelText: l10n.sheetUrlLabel,
             errorText: c.invalidInput ? l10n.sheetInvalidId : null,
@@ -69,78 +171,30 @@ class _SheetSectionState extends State<SheetSection> {
           enabled: !c.busy,
           decoration: InputDecoration(labelText: l10n.sheetTabLabel),
         ),
-        if (c.lastIssue != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: IssueNotice(issue: c.lastIssue!, isError: true),
-          ),
-        if (v != null) ...[
+        if (c.lastIssue != null) ...[
           const SizedBox(height: 10),
-          Text(
-            v.days == 0
-                ? l10n.sheetVerifyNoDates
-                : l10n.sheetVerifyResult(
-                    v.weekTables,
-                    v.days,
-                    presenter.formatDate(v.first!),
-                    presenter.formatDate(v.last!),
-                  ),
-          ),
+          IssueNotice(issue: c.lastIssue!, isError: true),
         ],
-        if (v != null && v.duplicates.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          Builder(
-            builder: (_) {
-              final dates = v.duplicates.keys.toList()..sort();
-              final rows =
-                  (v.duplicates.values.expand((r) => r).toSet().toList()
-                        ..sort())
-                      .join(', ');
-              return Text(
-                l10n.sheetDuplicates(
-                  dates.length,
-                  presenter.formatDate(dates.first),
-                  presenter.formatDate(dates.last),
-                  rows,
-                ),
-                style: errorStyle,
-              );
-            },
-          ),
-        ],
-        if (readOk && c.status.state != IntegrationState.verified)
-          Text(
-            l10n.sheetEditAccessNote,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        if (c.googleConnected)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              style: TextButton.styleFrom(padding: EdgeInsets.zero),
-              icon: const Icon(Icons.folder_open_outlined, size: 18),
-              label: Text(l10n.driveChooseButton),
-              onPressed: c.busy
-                  ? null
-                  : () async {
-                      final id = await showDrivePicker(context);
-                      if (id == null || !mounted) return;
-                      _input.text = id;
-                      await c.saveAndVerify(id, _tab.text);
-                    },
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            SoftButton(
+              label: l10n.ktCancel,
+              onPressed: () => Navigator.of(context).pop(),
             ),
-          ),
-        const SizedBox(height: 12),
-        FilledButton(
-          onPressed: c.busy
-              ? null
-              : () => c.saveAndVerify(_input.text, _tab.text),
-          child: c.busy
-              ? const SizedBox.square(
-                  dimension: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.sheetSaveVerify),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton(
+                onPressed: c.busy ? null : _save,
+                child: c.busy
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n.sheetSaveVerify),
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -486,5 +486,309 @@
         "type": "String"
       }
     }
-  }
+  },
+  "homeQuickSyncTitle": "Rychlá synchronizace",
+  "homeLastSync": "Naposledy {when}",
+  "@homeLastSync": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "homeLastSyncWith": "{when} · {trigger}",
+  "@homeLastSyncWith": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "trigger": {
+        "type": "String"
+      }
+    }
+  },
+  "qsYesterday": "Včera · {date}",
+  "@qsYesterday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "qsYesterdaySub": "Výživa a kroky",
+  "qsToday": "Dnes · {date}",
+  "@qsToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "qsTodaySub": "Váha {value}",
+  "@qsTodaySub": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qsTodaySubNone": "Jen váha",
+  "chipInSheet": "V tabulce",
+  "chipToWrite": "Ke zápisu",
+  "chipNutritionMissing": "Výživa chybí",
+  "chipError": "Chyba",
+  "chipNoData": "Bez dat",
+  "calendarRangeButton": "Období",
+  "legendFull": "Kompletní",
+  "legendPartial": "Částečně",
+  "legendMissing": "Chybí",
+  "legendFailed": "Chyba",
+  "homeNeedsSetup": "Nenastaveno",
+  "syncSheetRunning": "Synchronizuji…",
+  "syncSheetDone": "Hotovo",
+  "syncSheetWarn": "Hotovo s upozorněním",
+  "syncSheetFailed": "Synchronizace selhala",
+  "syncSheetNoData": "Žádná nová data",
+  "syncSheetSub": "{label} · {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}",
+  "@syncSheetSub": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncRowWaiting": "Čeká",
+  "syncRowReading": "Čtu Health Connect a Kalorické tabulky…",
+  "syncRowRead": "Načteno",
+  "syncRowWriting": "Zapisuji do tabulky…",
+  "syncRowResult": "{written, plural, =1{1 nová} few{{written} nové} other{{written} nových}} · {unchanged} beze změny",
+  "@syncRowResult": {
+    "placeholders": {
+      "written": {
+        "type": "int"
+      },
+      "unchanged": {
+        "type": "int"
+      }
+    }
+  },
+  "syncRowNutritionMissing": "výživa chybí",
+  "syncRowRestAfterMidnight": "zbytek po půlnoci",
+  "syncRowNoData": "Ve zdrojích nejsou data",
+  "syncMoreDays": "+ {count} dalších",
+  "@syncMoreDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actionClose": "Zavřít",
+  "actionOpenSheet": "Otevřít tabulku",
+  "fieldLabelWeight": "Váha",
+  "fieldLabelSteps": "Kroky",
+  "fieldLabelKcal": "Energie",
+  "fieldLabelProtein": "Bílkoviny",
+  "fieldLabelCarbs": "Sacharidy",
+  "fieldLabelFat": "Tuky",
+  "fieldLabelFiber": "Vláknina",
+  "cellInSheet": "V tabulce",
+  "cellToWrite": "Ke zápisu",
+  "cellMissing": "Chybí ve zdroji",
+  "cellAfterMidnight": "Po půlnoci",
+  "cellFormula": "Vzorec",
+  "cellFailed": "Chyba",
+  "dayChipFull": "Kompletní",
+  "dayChipPartial": "Částečně",
+  "dayChipNone": "Nesynchronizováno",
+  "dayChipFailed": "Chyba",
+  "dayChipNoData": "Bez dat",
+  "daySheetTab": "List {tab}",
+  "@daySheetTab": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
+  "dayTodaySuffix": "{title} · dnes",
+  "@dayTodaySuffix": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "dayTodayNote": "Den ještě neskončil. Výživa a kroky se zapíšou po půlnoci, teď lze zapsat jen váhu.",
+  "lockNoteManual": "Hlad, hydratace, trénink a poznámky zůstanou beze změny.",
+  "daySyncFirst": "Synchronizovat den",
+  "dayUpdate": "Aktualizovat den",
+  "rangePreset3": "Poslední 3 dny",
+  "rangePreset7": "Posledních 7 dní",
+  "rangePresetMonth": "Tento měsíc",
+  "rangeLockNote": "Existující hodnoty se jen aktualizují. Hlad, hydratace, trénink a poznámky zůstanou beze změny.",
+  "rangePickFirst": "Vyber první a poslední den",
+  "rangePickEnd": "{date} · klepni na konec období",
+  "@rangePickEnd": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rangeSummary": "{from} – {to} · {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}",
+  "@rangeSummary": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rangeButton": "Synchronizovat {count, plural, =1{1 den} few{{count} dny} other{{count} dní}}",
+  "@rangeButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthPrev": "Předchozí měsíc",
+  "monthNext": "Další měsíc",
+  "settingsGroupSources": "Zdroje dat",
+  "settingsGroupTarget": "Cíl",
+  "settingsGroupOther": "Ostatní",
+  "rowReads": "Čte",
+  "hcReadsValue": "Váhu a kroky",
+  "rowHistory": "Starší data",
+  "rowBackground": "Na pozadí",
+  "valueAllowed": "Povoleno",
+  "valueNotAllowed": "Nepovoleno",
+  "valueUnsupported": "Nepodporováno",
+  "hcGrantHistoryShort": "Povolit starší data",
+  "hcGrantBackgroundShort": "Povolit na pozadí",
+  "rowAccount": "Účet",
+  "ktReadsValue": "Energii, makra, vlákninu",
+  "ktLoginShort": "Přihlásit",
+  "rowAccess": "Přístup",
+  "googleAccessValue": "Tabulky, vybrané soubory",
+  "googleConnect": "Připojit",
+  "rowSheetId": "ID",
+  "rowTab": "List",
+  "rowCoverage": "Rozsah",
+  "sheetCoverage": "Týdnů: {weeks} · {first} – {last}",
+  "@sheetCoverage": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      },
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "sheetPickDrive": "Vybrat z Disku",
+  "sheetEditManual": "Upravit ručně",
+  "sheetEditTitle": "Upravit tabulku",
+  "autoSyncSub": "Denně 0:30 a 12:30 · doplní poslední 3 dny",
+  "notifySuccessSub": "Notifikace po každém běhu, nejen při chybě",
+  "rowNextRun": "Další běh",
+  "rowLastRun": "Poslední běh",
+  "rowBattery": "Baterie",
+  "batteryOk": "Optimalizace vypnutá",
+  "batteryOn": "Optimalizace zapnutá",
+  "valueOff": "vypnuto",
+  "valueNever": "zatím ne",
+  "autoSyncDelayHint": "Android může běh o pár minut posunout. Aby ho po delší době nezastavil, vypni v nastavení aplikace „Pozastavit aktivitu, pokud se aplikace nepoužívá“.",
+  "appSettingsButton": "Nastavení aplikace",
+  "batteryButton": "Vypnout optimalizaci",
+  "diagnosticsCount": "{count, plural, =1{1 záznam} few{{count} záznamy} other{{count} záznamů}}",
+  "@diagnosticsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsFooter": "Forgelink {version} · data zůstávají v telefonu",
+  "@settingsFooter": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "historyFilterAll": "Vše",
+  "historyFilterManual": "Ručně",
+  "historyFilterBackground": "Na pozadí",
+  "historyFilterIssues": "Problémy",
+  "historyFilterEmpty": "Žádné záznamy v tomto filtru.",
+  "historyToday": "Dnes",
+  "historyYesterday": "Včera",
+  "diagFilterAll": "Vše",
+  "diagFilterIssues": "Upozornění a chyby",
+  "diagBgTestShort": "Test na pozadí",
+  "onbWelcomeText": "Přenese váhu, kroky a výživu do tabulky tvého trenéra. Jedním klepnutím nebo samo každý den.",
+  "onbSourceHcSub": "Váha a kroky",
+  "onbSourceKtSub": "Energie, makra, vláknina",
+  "onbSourceSheets": "Google Sheets",
+  "onbSourceSheetsSub": "Tabulka trenéra",
+  "onbLocalNote": "Vše běží v telefonu. Žádný server ani další účet.",
+  "onbStart": "Začít nastavení",
+  "onbContinue": "Pokračovat",
+  "onbSkip": "Přeskočit",
+  "onbInstallHc": "Nainstalovat Health Connect",
+  "onbHcText": "Forgelink bude jen číst. Nic nezapisuje ani nemaže.",
+  "onbPermWeightSub": "Pro zápis dnešní váhy",
+  "onbPermStepsSub": "Denní součet",
+  "onbPermHistory": "Starší data",
+  "onbPermHistorySub": "Pro opravu dnů starších 30 dní",
+  "onbPermBackground": "Čtení na pozadí",
+  "onbPermBackgroundSub": "Pro automatickou synchronizaci",
+  "onbKtText": "Přihlas se stejným účtem jako v aplikaci. Údaje zůstanou uložené jen v telefonu.",
+  "onbKtOk": "Přihlášeno a ověřeno",
+  "onbEmailHint": "jmeno@email.cz",
+  "onbSheetTitle": "Tabulka trenéra",
+  "onbSheetText": "Přihlas se ke Googlu a vyber tabulku. Forgelink najde řádek podle data a vyplní jen svoje sloupce.",
+  "onbGoogleNotConnected": "Nepřihlášeno",
+  "onbGoogleAccess": "Přístup k vybraným tabulkám",
+  "onbSheetNone": "Nevybráno",
+  "onbSheetOk": "List {tab} · ověřeno",
+  "@onbSheetOk": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
+  "onbGoogleButton": "Přihlásit přes Google",
+  "onbPickSheet": "Vybrat tabulku",
+  "onbDoneTitle": "Vše připraveno",
+  "onbDoneText": "Každý den kolem 0:30 se zapíše celý předchozí den, ve 12:30 dnešní váha.",
+  "onbFinish": "Přejít na přehled",
+  "actionBack": "Zpět",
+  "syncButtonProgress": "Synchronizuji {done}/{total}",
+  "@syncButtonProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "syncButtonWriting": "Zapisuji…",
+  "syncButtonDone": "Hotovo"
 }

@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../../core/sync_issue.dart';
 import '../../l10n/l10n.dart';
 import '../../sources/health/hc_read_client.dart';
+import '../widgets/ds.dart';
 import '../widgets/issue_notice.dart';
+import '../widgets/section_card.dart';
 import 'health_connect_controller.dart';
 
 /// Body of Settings → Health Connect (the status pill sits in the header).
@@ -14,10 +16,8 @@ class HealthConnectSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
     final c = context.watch<HealthConnectController>();
-    final status = c.status;
-    final issue = status.issue;
+    final issue = c.status.issue;
 
     VoidCallback? actionFor(IssueAction? action) => switch (action?.kind) {
       IssueActionKind.installHealthConnect => c.install,
@@ -28,62 +28,50 @@ class HealthConnectSection extends StatelessWidget {
     if (!c.loaded) return const LinearProgressIndicator();
 
     final available = c.availability == HcAvailability.available;
+    String perm(bool supported, bool granted) => !supported
+        ? l10n.valueUnsupported
+        : granted
+        ? l10n.valueAllowed
+        : l10n.valueNotAllowed;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (issue != null)
+        KvRow(l10n.rowReads, l10n.hcReadsValue),
+        if (available) ...[
+          KvRow(l10n.rowHistory, perm(c.historyAvailable, c.historyAuthorized)),
+          KvRow(
+            l10n.rowBackground,
+            perm(c.backgroundAvailable, c.backgroundAuthorized),
+          ),
+        ],
+        if (issue != null) ...[
+          const SizedBox(height: 10),
           IssueNotice(
             issue: issue,
             onAction: c.busy ? null : actionFor(issue.action),
-          )
-        else
-          Text(l10n.settingsHcAllGranted),
-        if (available) ...[
-          const SizedBox(height: 12),
-          if (!c.historyAvailable)
-            Text(
-              l10n.settingsHcHistoryUnavailable,
-              style: theme.textTheme.bodySmall,
-            )
-          else if (c.historyAuthorized)
-            Text(l10n.settingsHcHistoryGranted)
-          else
-            OutlinedButton.icon(
-              icon: const Icon(Icons.history, size: 18),
-              onPressed: c.busy ? null : c.grantHistory,
-              label: Text(l10n.settingsHcHistory),
-            ),
-        ],
-        if (available) ...[
-          const SizedBox(height: 8),
-          if (!c.backgroundAvailable)
-            Text(
-              l10n.settingsHcBackgroundUnavailable,
-              style: theme.textTheme.bodySmall,
-            )
-          else if (c.backgroundAuthorized)
-            Text(l10n.settingsHcBackgroundGranted)
-          else
-            OutlinedButton.icon(
-              icon: const Icon(Icons.nightlight_outlined, size: 18),
-              onPressed: c.busy ? null : c.grantBackground,
-              label: Text(l10n.settingsHcBackground),
-            ),
-        ],
-        const SizedBox(height: 4),
-        TextButton.icon(
-          style: TextButton.styleFrom(padding: EdgeInsets.zero),
-          icon: const Icon(Icons.open_in_new, size: 18),
-          label: Text(l10n.settingsOpenHealthConnect),
-          onPressed: c.busy ? null : c.openSettings,
-        ),
-        Text(
-          l10n.settingsHcPriorityHint,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
           ),
-        ),
+        ],
+        CardNote(l10n.settingsHcPriorityHint),
+        CardActions([
+          if (available && c.historyAvailable && !c.historyAuthorized)
+            CardAction(
+              label: l10n.hcGrantHistoryShort,
+              icon: Icons.history_rounded,
+              onPressed: c.busy ? null : c.grantHistory,
+            ),
+          if (available && c.backgroundAvailable && !c.backgroundAuthorized)
+            CardAction(
+              label: l10n.hcGrantBackgroundShort,
+              icon: Icons.nightlight_round,
+              onPressed: c.busy ? null : c.grantBackground,
+            ),
+          CardAction(
+            label: l10n.settingsOpenHealthConnect,
+            icon: Icons.open_in_new_rounded,
+            onPressed: c.busy ? null : c.openSettings,
+          ),
+        ]),
       ],
     );
   }

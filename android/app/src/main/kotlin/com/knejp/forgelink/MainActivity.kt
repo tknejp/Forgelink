@@ -49,6 +49,20 @@ class MainActivity : FlutterFragmentActivity() {
                         )
                         result.success(null)
                     }
+                    "openUrl" -> {
+                        val url = call.argument<String>("url")
+                        if (url != null) {
+                            try {
+                                startActivity(
+                                    Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                )
+                            } catch (e: android.content.ActivityNotFoundException) {
+                                // No browser / Sheets app; nothing to open.
+                            }
+                        }
+                        result.success(null)
+                    }
                     "stopSyncService" -> {
                         stopService(Intent(this, SyncForegroundService::class.java))
                         result.success(null)

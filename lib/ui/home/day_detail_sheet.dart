@@ -6,17 +6,19 @@ import '../../core/local_date.dart';
 import '../../l10n/l10n.dart';
 import '../../sync/sync_controller.dart';
 import '../../sync/sync_models.dart';
+import '../day_view.dart';
+import '../settings/sheet_controller.dart';
 import '../sync_text.dart';
 import '../theme.dart';
+import '../widgets/ds.dart';
 
 /// Bottom sheet with the last per-field outcome of one date.
 Future<void> showDayDetail(
   BuildContext context,
   LocalDate date, {
   required VoidCallback onSync,
-}) => showModalBottomSheet<void>(
-  context: context,
-  showDragHandle: true,
+}) => showDesignSheet<void>(
+  context,
   builder: (ctx) => _DayDetail(date: date, onSync: onSync),
 );
 
@@ -29,91 +31,177 @@ class _DayDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colors = StatusColors.of(context);
+    final p = Palette.of(context);
     final c = context.watch<SyncController>();
+    final tab = context.watch<SheetController>().tab;
     final text = SyncText(l10n);
     final day = c.days[date];
+    final isToday = date == c.today;
 
-    Color colorOf(FieldOutcomeKind k) => switch (k) {
-      FieldOutcomeKind.written || FieldOutcomeKind.unchanged => colors.ok,
-      FieldOutcomeKind.missing => colors.neutral,
-      FieldOutcomeKind.skippedFormula => colors.warn,
-      FieldOutcomeKind.failed => colors.error,
+    final ktGap = day != null && !isToday && nutritionMissing(day);
+    final (String chip, Tone chipTone) = switch (day?.status) {
+      DayStatus.ok when ktGap => (l10n.dayChipPartial, Tone.warn),
+      DayStatus.ok => (l10n.dayChipFull, Tone.ok),
+      DayStatus.partial => (l10n.dayChipPartial, Tone.warn),
+      DayStatus.failed => (l10n.dayChipFailed, Tone.err),
+      DayStatus.noData => (l10n.dayChipNoData, Tone.neutral),
+      null => (l10n.dayChipNone, Tone.neutral),
     };
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+    String stateLabel(CellState s) => switch (s) {
+      CellState.inSheet => l10n.cellInSheet,
+      CellState.toWrite => l10n.cellToWrite,
+      CellState.missing => l10n.cellMissing,
+      CellState.afterMidnight => l10n.cellAfterMidnight,
+      CellState.formula => l10n.cellFormula,
+      CellState.failed => l10n.cellFailed,
+    };
+    IconData stateIcon(CellState s) => switch (s) {
+      CellState.inSheet => Icons.check_rounded,
+      CellState.toWrite => Icons.upload_rounded,
+      CellState.missing => Icons.block_rounded,
+      CellState.afterMidnight => Icons.schedule_rounded,
+      CellState.formula => Icons.functions_rounded,
+      CellState.failed => Icons.error_rounded,
+    };
+
+    Widget fieldRow(SheetColumn col) {
+      final f = day?.fields[col];
+      final state = cellState(day, col, isToday: isToday);
+      final (fg, _) = state.tone.colors(p);
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 9),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: p.line)),
+        ),
+        child: Row(
           children: [
-            Text(text.date(date), style: theme.textTheme.titleLarge),
-            const SizedBox(height: 12),
-            if (date == c.today)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  l10n.dayTodayWeightOnly,
-                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-                ),
+            Expanded(
+              child: Text(
+                text.fieldLabel(col),
+                style: const TextStyle(fontSize: 14),
               ),
-            if (day == null)
-              Text(l10n.dayNeverSynced)
-            else if (day.issue != null)
-              Text(
-                text.presenter.message(day.issue!),
-                style: TextStyle(color: colors.error),
-              )
-            else
-              for (final col in SheetColumn.values)
-                if (day.fields[col] case final f?)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: colorOf(f.kind),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(child: Text(text.field(col))),
-                        if (f.value != null)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: Text(
-                              text.value(col, f.value!),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        Text(
-                          text.outcome(f.kind),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorOf(f.kind),
-                          ),
-                        ),
-                      ],
+            ),
+            Text(
+              f?.value == null ? '—' : text.valueWithUnit(col, f!.value!),
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: f?.value == null ? p.faint : p.text,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            SizedBox(
+              width: 112,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(stateIcon(state), size: 15, color: fg),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      stateLabel(state),
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: fg,
+                      ),
                     ),
                   ),
-            if (day != null)
-              for (final n in day.notes)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    text.presenter.message(n),
-                    style: theme.textTheme.bodySmall,
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget group(String title, List<SheetColumn> cols) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GroupLabel(title, padding: const EdgeInsets.only(bottom: 4)),
+        for (final col in cols) fieldRow(col),
+      ],
+    );
+
+    // Missing nutrition is already explained by the day's NoData note.
+    final note = isToday ? l10n.dayTodayNote : null;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isToday
+                        ? l10n.dayTodaySuffix(text.dayTitle(date))
+                        : text.dayTitle(date),
+                    style: const TextStyle(
+                      fontSize: 21,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.daySheetTab(tab),
+                    style: TextStyle(fontSize: 12.5, color: p.muted),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            TonePill(chip, chipTone),
+          ],
+        ),
+        const SizedBox(height: 14),
+        group(l10n.settingsSectionHealthConnect, hcColumns),
+        const SizedBox(height: 14),
+        group(l10n.settingsSectionKt, ktColumns),
+        if (day?.issue != null) ...[
+          const SizedBox(height: 14),
+          Callout(text: text.presenter.message(day!.issue!), tone: Tone.err),
+        ],
+        // Why fields failed (e.g. missing login) when the whole day wasn't
+        // refused.
+        if (day != null && day.issue == null)
+          for (final message in {
+            for (final f in day.fields.values)
+              if (f.issue case final i?) text.presenter.message(i),
+          }) ...[
+            const SizedBox(height: 10),
+            Callout(text: message, tone: Tone.err),
+          ],
+        if (day != null)
+          for (final n in day.notes) ...[
+            const SizedBox(height: 10),
+            Callout(
+              text: text.presenter.message(n),
+              tone: Tone.warn,
+              icon: Icons.info_rounded,
+            ),
+          ],
+        if (note != null) ...[
+          const SizedBox(height: 14),
+          Callout(text: note, tone: Tone.warn, icon: Icons.info_rounded),
+        ],
+        const SizedBox(height: 14),
+        LockNote(l10n.lockNoteManual),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            SoftButton(
+              label: l10n.actionClose,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
               child: FilledButton.icon(
                 onPressed: c.busy
                     ? null
@@ -121,13 +209,13 @@ class _DayDetail extends StatelessWidget {
                         Navigator.of(context).pop();
                         onSync();
                       },
-                icon: const Icon(Icons.sync),
-                label: Text(l10n.daySyncNow),
+                icon: const Icon(Icons.sync_rounded, size: 22),
+                label: Text(day == null ? l10n.daySyncFirst : l10n.dayUpdate),
               ),
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 }

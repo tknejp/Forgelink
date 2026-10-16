@@ -50,4 +50,19 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - assets/branding/logo_256.png
+    - assets/branding/logo_fg_384.png
+  # Manrope (SIL OFL, assets/fonts/OFL.txt): static instances of the
+  # google/fonts variable font, one file per weight the design uses.
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Manrope-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Manrope-ExtraBold.ttf
+          weight: 800

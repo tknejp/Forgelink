@@ -3,6 +3,10 @@ abstract final class AppConfig {
   /// Brand name — intentionally not localized (launcher label, MaterialApp title).
   static const appName = 'Forgelink';
 
+  /// Shown in the Settings footer; keep in sync with `version:` in
+  /// pubspec.yaml.
+  static const version = '0.1.0';
+
   /// Google Cloud project `forgelink-511721` (#598204569304).
   ///
   /// Web OAuth client ID used as `serverClientId` for

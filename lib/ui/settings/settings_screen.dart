@@ -1,29 +1,33 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../../background/background_sync.dart';
+import '../../core/app_config.dart';
 import '../../core/log_buffer.dart';
 import '../../core/sync_issue.dart';
 import '../../l10n/l10n.dart';
 import '../../sync/integration_status.dart';
+import '../history/history_screen.dart';
+import '../theme.dart';
+import '../widgets/ds.dart';
 import '../widgets/section_card.dart';
 import '../widgets/status_pill.dart';
+import 'auto_sync_controller.dart';
+import 'auto_sync_section.dart';
+import 'diagnostics_screen.dart';
+import 'google_controller.dart';
+import 'google_section.dart';
 import 'health_connect_controller.dart';
 import 'health_connect_section.dart';
 import 'kt_controller.dart';
-import 'auto_sync_controller.dart';
-import 'auto_sync_section.dart';
-import 'google_controller.dart';
-import 'google_section.dart';
 import 'kt_section.dart';
 import 'sheet_controller.dart';
 import 'sheet_section.dart';
 
-/// Settings skeleton (Phase 1). Every section is addressable through
-/// [initialSection]: the screen scrolls to it and briefly highlights it, so
-/// error actions can deep-link straight to the right place.
+/// Settings: one card per integration (status chip, label → value rows,
+/// actions), automatic sync, history and diagnostics. Every section is
+/// addressable through [initialSection]: the screen scrolls to it and
+/// briefly highlights it, so error actions can deep-link straight to the
+/// right place.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key, this.initialSection});
 
@@ -93,172 +97,171 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final p = Palette.of(context);
     final hc = context.watch<HealthConnectController>().status;
     final kt = context.watch<KtController>().status;
     final google = context.watch<GoogleController>().status;
     final sheet = context.watch<SheetController>().status;
+    final logCount = context.watch<PersistentLogBuffer>().lines.length;
 
     Widget section(
       SettingsSection s,
       IconData icon,
       String title,
-      List<Widget> children, {
+      Widget body, {
       IntegrationStatus? status,
     }) => Padding(
       key: _keys[s],
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: SectionCard(
         icon: icon,
         title: title,
         highlighted: _highlighted == s,
         trailing: status == null ? null : StatusPill(status: status),
-        children: children,
+        children: [body],
+      ),
+    );
+
+    Widget tile(
+      IconData icon,
+      String label,
+      VoidCallback onTap, {
+      String? trailing,
+      bool last = false,
+    }) => InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: last ? null : Border(bottom: BorderSide(color: p.line)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 22, color: p.accentText),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            if (trailing != null)
+              Text(
+                trailing,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: p.muted,
+                ),
+              ),
+            Icon(Icons.chevron_right_rounded, size: 20, color: p.muted),
+          ],
+        ),
       ),
     );
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
+      // Not lazy: deep links must reach sections below the fold.
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            GroupLabel(l10n.settingsGroupSources),
             section(
               SettingsSection.healthConnect,
-              Icons.favorite_outline,
+              Icons.favorite_rounded,
               l10n.settingsSectionHealthConnect,
-              const [HealthConnectSection()],
+              const HealthConnectSection(),
               status: hc,
             ),
             section(
               SettingsSection.kt,
-              Icons.restaurant_outlined,
+              Icons.restaurant_rounded,
               l10n.settingsSectionKt,
-              const [KtSection()],
+              const KtSection(),
               status: kt,
             ),
+            GroupLabel(l10n.settingsGroupTarget),
             section(
               SettingsSection.google,
-              Icons.account_circle_outlined,
+              Icons.account_circle_rounded,
               l10n.settingsSectionGoogle,
-              const [GoogleSection()],
+              const GoogleSection(),
               status: google,
             ),
             section(
               SettingsSection.sheet,
-              Icons.table_chart_outlined,
+              Icons.table_chart_rounded,
               l10n.settingsSectionSheet,
-              const [SheetSection()],
+              const SheetSection(),
               status: sheet,
             ),
-            section(
-              SettingsSection.autoSync,
-              Icons.schedule,
-              l10n.settingsSectionAutoSync,
-              const [AutoSyncSection()],
+            GroupLabel(l10n.settingsSectionAutoSync),
+            Padding(
+              key: _keys[SettingsSection.autoSync],
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Panel(
+                border: _highlighted == SettingsSection.autoSync
+                    ? p.accent
+                    : null,
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
+                child: const AutoSyncSection(),
+              ),
             ),
-            section(
-              SettingsSection.diagnostics,
-              Icons.bug_report_outlined,
-              l10n.settingsSectionDiagnostics,
-              const [_DiagnosticsLog()],
+            GroupLabel(l10n.settingsGroupOther),
+            Panel(
+              key: _keys[SettingsSection.diagnostics],
+              padding: EdgeInsets.zero,
+              border: _highlighted == SettingsSection.diagnostics
+                  ? p.accent
+                  : null,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Column(
+                    children: [
+                      tile(
+                        Icons.history_rounded,
+                        l10n.historyTitle,
+                        () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const HistoryScreen(),
+                          ),
+                        ),
+                      ),
+                      tile(
+                        Icons.bug_report_rounded,
+                        l10n.settingsSectionDiagnostics,
+                        () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const DiagnosticsScreen(),
+                          ),
+                        ),
+                        trailing: l10n.diagnosticsCount(logCount),
+                        last: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 18),
+              child: Text(
+                l10n.settingsFooter(AppConfig.version),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: p.faint),
+              ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Collapsed by default: technical lines are only for troubleshooting.
-class _DiagnosticsLog extends StatefulWidget {
-  const _DiagnosticsLog();
-
-  @override
-  State<_DiagnosticsLog> createState() => _DiagnosticsLogState();
-}
-
-class _DiagnosticsLogState extends State<_DiagnosticsLog> {
-  bool _expanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final buffer = context.watch<PersistentLogBuffer>();
-    final lines = buffer.lines.reversed.take(100).toList();
-
-    if (lines.isEmpty) {
-      return Text(
-        l10n.diagnosticsEmpty,
-        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_expanded)
-          Container(
-            constraints: const BoxConstraints(maxHeight: 260),
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: SingleChildScrollView(
-              child: SelectableText(
-                lines.join('\n'),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontFamily: 'monospace',
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ),
-        Wrap(
-          spacing: 8,
-          children: [
-            TextButton(
-              onPressed: () => setState(() => _expanded = !_expanded),
-              child: Text(
-                _expanded
-                    ? l10n.diagnosticsHide
-                    : l10n.diagnosticsShow(lines.length),
-              ),
-            ),
-            if (kDebugMode)
-              TextButton(
-                onPressed: () async {
-                  final messenger = ScaffoldMessenger.of(context);
-                  await BackgroundSync.runOnceForTest();
-                  messenger.showSnackBar(
-                    SnackBar(content: Text(l10n.diagnosticsBgTestScheduled)),
-                  );
-                },
-                child: Text(l10n.diagnosticsBgTest),
-              ),
-            if (_expanded) ...[
-              TextButton(
-                onPressed: () async {
-                  final messenger = ScaffoldMessenger.of(context);
-                  await Clipboard.setData(
-                    ClipboardData(text: buffer.lines.join('\n')),
-                  );
-                  messenger.showSnackBar(
-                    SnackBar(content: Text(l10n.diagnosticsCopied)),
-                  );
-                },
-                child: Text(l10n.diagnosticsCopy),
-              ),
-              TextButton(
-                onPressed: buffer.clear,
-                child: Text(l10n.diagnosticsClear),
-              ),
-            ],
-          ],
-        ),
-      ],
     );
   }
 }

@@ -71,6 +71,17 @@ Future<void> main() async {
   // Register (or cancel) the automatic sync on every start (plan Phase 6).
   await BackgroundSync.apply(prefs);
 
+  // First-launch setup only while nothing is configured yet; an existing
+  // setup counts as done.
+  var showOnboarding = !await prefs.onboardingDone();
+  if (showOnboarding &&
+      (await prefs.spreadsheetId() != null ||
+          await prefs.googleAccount() != null ||
+          await ktClient.storedEmail() != null)) {
+    await prefs.setOnboardingDone();
+    showOnboarding = false;
+  }
+
   runApp(
     MultiProvider(
       providers: [
@@ -102,7 +113,7 @@ Future<void> main() async {
               SheetController(prefs, trackerSheet, googleAuth, statusStore),
         ),
       ],
-      child: const ForgelinkApp(),
+      child: ForgelinkApp(showOnboarding: showOnboarding),
     ),
   );
 }
