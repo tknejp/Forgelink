@@ -12,7 +12,7 @@ import 'google_auth.dart';
 
 /// Thin Sheets v4 wrapper: one fresh `AuthClient` per call, auth retry,
 /// backoff for 429/5xx, and error classification into [SyncIssue]s
-/// (docs/implementation_plan.md §6). Every failure leaves as
+/// (docs/archive/implementation_plan.md §6). Every failure leaves as
 /// [SyncIssueException].
 class SheetsGateway {
   SheetsGateway(

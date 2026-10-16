@@ -21,7 +21,7 @@ import '../sync/sync_history.dart';
 import '../sync/sync_models.dart';
 import 'sync_notifier.dart';
 
-/// Automatic sync at fixed times of day (docs/implementation_plan.md Phase 6).
+/// Automatic sync at fixed times of day (docs/archive/implementation_plan.md Phase 6).
 ///
 /// Runs at about 00:30 (the day that just ended, complete) and 12:30 (after
 /// the morning weigh-in). WorkManager periodic work drifts, so each run is a

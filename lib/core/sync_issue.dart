@@ -52,7 +52,7 @@ class IssueAction {
 /// Each subtype carries its parameters; the user-facing Czech text is produced
 /// by `IssuePresenter` from ARB strings. Technical detail (HTTP status,
 /// exception) goes to `AppLog` only — never into the message.
-/// See docs/implementation_plan.md §6.
+/// See docs/archive/implementation_plan.md §6.
 @immutable
 sealed class SyncIssue {
   const SyncIssue();

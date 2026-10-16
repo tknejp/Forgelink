@@ -61,7 +61,7 @@ class WritePlan {
   );
 }
 
-/// Builds the values-only write plan (docs/implementation_plan.md §4 step 8).
+/// Builds the values-only write plan (docs/archive/implementation_plan.md §4 step 8).
 /// Pure.
 ///
 /// [values]: per date, the new value per field; a missing key or `null`

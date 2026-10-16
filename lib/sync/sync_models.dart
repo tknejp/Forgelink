@@ -8,7 +8,7 @@ import '../core/sync_issue_codec.dart';
 /// What started a run.
 enum SyncTrigger { quick, calendar, range, background }
 
-/// docs/implementation_plan.md §4 "Outcomes".
+/// docs/archive/implementation_plan.md §4 "Outcomes".
 enum FieldOutcomeKind { written, unchanged, missing, skippedFormula, failed }
 
 @immutable

@@ -8,7 +8,7 @@ import '../../core/sync_issue.dart';
 import 'hc_read_client.dart';
 
 /// Health Connect as a sync source: preflight, steps and weight per local
-/// calendar day (docs/implementation_plan.md §3).
+/// calendar day (docs/archive/implementation_plan.md §3).
 ///
 /// Return-value contract:
 /// - `null` = missing data (leave the cell untouched),

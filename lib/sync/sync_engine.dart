@@ -18,7 +18,7 @@ const _ktFields = [
   SheetColumn.fiber,
 ];
 
-/// One sync run (docs/implementation_plan.md §4). No Flutter imports, so the
+/// One sync run (docs/archive/implementation_plan.md §4). No Flutter imports, so the
 /// Phase 6 worker can run it too.
 class SyncEngine {
   SyncEngine({

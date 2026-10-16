@@ -6,7 +6,7 @@ import '../core/sync_issue.dart';
 /// The three integrations shown in the status strip and Settings.
 enum Integration { healthConnect, kt, googleSheets }
 
-/// docs/implementation_plan.md §7. `readVerified` is used by Google Sheets only.
+/// docs/archive/implementation_plan.md §7. `readVerified` is used by Google Sheets only.
 enum IntegrationState {
   notConfigured,
   configured,

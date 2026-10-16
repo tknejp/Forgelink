@@ -23,7 +23,7 @@ import 'day_detail_sheet.dart';
 import 'month_calendar.dart';
 import 'sync_card.dart';
 
-/// Home (docs/implementation_plan.md §8): connections, open issues, Quick
+/// Home (docs/archive/implementation_plan.md §8): connections, open issues, Quick
 /// Sync, calendar, range sync, history.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

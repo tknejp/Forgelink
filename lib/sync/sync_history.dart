@@ -46,7 +46,7 @@ class LastSuccess {
 }
 
 /// Persisted sync state: run log, per-date status, open issues, last success
-/// (docs/implementation_plan.md §5 storage, §6 open issues, §7).
+/// (docs/archive/implementation_plan.md §5 storage, §6 open issues, §7).
 class SyncHistory {
   SyncHistory(this._prefs, this._statusStore);
 

@@ -75,7 +75,7 @@ class IndexedRow {
   });
 }
 
-/// Date → row lookup for the tracker tab (docs/implementation_plan.md §4
+/// Date → row lookup for the tracker tab (docs/archive/implementation_plan.md §4
 /// steps 4–5). Pure; built from the Table metadata and one values read.
 ///
 /// Older weeks in the coach's sheet use a different column order than newer

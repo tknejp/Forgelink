@@ -7,7 +7,7 @@ abstract final class AppConfig {
   ///
   /// Web OAuth client ID used as `serverClientId` for
   /// `GoogleSignIn.instance.initialize`. Required for the connect flow on
-  /// Android (docs/implementation_plan.md §11 step 6).
+  /// Android (docs/archive/implementation_plan.md §11 step 6).
   static const googleWebClientId =
       '598204569304-4556eie5qesqgqusnqsdumi2fdhuhm7f.apps.googleusercontent.com';
 
@@ -23,7 +23,7 @@ abstract final class AppConfig {
 
   static const ktBaseUrl = 'https://www.kaloricketabulky.cz';
 
-  /// Upper bound for one date-range sync (docs/implementation_plan.md §4).
+  /// Upper bound for one date-range sync (docs/archive/implementation_plan.md §4).
   static const maxRangeDays = 120;
 }
 

@@ -1,12 +1,22 @@
 # Forgelink — Implementation Plan
 
-Plan date: 2026-10-15. This is a living plan until the MVP ships. After that it becomes a design record (move it to `docs/archive/`).
+Plan date: 2026-10-15. **Archived 2026-10-16** — all phases 1–7 shipped; this is now the permanent design record (why the app looks the way it does). Open work lives in [../status.md](../status.md).
+
+> **What shipped (2026-10-16)**
+> - Manual sync: Quick Sync (yesterday in full + today's weight), calendar tap, hold-and-drag range, range picker; requests queue and merge, and run inside a foreground service so leaving the app doesn't stop them.
+> - Automatic sync at ~00:30 and ~12:30 (self-rebooking WorkManager one-offs), last 3 days + today's weight, notification after every run.
+> - Sheet writes are values-only into the matching date row; columns are located **per weekly Table by header name** (the real sheet has four column orders — see Phase 3 findings, which supersede the fixed B–H mapping in §2).
+> - Missing data is never written; real zeros are; unchanged cells are skipped (idempotent runs).
+> - Clear Czech errors with direct actions, open-issues card, history, diagnostics; orange theme from the logo, light/dark.
+> - "Vybrat z Google Disku" picker (extra `drive.metadata.readonly` scope, requested on demand).
+>
+> **Deviations from this plan, in one place:** per-table column mapping (Phase 3 findings); Home layout (calendar first, sync button at the bottom, period/history as calendar icons); fixed-time schedule instead of a 12 h periodic task and no WorkManager retries (Phase 6 status); success notifications are sent (user request; can be turned off) — contrary to §1/§6 "no notifications for successful background runs".
 
 Forgelink is a small Android utility for one user. It copies daily data from **Health Connect** (weight, steps) and **Kalorické tabulky** (kcal and macros) into the nutrition coach's existing **Google Sheet**. No manual copying is needed.
 
 > **Design principle:** this is a utility, not a fitness app. The goal is the smallest implementation that can be trusted to write the right numbers into the right cells and never damage anything else in the coach's sheet.
 
-The plan rests on a source-level research pass over Forgetrack and the plugins it already uses, done on 2026-10-15. Plugin claims cite the exact pub-cache sources, listed in [Appendix A](#appendix-a--verified-technical-facts). A skeptic pass checked them. Items still marked *unverified* go on the device validation list in [Phase 5](#phase-5--device-validation-on-the-real-sheet).
+The plan rests on a source-level research pass over Forgetrack and the plugins it already uses, done on 2026-10-15. Plugin claims cite the exact pub-cache sources, listed in [Appendix A](#appendix-a--verified-technical-facts). A skeptic pass checked them.
 
 ---
 
